@@ -234,7 +234,14 @@
                             <div class="flex justify-between items-start mb-1">
                                 <!-- 分類與交通時間 -->
                                 <div class="flex items-center gap-2 mb-2 flex-wrap">
-                                    <span class="text-xs px-2 py-1 rounded-full font-bold inline-block" :class="getCategoryColor(item.category)">{{ getCategoryLabel(item.category) }}</span>
+                                    <span
+  :class="[
+    'text-xs px-2 py-1 rounded-full font-bold inline-block',
+    getCategoryColor(item.category)
+  ]"
+>
+  {{ getCategoryLabel(item.category) }}
+</span>
                                     
                                     <span v-if="index > 0" class="text-[10px] text-gray-400 flex items-center bg-gray-50 px-2 py-1 rounded-full border border-gray-100">
                                         <i :class="getTransportIcon(item.transportType)" class="mr-1 text-sakura-dark"></i>約 {{ item.travelTime }} 分
@@ -445,21 +452,21 @@
         <div v-if="currentTab === 'shopping'">
             
             <!-- 成員過濾器 -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1">
-                <button 
-                    v-for="traveler in shoppingTravelers" 
-                    :key="traveler"
-                    @click="currentMemberFilter = (currentMemberFilter === traveler ? null : traveler)"
-                    :class="[
-                        'px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors border',
-                        (currentMemberFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200'
-                    ]"
-                >
-                    <span v-if="!currentMemberFilter && traveler === '全部'">全部</span>
-                    <span v-else>{{ traveler }}</span>
-                </button>
-                <button @click="currentMemberFilter = null" :class="['px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', !currentMemberFilter ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">全部</button>
-            </div>
+<div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1">
+  <button
+    v-for="traveler in shoppingTravelers"
+    :key="traveler"
+    @click="currentShoppingFilter = traveler"
+    :class="[
+      'px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors border',
+      (currentShoppingFilter === traveler)
+        ? 'bg-sakura text-white border-sakura shadow-md'
+        : 'bg-white text-gray-500 border-gray-200'
+    ]"
+  >
+    {{ traveler }}
+  </button>
+</div>
 
             <!-- 購物溫馨提醒 -->
             <div class="bg-pink-50 text-pink-700 text-xs px-4 py-2 rounded-xl mb-4 flex items-center border border-pink-100 mx-2 shadow-sm animate-pulse">
@@ -552,7 +559,16 @@
             <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-sakura-text">{{ modal.title }}</h3><button @click="closeModal" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button></div>
             
             <div v-if="modal.type === 'itinerary'" class="space-y-4">
-                <div><label class="block text-xs font-bold text-gray-500 mb-1">分類</label><select v-model="formData.category" class="w-full bg-gray-50 rounded-xl p-3"><option value="attraction">景點</option><option value="food">美食</option><option value="shopping">購物</option><option value="accommodation">住宿</option><option value="flight">航班</option><option value="other">其他</option></select></div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">分類</label><select v-model="formData.category" class="w-full bg-gray-50 rounded-xl p-3">
+  <option value="attraction">景點</option>
+  <option value="transport">交通</option>
+  <option value="food">美食</option>
+  <option value="shopping">購物</option>
+  <option value="accommodation">住宿</option>
+  <option value="flight">航班</option>
+  <option value="other">其他</option>
+</select>
+</div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">名稱</label><input type="text" v-model="formData.name" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none"></div>
                 <div class="flex gap-3"><div class="flex-1"><label class="block text-xs font-bold text-gray-500 mb-1">時間</label><input type="time" v-model="formData.time" class="w-full bg-gray-50 rounded-xl p-3 border outline-none"></div><div class="flex-1"><label class="block text-xs font-bold text-gray-500 mb-1">交通時間(分)</label><input type="number" v-model="formData.travelTime" class="w-full bg-gray-50 rounded-xl p-3 border outline-none" placeholder="30"></div></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">交通方式</label><select v-model="formData.transportType" class="w-full bg-gray-50 rounded-xl p-3"><option value="walk">步行</option><option value="transit">大眾運輸</option></select></div>
@@ -564,7 +580,7 @@
 
             <div v-if="modal.type === 'shopping'" class="space-y-4">
                 <!-- 誰的清單 (改用 shoppingTravelers，排除公費) -->
-                <div><label class="block text-xs font-bold text-gray-500 mb-1">是誰要買的？</label><select v-model="formData.owner" class="w-full bg-blue-50 text-blue-800 font-bold rounded-xl p-3 border-blue-200"><option v-for="t in shoppingTravelers" :value="t">{{ t }}</option></select></div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">是誰要買的？</label><select v-model="formData.owner" class="w-full bg-blue-50 text-blue-800 font-bold rounded-xl p-3 border-blue-200"><option v-for="t in shoppingOwners" :value="t">{{ t }}</option></select></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">商品名稱</label><input type="text" v-model="formData.name" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none"></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">圖片</label><div class="relative w-full h-32 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden"><input type="file" @change="handleImageUpload" class="absolute inset-0 opacity-0 cursor-pointer"><img v-if="formData.image" :src="formData.image" class="w-full h-full object-cover"><div v-else class="text-center text-gray-400"><i class="fa-solid fa-camera mb-1"></i><p class="text-xs">點擊上傳圖片</p></div></div></div>
             </div>
@@ -643,9 +659,12 @@
             });
 
             // === 核心修改：旅伴成員設定 ===
-            const travelers = ref(['公費', '翔', '倫', '茹', '萍']); 
-            const shoppingTravelers = computed(() => travelers.value.filter(t => t !== '公費')); // 購物專用名單(排除公費)
-            const currentMemberFilter = ref(null); // null 代表顯示全部
+            const travelers = ref(['公費', '翔', '倫', '茹', '萍']);
+const shoppingTravelers = computed(() => ['全部', ...travelers.value.filter(t => t !== '公費')]);
+const shoppingOwners = computed(() => travelers.value.filter(t => t !== '公費'));
+
+const currentShoppingFilter = ref('全部');
+const currentMemberFilter = ref(null);
 
             // === 核心修改：日期資料 (包含多個地點設定) ===
             const days = [
@@ -777,7 +796,6 @@
             watch(selectedDate, (newDate) => {
                 const dayInfo = days.find(d => d.dateStr === newDate);
                 if (dayInfo && dayInfo.locations.length > 0) {
-                    // 切換日期時，預設抓取該日的第一個地點天氣
                     changeWeatherCity(dayInfo.locations[0]);
                 }
             });
@@ -1307,9 +1325,9 @@
             // === 購物清單邏輯更新 (成員過濾) ===
             const shoppingList = ref(JSON.parse(localStorage.getItem('sakura_shopping')) || []);
             const filteredShoppingList = computed(() => {
-                if (!currentMemberFilter.value) return shoppingList.value;
-                return shoppingList.value.filter(item => item.owner === currentMemberFilter.value);
-            });
+  if (currentShoppingFilter.value === '全部') return shoppingList.value;
+  return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
+});
 
             // === 花費邏輯更新 (成員過濾) ===
             const expenses = ref(JSON.parse(localStorage.getItem('sakura_expenses')) || []);
@@ -1326,27 +1344,70 @@
             const modal = reactive({ show: false, type: '', title: '', isEdit: false });
             const formData = reactive({});
             
-            const openModal = (type, item = null) => { 
-                modal.type = type; 
-                modal.show = true; 
-                modal.isEdit = !!item; 
-                Object.keys(formData).forEach(key => delete formData[key]); 
-                if (item) { 
-                    modal.title = '編輯'; 
-                    Object.assign(formData, JSON.parse(JSON.stringify(item))); 
-                } else { 
-                    if (type === 'itinerary') { 
-                        modal.title = '新增行程'; 
-                        Object.assign(formData, { date: selectedDate.value, category: 'attraction', transportType: 'walk', travelTime: 15, name: '', time: '10:00' }); 
-                    } else if (type === 'shopping') { 
-                        modal.title = '新增購物清單'; 
-                        Object.assign(formData, { name: '', image: '', bought: false, owner: currentMemberFilter.value || travelers.value[1] }); // 預設為翔
-                    } else if (type === 'expense') { 
-                        modal.title = '新增花費'; 
-                        Object.assign(formData, { date: selectedDate.value, category: 'food', method: '現金', amount: '', owner: currentMemberFilter.value || travelers.value[1] }); // 預設為翔
-                    } 
-                } 
-            };
+            const openModal = (type, item = null) => {
+  modal.type = type;
+  modal.show = true;
+  modal.isEdit = !!item;
+
+  // 清空 formData
+  Object.keys(formData).forEach(key => delete formData[key]);
+
+  // 編輯模式：直接帶入
+  if (item) {
+    modal.title = '編輯';
+    Object.assign(formData, JSON.parse(JSON.stringify(item)));
+    return;
+  }
+
+  // 新增模式：依類型給預設值
+  if (type === 'itinerary') {
+    modal.title = '新增行程';
+    Object.assign(formData, {
+      date: selectedDate.value,
+      category: 'attraction',
+      transportType: 'walk',
+      travelTime: 15,
+      name: '',
+      time: '10:00',
+      note: '',
+      description: '',
+      openHours: '',
+      ticket: ''
+    });
+    return;
+  }
+
+  if (type === 'shopping') {
+    modal.title = '新增購物清單';
+
+    const defaultOwner =
+      currentShoppingFilter.value !== '全部'
+        ? currentShoppingFilter.value
+        : shoppingOwners.value[0]; // 第一位非公費
+
+    Object.assign(formData, {
+      name: '',
+      image: '',
+      bought: false,
+      owner: defaultOwner
+    });
+    return;
+  }
+
+  if (type === 'expense') {
+    modal.title = '新增花費';
+    Object.assign(formData, {
+      date: selectedDate.value,
+      category: 'food',
+      method: '現金',
+      amount: '',
+      name: '',
+      owner: currentMemberFilter.value || travelers.value[1] // 預設「翔」(跳過公費)
+    });
+    return;
+  }
+};
+
             const closeModal = () => modal.show = false;
             const submitForm = () => { if (modal.type === 'itinerary') { if (modal.isEdit) { const index = itineraryList.value.findIndex(i => i.id === formData.id); if (index !== -1) itineraryList.value[index] = { ...formData }; } else { itineraryList.value.push({ ...formData, id: Date.now() }); } saveToLocal('sakura_itinerary', itineraryList.value); } else if (modal.type === 'shopping') { shoppingList.value.push({ ...formData }); saveToLocal('sakura_shopping', shoppingList.value); } else if (modal.type === 'expense') { expenses.value.push({ ...formData }); saveToLocal('sakura_expenses', expenses.value); } closeModal(); };
             const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary', itineraryList.value); closeModal(); } };
@@ -1357,13 +1418,83 @@
             const moveItem = (index, direction) => { alert("拖曳排序功能需後端或更複雜的狀態管理，此為展示版本。"); };
             const openMap = (keyword) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`, '_blank'); };
             const saveToLocal = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+
+const saveToCloud = async () => {
+  if (typeof window.__CLOUD_SET_STATE__ !== "function") return;
+
+  const payload = {
+    itinerary: itineraryList.value,
+    shopping: shoppingList.value,
+    expenses: expenses.value,
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    await window.__CLOUD_SET_STATE__(payload);
+    console.log("☁️ saved to cloud");
+  } catch (e) {
+    console.warn("⚠️ cloud save failed", e);
+  }
+};
+
+const loadFromCloud = async () => {
+  if (typeof window.__CLOUD_GET_STATE__ !== "function") return;
+
+  try {
+    const cloud = await window.__CLOUD_GET_STATE__();
+    if (!cloud) return;
+
+    if (cloud.itinerary) itineraryList.value = cloud.itinerary;
+    if (cloud.shopping) shoppingList.value = cloud.shopping;
+    if (cloud.expenses) expenses.value = cloud.expenses;
+
+    saveToLocal("sakura_itinerary", itineraryList.value);
+    saveToLocal("sakura_shopping", shoppingList.value);
+    saveToLocal("sakura_expenses", expenses.value);
+
+    console.log("☁️ loaded from cloud");
+  } catch (e) {
+    console.warn("⚠️ cloud load failed", e);
+  }
+};
+
+onMounted(async () => {
+  await loadFromCloud();
+});
+
+watch(
+  [itineraryList, shoppingList, expenses],
+  async () => {
+    await saveToCloud();
+  },
+  { deep: true }
+);
+
             const getCategoryLabel = (cat) => ({ attraction: '景點', food: '美食', shopping: '購物', accommodation: '住宿', flight: '航班', transport: '交通', other: '其他' }[cat] || '其他');
             const getCategoryColor = (cat) => ({ attraction: 'bg-red-100 text-red-500', food: 'bg-orange-100 text-orange-500', shopping: 'bg-pink-100 text-pink-500', accommodation: 'bg-purple-100 text-purple-500', transport: 'bg-green-100 text-green-600' }[cat] || 'bg-gray-100 text-gray-500');
             const getTransportIcon = (type) => type === 'walk' ? 'fa-solid fa-person-walking' : 'fa-solid fa-train-subway';
             const getExpenseIcon = (cat) => `fa-solid ${{ transport: 'fa-train', food: 'fa-utensils', accommodation: 'fa-bed', ticket: 'fa-ticket', shopping: 'fa-bag-shopping', other: 'fa-circle' }[cat] || 'fa-circle'}`;
 
-            return { currentTab, tabs, days, selectedDate, filteredItinerary, modal, formData, openModal, closeModal, submitForm, shoppingList, filteredShoppingList, expenses, filteredExpenses, totalExpense, filteredTotalExpense, exchange, calcTwd, today, getCategoryLabel, getCategoryColor, getTransportIcon, getExpenseIcon, editItinerary: (item) => openModal('itinerary', item), confirmDeleteItinerary, deleteItineraryItem, deleteShoppingItem, deleteExpense, handleImageUpload, moveItem, openMap, isWeatherExpanded, toggleWeather, weatherData, weatherLoading, travelers, shoppingTravelers, currentMemberFilter, currentDayCities, changeWeatherCity, bannerImage, handleBannerUpload, daysUntilTrip, resetToDefaultItinerary };
-        }
+            return { 
+  currentTab, tabs, days, selectedDate, filteredItinerary, modal, formData, openModal, closeModal, submitForm,
+  shoppingList, filteredShoppingList,
+  expenses, filteredExpenses, totalExpense, filteredTotalExpense,
+  exchange, calcTwd, today,
+  getCategoryLabel, getCategoryColor, getTransportIcon, getExpenseIcon,
+  editItinerary: (item) => openModal('itinerary', item),
+  confirmDeleteItinerary, deleteItineraryItem, deleteShoppingItem, deleteExpense,
+  handleImageUpload, moveItem, openMap,
+  isWeatherExpanded, toggleWeather, weatherData, weatherLoading,
+  travelers, shoppingTravelers, shoppingOwners,
+  currentShoppingFilter,  
+  currentMemberFilter,
+  currentDayCities, changeWeatherCity,
+  bannerImage, handleBannerUpload,
+  daysUntilTrip,
+  resetToDefaultItinerary
+};
+}
+
     }).mount('#app');
 </script>
 
@@ -1375,38 +1506,46 @@
     .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 </style>
 
-console.log("🔥 firebase module script loaded");
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+  import { 
+    getFirestore, doc, getDoc, setDoc, serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-  const firebaseConfig = { /* 你的設定不變 */ };
+  const firebaseConfig = {
+  apiKey: "AIzaSyDc1X5CFJc7ThluEmPN--uVKxSfrlZavek",
+  authDomain: "osa0402test.firebaseapp.com",
+  projectId: "osa0402test",
+  storageBucket: "osa0402test.firebasestorage.app",
+  messagingSenderId: "49893570598",
+  appId: "1:49893570598:web:c334c87afbd84ee329cee7",
+  measurementId: "G-HTNRTFVN0S"
+};
+
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  async function writeTest() {
-    const ref = await addDoc(collection(db, "test"), {
-      message: "Hello from Cloudflare Pages",
-      time: new Date().toISOString()
-    });
-    console.log("✅ 寫入成功，ID:", ref.id);
-  }
+const TRIP_ID = "keihan_2026_0402";
 
-  async function readTest() {
-    const snap = await getDocs(collection(db, "test"));
-    console.log("📄 讀取到", snap.size, "筆資料");
-    snap.forEach(d => console.log(d.id, d.data()));
-  }
+  const stateDoc = () => doc(db, "trips", TRIP_ID, "state", "main");   
 
-  (async () => {
-    await writeTest();
-    await readTest();
-  })();
+window.__CLOUD_GET_STATE__ = async () => {
+    const snap = await getDoc(stateDoc());
+    return snap.exists() ? snap.data() : null;
+  };
+
+window.__CLOUD_SET_STATE__ = async (payload) => {
+    await setDoc(doc(db, "trips", TRIP_ID), { updatedAt: serverTimestamp() }, { merge: true });
+    await setDoc(stateDoc(), payload, { merge: true });
+    return true;
+  };
+
+console.log("✅ Firebase ready. TRIP_ID =", TRIP_ID);
+
+
+console.log("🔥 firebase module script loaded");
+
 </script>
-
-
 </body>
-
 </html>
