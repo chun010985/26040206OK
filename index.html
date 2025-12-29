@@ -114,6 +114,7 @@
             <p class="text-sm opacity-90">2026.04.02 - 04.06</p>
         </div>
 
+
     </header>
 
     <!-- 圓弧銜接層 & 主內容 -->
@@ -656,6 +657,34 @@
             // === 橫幅圖片邏輯 (新增) ===
            const defaultBanner = 'https://i.ibb.co/5gYDvnCj/Gemini-Generated-Image-b9cv82b9cv82b9cv.png';
 const bannerImage = ref(defaultBanner);
+
+            const handleBannerUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // 檢查檔案大小 (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('圖片太大囉！建議使用 2MB 以下的圖片，以免瀏覽器存不下。');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    bannerImage.value = e.target.result;
+                    try {
+                        localStorage.setItem('sakura_banner_image', e.target.result);
+                    } catch (err) {
+                        alert('圖片儲存失敗 (可能是容量已滿)，但本次瀏覽仍有效。');
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+
+            // 處理圖片載入錯誤 (例如 Drive 連結失效時自動切回預設圖)
+            const handleImageError = () => {
+                console.warn('Banner image failed to load, reverting to default.');
+                bannerImage.value = defaultBanner;
+            };
 
             // === 倒數計時邏輯 (新增) ===
             const tripStartDate = new Date('2026-04-02T00:00:00');
@@ -1516,8 +1545,8 @@ watch(expenses, saveToCloud, { deep: true });
   currentShoppingFilter,  
   currentMemberFilter,
   currentDayCities, changeWeatherCity,
-bannerImage,
-handleImageError, daysUntilTrip,
+  bannerImage, handleBannerUpload,
+  handleImageError,daysUntilTrip,
   cloudSync,
   manualCloudSync,
   resetToDefaultItinerary
