@@ -1465,7 +1465,16 @@ const currentMemberFilter = ref(null);
             const openMap = (keyword) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`, '_blank'); };
             const saveToLocal = (key, data) => localStorage.setItem(key, JSON.stringify(data));
 
+// --- Cloud sync state ---
+const cloudSync = reactive({
+  state: "idle", // idle | syncing | synced | error
+  message: "尚未同步",
+  lastSyncedAt: ""
+});
+
+// --- Save to cloud ---
 const saveToCloud = async () => {
+  // Firebase 還沒準備好就先不做（避免一直噴錯）
   if (typeof window.__CLOUD_SET_STATE__ !== "function") return;
 
   const payload = {
@@ -1475,55 +1484,49 @@ const saveToCloud = async () => {
     updatedAt: new Date().toISOString()
   };
 
-  try {
-    await window.__CLOUD_SET_STATE__(payload);
-    console.log("☁️ saved to cloud");
-  } catch (e) {
-    console.warn("⚠️ cloud save failed", e);
-  }
+  await window.__CLOUD_SET_STATE__(payload);
 };
 
+// --- Load from cloud ---
 const loadFromCloud = async () => {
   if (typeof window.__CLOUD_GET_STATE__ !== "function") return;
 
-  try {
-    const cloud = await window.__CLOUD_GET_STATE__();
-    if (!cloud) return;
+  const cloud = await window.__CLOUD_GET_STATE__();
+  if (!cloud) return;
 
-    if (cloud.itinerary) itineraryList.value = cloud.itinerary;
-    if (cloud.shopping) shoppingList.value = cloud.shopping;
-    if (cloud.expenses) expenses.value = cloud.expenses;
+  if (cloud.itinerary) itineraryList.value = cloud.itinerary;
+  if (cloud.shopping) shoppingList.value = cloud.shopping;
+  if (cloud.expenses) expenses.value = cloud.expenses;
 
-    saveToLocal("sakura_itinerary", itineraryList.value);
-    saveToLocal("sakura_shopping", shoppingList.value);
-    saveToLocal("sakura_expenses", expenses.value);
-
-    console.log("☁️ loaded from cloud");
-  } catch (e) {
-    console.warn("⚠️ cloud load failed", e);
-  }
-};
-
-onMounted(async () => {
-  await loadFromCloud();
-});
-
-const cloudSync = reactive({
-  state: "idle", // idle | syncing | synced | error
-  message: "尚未同步",
-  lastSyncedAt: ""
-});
-
-const setCloudState = (state, message = "", timeISO = "") => {
-  cloudSync.state = state;
-  cloudSync.message = message || cloudSync.message;
-  if (timeISO) cloudSync.lastSyncedAt = timeISO;
+  saveToLocal("sakura_itinerary", itineraryList.value);
+  saveToLocal("sakura_shopping", shoppingList.value);
+  saveToLocal("sakura_expenses", expenses.value);
 };
 
 const manualCloudSync = async () => {
-  await saveToCloud(true);
+  cloudSync.state = "syncing";
+  cloudSync.message = "同步中…";
+  try {
+    await saveToCloud();
+    cloudSync.state = "synced";
+    cloudSync.message = "已同步";
+    cloudSync.lastSyncedAt = new Date().toISOString();
+  } catch (e) {
+    cloudSync.state = "error";
+    cloudSync.message = "同步失敗，點我重試";
+    console.warn(e);
+  }
 };
 
+// 等 Firebase module 掛好 window.__CLOUD_GET_STATE__ 再載入
+onMounted(async () => {
+  while (typeof window.__CLOUD_GET_STATE__ !== "function") {
+    await new Promise(r => setTimeout(r, 100));
+  }
+  await loadFromCloud();
+});
+
+// 變更就自動同步（Firebase 未就緒會 return，不會噴錯）
 watch(itineraryList, saveToCloud, { deep: true });
 watch(shoppingList, saveToCloud, { deep: true });
 watch(expenses, saveToCloud, { deep: true });
@@ -1609,3 +1612,4 @@ console.log("🔥 firebase module script loaded");
 </script>
 </body>
 </html>
+
