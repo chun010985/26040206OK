@@ -1514,22 +1514,30 @@ const applyCloudToLocal = (cloud) => {
 };
 
 const pullFromCloudOnce = async () => {
-  await waitForCloudFns();
+  try {
+    await waitForCloudFns();
 
-  cloudSync.state = "syncing";
-  cloudSync.message = "從雲端載入中…";
-  cloudSync.error = null;
+    cloudSync.state = "syncing";
+    cloudSync.message = "從雲端載入中…";
+    cloudSync.error = null;
 
-  const cloud = await window.__CLOUD_GET_STATE__();
+    const cloud = await window.__CLOUD_GET_STATE__();
 
-  // ★避免拉資料時觸發 watch 上傳
-  isHydratingFromCloud = true;
-  applyCloudToLocal(cloud);
-  isHydratingFromCloud = false;
+    isHydratingFromCloud = true;
+    applyCloudToLocal(cloud);
+    isHydratingFromCloud = false;
 
-  cloudSync.state = "synced";
-  cloudSync.message = cloud ? "已從雲端載入" : "雲端目前沒有資料";
-  cloudSync.lastSyncedAt = new Date().toISOString();
+    cloudSync.state = "synced";
+    cloudSync.message = cloud ? "已從雲端載入" : "雲端目前沒有資料";
+    cloudSync.lastSyncedAt = new Date().toISOString();
+  } catch (err) {
+    console.error("pullFromCloudOnce failed:", err);
+    isHydratingFromCloud = false;
+
+    cloudSync.state = "error";
+    cloudSync.message = "雲端載入失敗，點這裡重試";
+    cloudSync.error = err?.message || String(err);
+  }
 };
 
 const pushToCloud = async () => {
