@@ -22,7 +22,7 @@
                         sakura: {
                             light: '#fff0f5', // 淺粉紅背景
                             DEFAULT: '#ffb7c5', // 櫻花粉
-                            dark: '#', // 深粉紅
+                            dark: '#2EA9DF', // 深粉紅
                             text: '#5d4037', // 溫暖的深褐色文字
                         }
                     },
@@ -365,7 +365,7 @@
 
                     <div class="flex justify-between items-center text-center mb-4 relative z-10">
                         <div class="text-left">
-                            <div class="text-3xl font-black text-gray-800 -none">12:00</div>
+                            <div class="text-3xl font-black text-gray-800">12:00</div>
                             <div class="text-sm font-bold text-gray-600 mt-1">KIX 關西</div>
                             <div class="text-[10px] text-gray-400 mt-0.5 bg-white/60 inline-block px-1 rounded">第一航廈</div>
                         </div>
@@ -1377,28 +1377,13 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs
-  } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDc1X5CFJc7ThluEmPN--uVKxSfrlZavek",
-  authDomain: "osa0402test.firebaseapp.com",
-  projectId: "osa0402test",
-  storageBucket: "osa0402test.firebasestorage.app",
-  messagingSenderId: "49893570598",
-  appId: "1:49893570598:web:c334c87afbd84ee329cee7",
-  measurementId: "G-HTNRTFVN0S"
-};
+  const firebaseConfig = { /* 你的設定不變 */ };
 
-  // 初始化 Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 寫入一筆測試資料
   async function writeTest() {
     const ref = await addDoc(collection(db, "test"), {
       message: "Hello from Cloudflare Pages",
@@ -1407,16 +1392,19 @@ const firebaseConfig = {
     console.log("✅ 寫入成功，ID:", ref.id);
   }
 
-  // 讀取資料
   async function readTest() {
     const snap = await getDocs(collection(db, "test"));
     console.log("📄 讀取到", snap.size, "筆資料");
     snap.forEach(d => console.log(d.id, d.data()));
   }
 
-  await writeTest();
-  await readTest();
+  (async () => {
+    await writeTest();
+    await readTest();
+  })();
 </script>
 
+
 </body>
+
 </html>
