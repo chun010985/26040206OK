@@ -133,12 +133,13 @@
   }"
   @click="cloudSync.state === 'error' && manualCloudSync()"
 >
+  <!-- 左側：圖示 + 狀態文字 -->
   <div class="flex items-center gap-2">
     <i
       class="fa-solid"
       :class="{
         'fa-cloud': cloudSync.state === 'idle',
-        'fa-rotate': cloudSync.state === 'syncing',
+        'fa-rotate animate-spin': cloudSync.state === 'syncing',
         'fa-circle-check': cloudSync.state === 'synced',
         'fa-triangle-exclamation': cloudSync.state === 'error'
       }"
@@ -146,10 +147,28 @@
     <span>{{ cloudSync.message }}</span>
   </div>
 
-  <span v-if="cloudSync.lastSyncedAt" class="text-[10px] opacity-70">
-    {{ new Date(cloudSync.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-  </span>
-</div>    
+  <!-- 右側：時間 + 同步按鈕（包成一組） -->
+  <div class="flex items-center gap-2">
+    <span v-if="cloudSync.lastSyncedAt" class="text-[10px] opacity-70">
+      {{ new Date(cloudSync.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+    </span>
+
+    <button
+      class="text-[10px] font-bold px-3 py-1 rounded-full border bg-white/70 hover:bg-white active:scale-95 transition"
+      :class="cloudSync.state === 'syncing' ? 'opacity-60 cursor-not-allowed' : ''"
+      @click.stop="manualCloudSync"
+      :disabled="cloudSync.state === 'syncing'"
+      title="手動同步到雲端"
+    >
+      <i
+        class="fa-solid mr-1"
+        :class="cloudSync.state === 'syncing' ? 'fa-rotate animate-spin' : 'fa-floppy-disk'"
+      ></i>
+      同步
+    </button>
+  </div>
+</div>
+
 <main class="relative -mt-6 bg-[#fafafa] rounded-t-[30px] px-4 pt-6 min-h-[500px] z-10">
         
         <!-- === TAB 1: 每日行程表 === -->
@@ -1590,6 +1609,3 @@ console.log("🔥 firebase module script loaded");
 </script>
 </body>
 </html>
-
-
-
