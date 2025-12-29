@@ -114,12 +114,7 @@
             <p class="text-sm opacity-90">2026.04.02 - 04.06</p>
         </div>
 
-        <!-- 更換封面按鈕 -->
-        <label class="absolute bottom-4 right-4 bg-white/90 px-3 py-2 rounded-full cursor-pointer shadow-lg backdrop-blur-sm active:scale-95 transition-all z-20 hover:bg-white text-sakura-text flex items-center gap-2 group-hover:opacity-100">
-            <input type="file" @change="handleBannerUpload" class="hidden" accept="image/*">
-            <i class="fa-solid fa-camera"></i>
-            <span class="text-xs font-bold">更換封面</span>
-        </label>
+     
     </header>
 
     <!-- 圓弧銜接層 & 主內容 -->
@@ -659,37 +654,12 @@
                 { id: 'expense', name: '花費', icon: 'fa-solid fa-yen-sign' },
             ];
 
-            // === 橫幅圖片邏輯 (新增) ===
-            const defaultBanner = 'https://images.unsplash.com/photo-1522383225653-ed111181a951?q=80&w=1920&auto=format&fit=crop';
-            const bannerImage = ref(localStorage.getItem('sakura_banner_image') || defaultBanner);
+const defaultBanner = 'https://i.ibb.co/5gYDvnCj/Gemini-Generated-Image-b9cv82b9cv82b9cv.png';
+const bannerImage = ref(defaultBanner);   
 
-            const handleBannerUpload = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                // 檢查檔案大小 (2MB)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('圖片太大囉！建議使用 2MB 以下的圖片，以免瀏覽器存不下。');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    bannerImage.value = e.target.result;
-                    try {
-                        localStorage.setItem('sakura_banner_image', e.target.result);
-                    } catch (err) {
-                        alert('圖片儲存失敗 (可能是容量已滿)，但本次瀏覽仍有效。');
-                    }
-                };
-                reader.readAsDataURL(file);
-            };
-
-            // 處理圖片載入錯誤 (例如 Drive 連結失效時自動切回預設圖)
-            const handleImageError = () => {
-                console.warn('Banner image failed to load, reverting to default.');
-                bannerImage.value = defaultBanner;
-            };
+const handleImageError = () => {
+  bannerImage.value = defaultBanner;
+};         
 
             // === 倒數計時邏輯 (新增) ===
             const tripStartDate = new Date('2026-04-02T00:00:00');
@@ -1489,7 +1459,6 @@ const buildPayload = () => ({
   itinerary: itineraryList.value,
   shopping: shoppingList.value,
   expenses: expenses.value,
-  bannerImage: bannerImage.value,          // ★把 banner 一起同步
   updatedAt: new Date().toISOString()
 });
 
@@ -1500,16 +1469,12 @@ const applyCloudToLocal = (cloud) => {
   if (Array.isArray(cloud.itinerary)) itineraryList.value = cloud.itinerary;
   if (Array.isArray(cloud.shopping))  shoppingList.value  = cloud.shopping;
   if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
-  if (cloud.bannerImage) bannerImage.value = cloud.bannerImage;
 
   // 同步到 localStorage（讓下次開啟速度快）
   saveToLocal('sakura_itinerary', itineraryList.value);
   saveToLocal('sakura_shopping', shoppingList.value);
   saveToLocal('sakura_expenses', expenses.value);
-  try {
-    localStorage.setItem('sakura_banner_image', bannerImage.value);
-  } catch (e) {}
-
+  
   lastCloudUpdatedAt = cloud.updatedAt || null;
 };
 
@@ -1580,7 +1545,6 @@ const scheduleSync = () => {
 watch(itineraryList, scheduleSync, { deep: true });
 watch(shoppingList, scheduleSync, { deep: true });
 watch(expenses, scheduleSync, { deep: true });
-watch(bannerImage, scheduleSync); // ★banner 也要自動同步
 
             const getCategoryLabel = (cat) => ({ attraction: '景點', food: '美食', shopping: '購物', accommodation: '住宿', flight: '航班', transport: '交通', other: '其他' }[cat] || '其他');
             const getCategoryColor = (cat) => ({ attraction: 'bg-red-100 text-red-500', food: 'bg-orange-100 text-orange-500', shopping: 'bg-pink-100 text-pink-500', accommodation: 'bg-purple-100 text-purple-500', transport: 'bg-green-100 text-green-600' }[cat] || 'bg-gray-100 text-gray-500');
@@ -1601,7 +1565,7 @@ watch(bannerImage, scheduleSync); // ★banner 也要自動同步
   currentShoppingFilter,  
   currentMemberFilter,
   currentDayCities, changeWeatherCity,
-  bannerImage, handleBannerUpload,
+  bannerImage, 
   handleImageError,daysUntilTrip,
   cloudSync,
   manualCloudSync,
