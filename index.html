@@ -1465,9 +1465,29 @@ const currentMemberFilter = ref(null);
             const openMap = (keyword) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`, '_blank'); };
             const saveToLocal = (key, data) => localStorage.setItem(key, JSON.stringify(data));
 
+const cloudSync = reactive({
+  state: "idle",          // idle | syncing | synced | error
+  message: "雲端同步待命",
+  lastSyncedAt: null,
+  error: null
+});
+
+// 等 Firebase module script 把 window.__CLOUD_* 掛上去
+const waitForCloudFns = () => new Promise((resolve, reject) => {
+  const start = Date.now();
+  const timer = setInterval(() => {
+    const ok = (typeof window.__CLOUD_GET_STATE__ === "function") &&
+               (typeof window.__CLOUD_SET_STATE__ === "function");
+    if (ok) { clearInterval(timer); resolve(true); }
+    if (Date.now() - start > 8000) { clearInterval(timer); reject(new Error("Cloud functions not ready")); }
+  }, 100);
+});
+
+// 寫入雲端（純寫入，不改 UI 狀態，UI 由 manualCloudSync 控）
 const saveToCloud = async () => {
   if (typeof window.__CLOUD_SET_STATE__ !== "function") {
-    throw new Error("Cloud setter not ready");
+    console.warn("Cloud setter not ready yet, skip save.");
+    return;
   }
 
   const payload = {
@@ -1479,79 +1499,33 @@ const saveToCloud = async () => {
 
   await window.__CLOUD_SET_STATE__(payload);
 };
-  const payload = {
-    itinerary: itineraryList.value,
-    shopping: shoppingList.value,
-    expenses: expenses.value,
-    updatedAt: new Date().toISOString()
-  };
 
-  try {
-    await window.__CLOUD_SET_STATE__(payload);
-    console.log("☁️ saved to cloud");
-  } catch (e) {
-    console.warn("⚠️ cloud save failed", e);
-  }
-};
-
-const loadFromCloud = async () => {
-  if (typeof window.__CLOUD_GET_STATE__ !== "function") return;
-
-  try {
-    const cloud = await window.__CLOUD_GET_STATE__();
-    if (!cloud) return;
-
-    if (cloud.itinerary) itineraryList.value = cloud.itinerary;
-    if (cloud.shopping) shoppingList.value = cloud.shopping;
-    if (cloud.expenses) expenses.value = cloud.expenses;
-
-    saveToLocal("sakura_itinerary", itineraryList.value);
-    saveToLocal("sakura_shopping", shoppingList.value);
-    saveToLocal("sakura_expenses", expenses.value);
-
-    console.log("☁️ loaded from cloud");
-  } catch (e) {
-    console.warn("⚠️ cloud load failed", e);
-  }
-};
-
-onMounted(async () => {
-  while (typeof window.__CLOUD_GET_STATE__ !== "function") {
-    await new Promise(r => setTimeout(r, 100));
-  }
-  await loadFromCloud();
-});
-
-const cloudSync = reactive({
-  state: "idle", // idle | syncing | synced | error
-  message: "尚未同步",
-  lastSyncedAt: ""
-});
-
-const setCloudState = (state, message = "", timeISO = "") => {
-  cloudSync.state = state;
-  cloudSync.message = message || cloudSync.message;
-  if (timeISO) cloudSync.lastSyncedAt = timeISO;
-};
-
+// 手動同步（也給 watch 自動呼叫）
 const manualCloudSync = async () => {
-  cloudSync.state = "syncing";
-  cloudSync.message = "同步中…";
-
+  // 防呆：Firebase 還沒 ready 就先不要同步（避免報錯）
   try {
+    if (typeof window.__CLOUD_SET_STATE__ !== "function") return;
+
+    cloudSync.state = "syncing";
+    cloudSync.message = "同步中…";
+    cloudSync.error = null;
+
     await saveToCloud();
+
     cloudSync.state = "synced";
-    cloudSync.message = "已同步";
+    cloudSync.message = "已同步到雲端";
     cloudSync.lastSyncedAt = new Date().toISOString();
-  } catch (e) {
+  } catch (err) {
+    console.error(err);
     cloudSync.state = "error";
-    cloudSync.message = "同步失敗，點我重試";
+    cloudSync.message = "同步失敗，點這裡重試";
+    cloudSync.error = err?.message || String(err);
   }
 };
 
-watch(itineraryList, saveToCloud, { deep: true });
-watch(shoppingList, saveToCloud, { deep: true });
-watch(expenses, saveToCloud, { deep: true });
+watch(itineraryList, manualCloudSync, { deep: true });
+watch(shoppingList, manualCloudSync, { deep: true });
+watch(expenses, manualCloudSync, { deep: true });
 
             const getCategoryLabel = (cat) => ({ attraction: '景點', food: '美食', shopping: '購物', accommodation: '住宿', flight: '航班', transport: '交通', other: '其他' }[cat] || '其他');
             const getCategoryColor = (cat) => ({ attraction: 'bg-red-100 text-red-500', food: 'bg-orange-100 text-orange-500', shopping: 'bg-pink-100 text-pink-500', accommodation: 'bg-purple-100 text-purple-500', transport: 'bg-green-100 text-green-600' }[cat] || 'bg-gray-100 text-gray-500');
