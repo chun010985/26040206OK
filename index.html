@@ -479,7 +479,7 @@
                     <li><b>注意事項</b>：
                         <ol class="list-decimal pl-4 mt-1 space-y-1 text-gray-500">
                             <li>行程含SIM卡，不用再另外購買。</li>
-                            <li>自由行每日約為20,000步以上，大家一起加油~回飯店休息後別忘了讓腳好好休息唷！</li>
+                            <li>自由行每日約為20000步以上，大家一起加油~回飯店休息後別忘了讓腳好好休息唷！</li>
                             <li>個人藥品請務必記得攜帶。</li>
                         </ol>
                     </li>
@@ -640,18 +640,7 @@
                 <!-- 誰付錢 -->
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">是誰付的錢？</label><select v-model="formData.owner" class="w-full bg-blue-50 text-blue-800 font-bold rounded-xl p-3 border-blue-200"><option v-for="t in travelers" :value="t">{{ t }}</option></select></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">日期</label><select v-model="formData.date" class="w-full bg-gray-50 rounded-xl p-3"><option v-for="day in days" :value="day.dateStr">{{ day.displayDate }}</option></select></div>
-               <div>
-  <label class="block text-xs font-bold text-gray-500 mb-1">分類</label>
-  <select v-model="formData.category" class="w-full bg-gray-50 rounded-xl p-3">
-    <option value="transport">交通</option>
-    <option value="food">飲食</option>
-    <option value="accommodation">住宿</option>
-    <option value="ticket">門票</option>
-    <option value="shopping">購物</option>
-    <option value="gambling">博弈</option>
-    <option value="other">其他</option>
-  </select>
-</div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">類別</label><select v-model="formData.category" class="w-full bg-gray-50 rounded-xl p-3"><option value="transport">交通</option><option value="food">飲食</option><option value="accommodation">住宿</option><option value="ticket">門票</option><option value="shopping">購物</option><option value="gambling">博弈</option><option value="other">其他</option></select></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">名稱</label><input type="text" v-model="formData.name" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none"></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">金額 (JPY)</label><input type="number" v-model="formData.amount" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none"></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">付款方式</label><div class="flex gap-2"><label class="flex-1 bg-gray-50 p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer has-[:checked]:bg-sakura-light has-[:checked]:text-sakura-dark"><input type="radio" v-model="formData.method" value="現金" class="hidden"><i class="fa-solid fa-coins"></i> 現金</label><label class="flex-1 bg-gray-50 p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer has-[:checked]:bg-sakura-light has-[:checked]:text-sakura-dark"><input type="radio" v-model="formData.method" value="信用卡" class="hidden"><i class="fa-solid fa-credit-card"></i> 信用卡</label></div></div>
@@ -1312,7 +1301,7 @@ const currentMemberFilter = ref(null);
                     id: 502,
                     date: '2026-04-06',
                     category: 'other',
-                    name: '機場報到 & 行李托運',
+                    name: '機場報到 & 行利托運',
                     time: '10:00',
                     travelTime: 0,
                     transportType: 'walk',
@@ -1648,6 +1637,7 @@ console.log("🔥 firebase module script loaded");
 </script>
 </body>
 </html>
+
 
 
 
