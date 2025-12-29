@@ -109,7 +109,7 @@
         </div>
 
         <!-- 標題 -->
-        <div class="absolute bottom-10 left-6 text-white text-shadow z-10 pointer-events-none">
+        <div class="absolute bottom-40 left-6 text-white text-shadow z-10 pointer-events-none">
             <h1 class="text-3xl font-bold tracking-widest">京阪之旅</h1>
             <p class="text-sm opacity-90">2026.04.02 - 04.06</p>
         </div>
@@ -123,7 +123,34 @@
     </header>
 
     <!-- 圓弧銜接層 & 主內容 -->
-    <main class="relative -mt-6 bg-[#fafafa] rounded-t-[30px] px-4 pt-6 min-h-[500px] z-10">
+<div
+  class="mx-1 mb-3 px-4 py-2 rounded-2xl text-xs font-bold flex items-center justify-between border shadow-sm"
+  :class="{
+    'bg-gray-50 text-gray-500 border-gray-100': cloudSync.state === 'idle',
+    'bg-blue-50 text-blue-700 border-blue-100': cloudSync.state === 'syncing',
+    'bg-green-50 text-green-700 border-green-100': cloudSync.state === 'synced',
+    'bg-red-50 text-red-700 border-red-100 cursor-pointer': cloudSync.state === 'error'
+  }"
+  @click="cloudSync.state === 'error' && manualCloudSync()"
+>
+  <div class="flex items-center gap-2">
+    <i
+      class="fa-solid"
+      :class="{
+        'fa-cloud': cloudSync.state === 'idle',
+        'fa-rotate': cloudSync.state === 'syncing',
+        'fa-circle-check': cloudSync.state === 'synced',
+        'fa-triangle-exclamation': cloudSync.state === 'error'
+      }"
+    ></i>
+    <span>{{ cloudSync.message }}</span>
+  </div>
+
+  <span v-if="cloudSync.lastSyncedAt" class="text-[10px] opacity-70">
+    {{ new Date(cloudSync.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+  </span>
+</div>    
+<main class="relative -mt-6 bg-[#fafafa] rounded-t-[30px] px-4 pt-6 min-h-[500px] z-10">
         
         <!-- === TAB 1: 每日行程表 === -->
         <div v-if="currentTab === 'itinerary'">
@@ -1462,13 +1489,25 @@ onMounted(async () => {
   await loadFromCloud();
 });
 
-watch(
-  [itineraryList, shoppingList, expenses],
-  async () => {
-    await saveToCloud();
-  },
-  { deep: true }
-);
+const cloudSync = reactive({
+  state: "idle", // idle | syncing | synced | error
+  message: "尚未同步",
+  lastSyncedAt: ""
+});
+
+const setCloudState = (state, message = "", timeISO = "") => {
+  cloudSync.state = state;
+  cloudSync.message = message || cloudSync.message;
+  if (timeISO) cloudSync.lastSyncedAt = timeISO;
+};
+
+const manualCloudSync = async () => {
+  await saveToCloud(true);
+};
+
+watch(itineraryList, saveToCloud, { deep: true });
+watch(shoppingList, saveToCloud, { deep: true });
+watch(expenses, saveToCloud, { deep: true });
 
             const getCategoryLabel = (cat) => ({ attraction: '景點', food: '美食', shopping: '購物', accommodation: '住宿', flight: '航班', transport: '交通', other: '其他' }[cat] || '其他');
             const getCategoryColor = (cat) => ({ attraction: 'bg-red-100 text-red-500', food: 'bg-orange-100 text-orange-500', shopping: 'bg-pink-100 text-pink-500', accommodation: 'bg-purple-100 text-purple-500', transport: 'bg-green-100 text-green-600' }[cat] || 'bg-gray-100 text-gray-500');
@@ -1491,6 +1530,8 @@ watch(
   currentDayCities, changeWeatherCity,
   bannerImage, handleBannerUpload,
   handleImageError,daysUntilTrip,
+  cloudSync,
+  manualCloudSync,
   resetToDefaultItinerary
 };
 }
