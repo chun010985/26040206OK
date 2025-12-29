@@ -116,56 +116,66 @@
 
      
     </header>
+<main class="relative -mt-10 bg-[#fafafa] rounded-t-[40px] px-4 pt-4 min-h-[500px] z-10">
+
 
     <!-- 圓弧銜接層 & 主內容 -->
-<div
-  class="mx-1 mb-3 px-4 py-2 rounded-2xl text-xs font-bold flex items-center justify-between border shadow-sm"
-  :class="{
-    'bg-gray-50 text-gray-500 border-gray-100': cloudSync.state === 'idle',
-    'bg-blue-50 text-blue-700 border-blue-100': cloudSync.state === 'syncing',
-    'bg-green-50 text-green-700 border-green-100': cloudSync.state === 'synced',
-    'bg-red-50 text-red-700 border-red-100 cursor-pointer': cloudSync.state === 'error'
-  }"
-  @click="cloudSync.state === 'error' && manualCloudSync()"
+<div v-if="fales"
+  class="mx-2 mb-3 rounded-2xl border shadow-soft overflow-hidden select-none"
+  :class="cloudSyncWrapClass"
 >
-  <!-- 左側：圖示 + 狀態文字 -->
-  <div class="flex items-center gap-2">
-    <i
-      class="fa-solid"
-      :class="{
-        'fa-cloud': cloudSync.state === 'idle',
-        'fa-rotate animate-spin': cloudSync.state === 'syncing',
-        'fa-circle-check': cloudSync.state === 'synced',
-        'fa-triangle-exclamation': cloudSync.state === 'error'
-      }"
-    ></i>
-    <span>{{ cloudSync.message }}</span>
-  </div>
+  <!-- 上排：狀態 + 時間 + 按鈕 -->
+  <div class="px-4 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2 min-w-0">
+      <!-- 狀態小點點（會呼吸） -->
+      <span
+        class="w-2.5 h-2.5 rounded-full shrink-0"
+        :class="cloudSyncDotClass"
+      ></span>
 
-  <!-- 右側：時間 + 同步按鈕（包成一組） -->
-  <div class="flex items-center gap-2">
-    <span v-if="cloudSync.lastSyncedAt" class="text-[10px] opacity-70">
-      {{ new Date(cloudSync.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-    </span>
-
-    <button
-      class="text-[10px] font-bold px-3 py-1 rounded-full border bg-white/70 hover:bg-white active:scale-95 transition"
-      :class="cloudSync.state === 'syncing' ? 'opacity-60 cursor-not-allowed' : ''"
-      @click.stop="manualCloudSync"
-      :disabled="cloudSync.state === 'syncing'"
-      title="手動同步到雲端"
-    >
-      <i
-        class="fa-solid mr-1"
-        :class="cloudSync.state === 'syncing' ? 'fa-rotate animate-spin' : 'fa-floppy-disk'"
+      <!-- 圖示 -->
+      <i class="fa-solid shrink-0"
+        :class="cloudSyncIconClass"
       ></i>
-      同步
-    </button>
-  </div>
-</div>
 
-<main class="relative -mt-6 bg-[#fafafa] rounded-t-[30px] px-4 pt-6 min-h-[500px] z-10">
-        
+      <!-- 文字 -->
+      <div class="min-w-0">
+        <div class="text-xs font-black leading-tight truncate">
+          {{ cloudSyncTitle }}
+        </div>
+        <div class="text-[10px] opacity-80 truncate">
+          {{ cloudSyncSubTitle }}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <span v-if="cloudSync.lastSyncedAt" class="text-[10px] opacity-70">
+        {{ new Date(cloudSync.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+      </span>
+
+    </div>
+  </div>
+
+  <!-- 下排：進度條（只有同步中才顯示） -->
+  <div v-if="cloudSync.state === 'syncing'" class="px-4 pb-3">
+    <div class="h-1.5 rounded-full bg-white/50 overflow-hidden">
+      <div class="h-full w-1/3 animate-sync-bar rounded-full bg-white"></div>
+    </div>
+    <div class="mt-1 text-[10px] opacity-75">請稍等一下下…</div>
+  </div>
+
+  <!-- 錯誤提示（點整條也可重試） -->
+  <button
+    v-if="cloudSync.state === 'error'"
+    class="w-full text-left px-4 pb-3 text-[10px] opacity-90"
+    @click.stop="manualCloudSync"
+  >
+    點這裡重試（{{ cloudSync.error || '未知原因' }}）
+  </button>
+</div>
+ 
+       
         <!-- === TAB 1: 每日行程表 === -->
         <div v-if="currentTab === 'itinerary'">
             
@@ -1627,6 +1637,3 @@ console.log("🔥 firebase module script loaded");
 </script>
 </body>
 </html>
-
-
-
