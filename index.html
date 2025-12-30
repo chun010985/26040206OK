@@ -204,6 +204,15 @@
 
 <main class="relative -mt-10 bg-[#fafafa] rounded-t-[40px] px-4 pt-4 min-h-[500px] z-10">
 
+        <!-- 同步狀態指示器 (簡化版：只有小燈) -->
+        <div class="fixed top-4 left-4 z-50">
+             <div 
+                class="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.2)] border border-white transition-all duration-500"
+                :class="cloudSyncDotClass"
+                @click="cloudSync.state === 'error' && manualCloudSync()"
+             ></div>
+        </div>
+
         <!-- === TAB 1: 每日行程表 === -->
         <div v-if="currentTab === 'itinerary'">
             
@@ -1302,13 +1311,13 @@
                 { id: 504, date: '2026-04-06', category: 'flight', name: '航班 IT-285 KIX->KHH', time: '12:00', travelTime: 0, transportType: 'flight', note: '起飛 12:00 / 抵達 14:00', description: '帶著滿滿的回憶（和超重的行李）回家囉！✈️ 抵達高雄後記得領取行李。' }
             ];
 
-            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v8')) || fullItineraryData);
+            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v10')) || fullItineraryData);
             const filteredItinerary = computed(() => itineraryList.value.filter(item => item.date === selectedDate.value).sort((a, b) => a.time.localeCompare(b.time)));
             
             const resetToDefaultItinerary = () => {
                 if (confirm('確定要重置行程表嗎？這將會覆蓋您目前的變更，並載入預設的 4/2~4/6 完整行程。')) {
                     itineraryList.value = JSON.parse(JSON.stringify(fullItineraryData));
-                    saveToLocal('sakura_itinerary_v8', itineraryList.value);
+                    saveToLocal('sakura_itinerary_v10', itineraryList.value);
                     alert('行程已重置為預設狀態！');
                 }
             };
@@ -1456,7 +1465,7 @@
                 };
 
                 if (modal.type === 'itinerary') { 
-                    updateList(itineraryList, 'sakura_itinerary_v8');
+                    updateList(itineraryList, 'sakura_itinerary_v10');
                 } else if (modal.type === 'shopping') { 
                     updateList(shoppingList, 'sakura_shopping');
                 } else if (modal.type === 'expense') { 
@@ -1467,8 +1476,8 @@
                 closeModal(); 
             };
 
-            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v8', itineraryList.value); closeModal(); } };
-            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v8', itineraryList.value); } };
+            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v10', itineraryList.value); closeModal(); } };
+            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v10', itineraryList.value); } };
             // [修改] 刪除改用 ID
             const deleteShoppingItem = (id) => { if(confirm('刪除此商品？')) { shoppingList.value = shoppingList.value.filter(item => item.id !== id); saveToLocal('sakura_shopping', shoppingList.value); } }
             // [修改] 刪除改用 ID
@@ -1499,7 +1508,7 @@
             const cloudSyncDotClass = computed(() => {
                 switch(cloudSync.state) {
                     case 'syncing': return 'bg-yellow-400 animate-pulse';
-                    case 'error': return 'bg-red-500';
+                    case 'error': return 'bg-red-500 cursor-pointer';
                     case 'synced': return 'bg-green-500';
                     default: return 'bg-gray-300';
                 }
@@ -1582,7 +1591,7 @@
                 if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
                 if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
                 
-                saveToLocal('sakura_itinerary_v8', itineraryList.value);
+                saveToLocal('sakura_itinerary_v10', itineraryList.value);
                 saveToLocal('sakura_shopping', shoppingList.value);
                 saveToLocal('sakura_expenses', expenses.value);
                 saveToLocal('sakura_notebook', notebookList.value);
@@ -1707,6 +1716,7 @@
   import { 
     getFirestore, doc, getDoc, setDoc, serverTimestamp 
   } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDc1X5CFJc7ThluEmPN--uVKxSfrlZavek",
@@ -1720,16 +1730,32 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
 
   const TRIP_ID = "keihan_2026_0402";
   const stateDoc = () => doc(db, "trips", TRIP_ID, "state", "main");   
 
+  // 確保在登入後才允許讀寫
+  let user = null;
+  signInAnonymously(auth).then(() => {
+      console.log("Signed in anonymously");
+  }).catch((error) => {
+      console.error("Error signing in anonymously", error);
+  });
+
+  onAuthStateChanged(auth, (u) => {
+      user = u;
+  });
+
   window.__CLOUD_GET_STATE__ = async () => {
+    // 簡單的等待機制，確保已登入
+    if (!user) await new Promise(r => setTimeout(r, 1000));
     const snap = await getDoc(stateDoc());
     return snap.exists() ? snap.data() : null;
   };
 
   window.__CLOUD_SET_STATE__ = async (payload) => {
+    if (!user) await new Promise(r => setTimeout(r, 1000));
     await setDoc(doc(db, "trips", TRIP_ID), { updatedAt: serverTimestamp() }, { merge: true });
     await setDoc(stateDoc(), payload, { merge: true });
     return true;
@@ -1739,3 +1765,4 @@
 </script>
 </body>
 </html>
+
