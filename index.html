@@ -1599,31 +1599,38 @@ if (!window.__APP_ALREADY_STARTED__) {
                 updatedAt: new Date().toISOString()
             });
 
-            const applyCloudToLocal = (cloud) => {
-                if (!cloud) return;
-                let newItinerary = cloud.itinerary || [];
-                
-                // 1. 確保 05:00 集合存在 (Migration Fix)
-                const hasAirportMeetup = newItinerary.some(i => i.id === 0);
-                if (!hasAirportMeetup) {
-                    const meetupItem = fullItineraryData.find(i => i.id === 0);
-                    if (meetupItem) newItinerary.push(meetupItem);
-                }
+           const applyCloudToLocal = (cloud) => {
+  // ✅ 雲端沒資料：不要覆蓋本機，直接用預設完整行程
+  if (!cloud || !Array.isArray(cloud.itinerary) || cloud.itinerary.length === 0) {
+    itineraryList.value = JSON.parse(JSON.stringify(fullItineraryData));
+    saveToLocal('sakura_itinerary_v14', itineraryList.value);
+    return;
+  }
 
-                // 2. 強制更新 4/5 的時間設定 (修復雲端舊資料覆蓋問題)
-                newItinerary = newItinerary.map(item => {
-                    const freshData = fullItineraryData.find(f => f.id === item.id);
-                    // 如果這個行程是 4/5 的，強制使用最新的時間
-                    if (freshData && freshData.date === '2026-04-05') {
-                         item.time = freshData.time;
-                         item.travelTime = freshData.travelTime;
-                    }
-                    
-                    // 強制更新 4/6 錯字 (id 502)
-                    if (item.id === 502 && freshData) {
-                        item.name = freshData.name;
-                    }
+  let newItinerary = cloud.itinerary;
 
+  // ✅ 保底：確保 05:00 集合存在
+  const hasAirportMeetup = newItinerary.some(i => i.id === 0);
+  if (!hasAirportMeetup) {
+    const meetupItem = fullItineraryData.find(i => i.id === 0);
+    if (meetupItem) newItinerary.push(meetupItem);
+  }
+
+  // 重新排序
+  newItinerary.sort((a, b) => a.time.localeCompare(b.time));
+
+  itineraryList.value = newItinerary;
+  if (Array.isArray(cloud.shopping))  shoppingList.value  = cloud.shopping;
+  if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
+  if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
+
+  saveToLocal('sakura_itinerary_v14', itineraryList.value);
+  saveToLocal('sakura_shopping', shoppingList.value);
+  saveToLocal('sakura_expenses', expenses.value);
+  saveToLocal('sakura_notebook', notebookList.value);
+
+  lastCloudUpdatedAt = cloud.updatedAt || null;
+};
                     return item;
                 });
 
