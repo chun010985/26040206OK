@@ -1581,23 +1581,20 @@ cloudSync.lastSyncedAt = new Date().toISOString();
       watch(notebookList, scheduleSync, { deep: true });
       watch(packingData, scheduleSync, { deep: true });
 
-      const startRealtimeCloud = async () => {
-        try {
-          await waitForCloudFns();
-          cloudSync.state = "syncing";
-          cloudSync.message = "連線雲端中…";
-          cloudSync.error = null;
+const startRealtimeCloud = async () => {
+  await waitForCloudFns();
 
-          if (unsubscribeRealtime) { try { unsubscribeRealtime(); } catch(e) {} unsubscribeRealtime = null; }
+  cloudSync.state = "syncing";
+  cloudSync.message = "連線雲端中…";
+  cloudSync.error = null;
 
-          unsubscribeRealtime = window.__CLOUD_ON_SNAPSHOT__(async (remote) => {
-  try {
-    if (!remote) {
-      cloudSync.state = "synced";
-      cloudSync.message = "雲端尚無資料";
-      cloudSync.lastSyncedAt = new Date().toISOString();
-      return;
-    }
+  if (unsubscribeRealtime) {
+    try { unsubscribeRealtime(); } catch (e) {}
+    unsubscribeRealtime = null;
+  }
+
+  unsubscribeRealtime = window.__CLOUD_ON_SNAPSHOT__(async (remote) => {
+    if (!remote) return;
 
     const serverMs = remote.serverUpdatedAtMs || 0;
     const clientMs = remote.clientUpdatedAtMs || 0;
@@ -1607,14 +1604,12 @@ cloudSync.lastSyncedAt = new Date().toISOString();
     const localUpdatedAtMs = localMeta.localUpdatedAtMs || 0;
 
     const isNewerThanApplied =
-      (serverMs > (localMeta.lastAppliedServerMs || 0)) ||
-      (clientMs > (localMeta.lastAppliedClientMs || 0));
+      serverMs > (localMeta.lastAppliedServerMs || 0) ||
+      clientMs > (localMeta.lastAppliedClientMs || 0);
 
     const isFromOther = writer && writer !== deviceId;
-
-    // ✅ 重點：只有「本機還沒同步出去」才算本機比較新
     const pendingSync = !!localMeta.pendingSync;
-    const localIsNewer = pendingSync && (localUpdatedAtMs > clientMs);
+    const localIsNewer = pendingSync && localUpdatedAtMs > clientMs;
 
     if (isNewerThanApplied && isFromOther && !localIsNewer) {
       isHydratingFromCloud = true;
@@ -1624,36 +1619,16 @@ cloudSync.lastSyncedAt = new Date().toISOString();
       const newMeta = getLocalMeta();
       newMeta.lastAppliedServerMs = serverMs;
       newMeta.lastAppliedClientMs = clientMs;
-
-      // ✅ 套用雲端後，本機視為同一份
       newMeta.localUpdatedAtMs = clientMs;
       newMeta.pendingSync = false;
-
       setLocalMeta(newMeta);
-
-      cloudSync.state = "synced";
-      cloudSync.message = "已從雲端同步";
-      cloudSync.lastSyncedAt = new Date().toISOString();
-      return;
     }
-    
-
-    // ✅ 沒套用雲端也要記錄已看到的時間，避免重複判斷
-    const newMeta = getLocalMeta();
-    newMeta.lastAppliedServerMs = Math.max(newMeta.lastAppliedServerMs || 0, serverMs);
-    newMeta.lastAppliedClientMs = Math.max(newMeta.lastAppliedClientMs || 0, clientMs);
-    setLocalMeta(newMeta);
 
     cloudSync.state = "synced";
     cloudSync.message = "即時同步中";
     cloudSync.lastSyncedAt = new Date().toISOString();
-  } catch (e) {
-    isHydratingFromCloud = false;
-    cloudSync.state = "error";
-    cloudSync.message = "雲端同步發生錯誤，點這裡重試";
-    cloudSync.error = e?.message || String(e);
-  }
-});
+  });
+};
 
  
 // init
