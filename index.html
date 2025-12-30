@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+  
+  <head>
+  <!-- ⬇️ 把錯誤顯示 script 放這裡（最上面） -->
+  <script>
+    window.addEventListener("error", (e) => {
+      document.body.innerHTML =
+        "<pre style='white-space:pre-wrap;color:red;font-size:14px'>" +
+        "JS Error:\n" + (e?.message || e) +
+        "\n\n" + (e?.filename || "") + ":" + (e?.lineno || "") +
+        "</pre>";
+    });
+    window.addEventListener("unhandledrejection", (e) => {
+      document.body.innerHTML =
+        "<pre style='white-space:pre-wrap;color:red;font-size:14px'>" +
+        "Promise Error:\n" + (e?.reason?.message || e?.reason || e) +
+        "</pre>";
+    });
+  </script>
+
+  <!-- 下面才是原本的 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>京阪之旅</title>
