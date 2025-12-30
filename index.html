@@ -1302,13 +1302,13 @@
                 { id: 504, date: '2026-04-06', category: 'flight', name: '航班 IT-285 KIX->KHH', time: '12:00', travelTime: 0, transportType: 'flight', note: '起飛 12:00 / 抵達 14:00', description: '帶著滿滿的回憶（和超重的行李）回家囉！✈️ 抵達高雄後記得領取行李。' }
             ];
 
-            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v7')) || fullItineraryData);
+            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v8')) || fullItineraryData);
             const filteredItinerary = computed(() => itineraryList.value.filter(item => item.date === selectedDate.value).sort((a, b) => a.time.localeCompare(b.time)));
             
             const resetToDefaultItinerary = () => {
                 if (confirm('確定要重置行程表嗎？這將會覆蓋您目前的變更，並載入預設的 4/2~4/6 完整行程。')) {
                     itineraryList.value = JSON.parse(JSON.stringify(fullItineraryData));
-                    saveToLocal('sakura_itinerary_v7', itineraryList.value);
+                    saveToLocal('sakura_itinerary_v8', itineraryList.value);
                     alert('行程已重置為預設狀態！');
                 }
             };
@@ -1456,7 +1456,7 @@
                 };
 
                 if (modal.type === 'itinerary') { 
-                    updateList(itineraryList, 'sakura_itinerary_v7');
+                    updateList(itineraryList, 'sakura_itinerary_v8');
                 } else if (modal.type === 'shopping') { 
                     updateList(shoppingList, 'sakura_shopping');
                 } else if (modal.type === 'expense') { 
@@ -1467,8 +1467,8 @@
                 closeModal(); 
             };
 
-            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v7', itineraryList.value); closeModal(); } };
-            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v7', itineraryList.value); } };
+            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v8', itineraryList.value); closeModal(); } };
+            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v8', itineraryList.value); } };
             // [修改] 刪除改用 ID
             const deleteShoppingItem = (id) => { if(confirm('刪除此商品？')) { shoppingList.value = shoppingList.value.filter(item => item.id !== id); saveToLocal('sakura_shopping', shoppingList.value); } }
             // [修改] 刪除改用 ID
@@ -1562,12 +1562,15 @@
                     const freshData = fullItineraryData.find(f => f.id === item.id);
                     // 如果這個行程是 4/5 的，強制使用最新的時間
                     if (freshData && freshData.date === '2026-04-05') {
-                        return { 
-                            ...item, 
-                            time: freshData.time,
-                            travelTime: freshData.travelTime 
-                        };
+                         item.time = freshData.time;
+                         item.travelTime = freshData.travelTime;
                     }
+                    
+                    // 強制更新 4/6 錯字 (id 502)
+                    if (item.id === 502 && freshData) {
+                        item.name = freshData.name;
+                    }
+
                     return item;
                 });
 
@@ -1579,7 +1582,7 @@
                 if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
                 if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
                 
-                saveToLocal('sakura_itinerary_v7', itineraryList.value);
+                saveToLocal('sakura_itinerary_v8', itineraryList.value);
                 saveToLocal('sakura_shopping', shoppingList.value);
                 saveToLocal('sakura_expenses', expenses.value);
                 saveToLocal('sakura_notebook', notebookList.value);
