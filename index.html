@@ -1614,8 +1614,7 @@ const manualCloudSync = async () => {
             });
 
             const cloudSyncSubTitle = computed(() => cloudSync.message);
-
-            let isHydratingFromCloud = false;   
+ 
             let lastCloudUpdatedAt = null;      
 
             const waitForCloudFns = () => new Promise((resolve, reject) => {
