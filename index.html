@@ -1550,11 +1550,10 @@ payload.lastWriter = deviceId;
 
 await window.__CLOUD_SET_STATE__(payload);
 
-// ✅ 同步成功後：標記為乾淨，並記住這次 client 版本
+// ✅ 不要在這裡 pendingSync=false（等雲端回傳確認再清）
 const meta = getLocalMeta();
-meta.pendingSync = false;
-meta.lastAppliedClientMs = meta.localUpdatedAtMs;
-meta.lastAppliedServerMs = Date.now();
+meta.expectedClientMs = meta.localUpdatedAtMs; // ✅ 新增：等快照回來確認用
+setLocalMeta(meta);
 
 cloudSync.state = "synced";
 cloudSync.message = "已同步到雲端";
@@ -1602,6 +1601,28 @@ const startRealtimeCloud = async () => {
     const serverMs = remote.serverUpdatedAtMs || 0;
     const clientMs = remote.clientUpdatedAtMs || 0;
     const writer = remote.lastWriter || null;
+    
+    // ✅ 如果這次快照是「自己寫上去的」，就當作寫入確認：清 pendingSync
+if (writer === deviceId) {
+  const m = getLocalMeta();
+  const expected = m.expectedClientMs || 0;
+
+  if (m.pendingSync && clientMs >= expected) {
+    m.pendingSync = false;
+    m.expectedClientMs = 0;
+  }
+
+  m.lastAppliedServerMs = Math.max(m.lastAppliedServerMs || 0, serverMs);
+  m.lastAppliedClientMs = Math.max(m.lastAppliedClientMs || 0, clientMs);
+  m.localUpdatedAtMs = Math.max(m.localUpdatedAtMs || 0, clientMs);
+  setLocalMeta(m);
+
+  cloudSync.state = "synced";
+  cloudSync.message = "已同步";
+  cloudSync.lastSyncedAt = new Date().toISOString();
+  const isFromOther = writer && writer !== deviceId;
+  return;
+}
 
     const localMeta = getLocalMeta();
 const localUpdatedAtMs = localMeta.localUpdatedAtMs || 0;
