@@ -169,12 +169,12 @@
             @error="handleImageError" 
         >
         
-        <!-- [修正] 補回倒數計時小標籤 -->
+        <!-- [修正] 補回倒數計時小標籤，並更新狀態文字 -->
         <div class="absolute top-4 right-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full text-sakura-text text-xs border border-white/50 shadow-sm flex items-center gap-2 z-20">
             <i class="fa-regular fa-clock"></i>
             <span v-if="daysUntilTrip > 0">距離出發還有 <b>{{ daysUntilTrip }}</b> 天</span>
-            <span v-else-if="daysUntilTrip === 0">就是今天！出發！✈️</span>
-            <span v-else>旅程第 {{ Math.abs(daysUntilTrip) + 1 }} 天</span>
+            <span v-else-if="daysUntilTrip >= -4">美好的旅程進行中 ✨</span>
+            <span v-else>旅途結束 🔚</span>
         </div>
 
         <!-- 標題 (改為 Top-6、深色字、加入實色白底) -->
@@ -374,9 +374,13 @@
                                 <span class="text-sm font-black text-sakura-text bg-sakura-light px-2 py-1 rounded-lg whitespace-nowrap ml-2">{{ item.time }}</span>
                             </div>
                             
-                            <h3 @click="openMap(item.name)" class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2 cursor-pointer hover:text-sakura-dark">
-                                {{ item.name }} <i class="fa-solid fa-location-arrow text-xs text-sakura"></i>
-                            </h3>
+                            <!-- [修改] 景點名稱顯示 (新增圓框圖片) -->
+                            <div class="flex items-center gap-3 mb-2 cursor-pointer group/name" @click="openMap(item.name)">
+                                <img v-if="item.image" :src="item.image" class="w-12 h-12 rounded-full object-cover shadow-sm border border-gray-100 shrink-0 group-hover/name:scale-110 transition-transform">
+                                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2 group-hover/name:text-sakura-dark transition-colors">
+                                    {{ item.name }} <i class="fa-solid fa-location-arrow text-xs text-sakura"></i>
+                                </h3>
+                            </div>
 
                             <div class="space-y-2 text-sm text-gray-600">
                                 <div class="flex flex-wrap gap-3 text-xs">
@@ -1094,6 +1098,7 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '🌸 櫻花百選名所',
+                    image: 'https://images.unsplash.com/photo-1590559899731-a38283956c8c?w=150&h=150&fit=crop',
                     openHours: '09:00 - 17:00 (最後入場 16:30)',
                     ticket: '天守閣 ¥600 / 西之丸庭園 ¥200',
                     description: '大阪的地標，園內種植約3000株櫻花。推薦前往「西之丸庭園」賞櫻，這裡以染井吉野櫻為主，能拍到天守閣與櫻花同框的絕美畫面。天守閣內展示豐臣秀吉的歷史文物，8樓展望台可俯瞰大阪市景。'
@@ -1175,6 +1180,7 @@ const currentMemberFilter = ref(null);
                     time: '09:10',
                     travelTime: 10,
                     transportType: 'walk',
+                    image: 'https://images.unsplash.com/photo-1599816773809-5a6792d47a46?w=150&h=150&fit=crop',
                     note: '買鹿仙貝小心被圍攻',
                     description: '從近鐵奈良站 2 號出口出來，沿著登大路往東走即達。沿途就會看到很多鹿。請注意手上的地圖或紙張，鹿可能會咬走。'
                 },
@@ -1187,6 +1193,7 @@ const currentMemberFilter = ref(null);
                     travelTime: 15,
                     transportType: 'walk',
                     note: '世界最大木造建築',
+                    image: 'https://images.unsplash.com/photo-1624253321171-1be53e12f5f4?w=150&h=150&fit=crop',
                     ticket: '¥600',
                     openHours: '07:30 - 17:30',
                     description: '穿越巨大的南大門（有金剛力士像），參觀大佛殿內的盧舍那佛。如果人不多，可以挑戰鑽「大佛鼻孔」柱子洞，聽說能保平安。'
@@ -1200,6 +1207,7 @@ const currentMemberFilter = ref(null);
                     travelTime: 20,
                     transportType: 'walk',
                     note: '參道石燈籠',
+                    image: 'https://images.unsplash.com/photo-1549646461-a47738363b7e?w=150&h=150&fit=crop',
                     description: '沿著森林參道前往，這裡氣氛比較幽靜。以數千座石燈籠和吊燈籠聞名。如果走累了，可以在參道入口附近的茶屋休息吃點東西。'
                 },
                 {
@@ -1233,6 +1241,7 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '千本鳥居',
+                    image: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?w=150&h=150&fit=crop',
                     description: '必拍千本鳥居！建議往山上走一段，人潮會變少，比較好拍照。這裡狐狸是神的使者，繪馬也是狐狸形狀的喔。'
                 },
                 {
@@ -1290,6 +1299,7 @@ const currentMemberFilter = ref(null);
                     travelTime: 15,
                     transportType: 'walk',
                     note: '清水舞台、音羽瀑布',
+                    image: 'https://images.unsplash.com/photo-1549444318-7b96620577d6?w=150&h=150&fit=crop',
                     ticket: '¥400',
                     openHours: '06:00 - 18:00',
                     description: '京都最著名的古老寺院，必看懸空的「清水舞台」。參拜後可去「地主神社」求姻緣 (若整修中則略過)，最後別忘了在「音羽瀑布」排隊喝水祈福（分別代表學業、戀愛、長壽，只能選一道喝喔）。'
@@ -1313,6 +1323,7 @@ const currentMemberFilter = ref(null);
                     time: '13:00',
                     travelTime: 15,
                     transportType: 'walk',
+                    image: 'https://images.unsplash.com/photo-1587399434857-e6f7734a36f5?w=150&h=150&fit=crop',
                     note: '藝妓與茶屋文化',
                     description: '沿著寧寧之道走到八坂神社，再前往祇園區域。花見小路兩旁是保存良好的傳統茶屋，運氣好可能會看到藝妓或舞妓經過（請勿觸碰或阻擋拍照）。午餐建議在此區域或河原町解決。'
                 },
@@ -1382,6 +1393,7 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '世界最大級水族館',
+                    image: 'https://images.unsplash.com/photo-1585257989998-d0e80a04918e?w=150&h=150&fit=crop',
                     ticket: '¥2,700',
                     openHours: '09:30 - 20:00',
                     description: '必看巨大的「太平洋」水槽與鎮館之寶——鯨鯊。館內設計是從8樓螺旋狀往下參觀，模擬從海面潛入深海的過程。旁邊的天保山摩天輪也可以順道看看。'
@@ -1406,6 +1418,7 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '大阪懷舊地標',
+                    image: 'https://images.unsplash.com/photo-1595460592923-a5c92e9d29d3?w=150&h=150&fit=crop',
                     description: '這裡充滿昭和時代的懷舊氛圍，巨大的河豚招牌是必拍景點。可以上通天閣展望台摸摸Billiken神像的腳底求好運。'
                 },
                 {
@@ -1452,6 +1465,7 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '絕美日落與夜景',
+                    image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=150&h=150&fit=crop',
                     ticket: '¥1,800',
                     openHours: '09:00 - 22:00',
                     description: '登上 60 樓展望台，360 度俯瞰大阪全景。建議在日落前抵達，可以一次欣賞夕陽與百萬夜景。樓下的近鐵百貨也很好逛，甜點伴手禮豐富。'
@@ -1760,7 +1774,7 @@ const currentMemberFilter = ref(null);
   }
 
   if (type === 'notebook') {
-    modal.title = '新增筆記';
+    modal.title = item ? '編輯筆記' : '新增筆記'; // [修改] 支援編輯標題
     Object.assign(formData, {
       id: Date.now(), // 預設 ID (新增用)
       title: '',
