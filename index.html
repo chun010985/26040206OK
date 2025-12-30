@@ -1611,12 +1611,15 @@ onMounted(async () => {
         fetchExchangeRate();
 
         // cloud realtime
-if (window.__CLOUD_READY__) {
-  await window.__CLOUD_READY__;
-}
-await startRealtimeCloud();
-isBooting = false;
+(async () => {
+  if (window.__CLOUD_READY__) {
+    await window.__CLOUD_READY__;
+  }
+  await startRealtimeCloud();
 
+  // ✅ 一定要一起放進來
+  isBooting = false;
+})();
       return {
         showSplash,
         currentTab, tabs,
