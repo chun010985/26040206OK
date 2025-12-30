@@ -2,8 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- [優化] 加入 viewport-fit=cover 以適配全螢幕手機 (如 iPhone X+) -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>京阪之旅</title>
     
     <!-- Tailwind CSS -->
@@ -70,12 +69,10 @@
             max-width: 480px; /* 模擬手機寬度 */
             margin: 0 auto;
             background-color: #fafafa;
-            /* [優化] 改用 dvh 解決手機瀏覽器網址列問題 */
-            min-height: 100dvh;
+            min-height: 100vh;
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            /* [優化] 底部留白加入安全區域計算 */
-            padding-bottom: calc(80px + env(safe-area-inset-bottom));
+            padding-bottom: 80px; /* 避開底部導航 */
         }
         /* 載入動畫 */
         .weather-loading {
@@ -124,6 +121,7 @@
 <body>
 
 <div id="app" class="app-container">
+<div v-if="false">
     
     <!-- [新增] 開場動畫 (Splash Screen) -->
     <transition name="splash">
@@ -172,18 +170,16 @@
             @error="handleImageError" 
         >
         
-        <!-- [修正] 倒數計時小標籤：加入 top 安全區域設定 -->
-        <div class="absolute right-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full text-sakura-text text-xs border border-white/50 shadow-sm flex items-center gap-2 z-20"
-             style="top: max(1rem, env(safe-area-inset-top) + 1rem);">
+        <!-- [修正] 補回倒數計時小標籤 -->
+        <div class="absolute top-4 right-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full text-sakura-text text-xs border border-white/50 shadow-sm flex items-center gap-2 z-20">
             <i class="fa-regular fa-clock"></i>
             <span v-if="daysUntilTrip > 0">距離出發還有 <b>{{ daysUntilTrip }}</b> 天</span>
-            <span v-else-if="daysUntilTrip >= -4">美好的旅程進行中 ✨</span>
-            <span v-else>旅途結束 🔚</span>
+            <span v-else-if="daysUntilTrip === 0">就是今天！出發！✈️</span>
+            <span v-else>旅程第 {{ Math.abs(daysUntilTrip) + 1 }} 天</span>
         </div>
 
-        <!-- [修正] 標題：加入 top 安全區域設定，確保不被瀏海遮擋 -->
-        <div class="absolute left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm"
-             style="top: max(1.5rem, env(safe-area-inset-top) + 1.5rem);">
+        <!-- 標題 (改為 Top-6、深色字、加入實色白底) -->
+        <div class="absolute top-6 left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm">
             <h1 class="text-3xl font-bold tracking-widest text-sakura-text">京阪之旅</h1>
             <p class="text-sm opacity-90 text-sakura-text/80">2026.04.02 - 04.06</p>
         </div>
@@ -293,7 +289,7 @@
                 </div>
 
                 <div v-if="isWeatherExpanded" class="px-4 pb-4 animate-fade-in">
-                    <div class="grid grid-cols-4 gap-2 bg-white/60 rounded-xl p-3 backdrop-blur-sm shadow-inner mb-2">
+                    <div class="grid grid-cols-4 gap-2 bg-white/60 rounded-xl p-3 backdrop-blur-sm shadow-inner">
                         <div class="flex flex-col items-center justify-center p-1">
                             <i class="fa-solid fa-droplet text-blue-400 text-sm mb-1"></i><span class="text-[10px] text-gray-400">濕度</span><span class="text-xs font-bold text-gray-600">{{ weatherData.humidity }}%</span>
                         </div>
@@ -307,20 +303,7 @@
                             <i class="fa-solid fa-sun text-orange-400 text-sm mb-1"></i><span class="text-[10px] text-gray-400">紫外線</span><span class="text-xs font-bold text-gray-600">{{ weatherData.uvIndex }}</span>
                         </div>
                     </div>
-
-                    <!-- [新增] 天氣預報：最高/最低溫與穿衣建議 -->
-                    <div class="bg-white/60 rounded-xl p-3 backdrop-blur-sm shadow-inner mb-2">
-                        <div class="flex justify-between items-center mb-2 border-b border-gray-200/50 pb-2">
-                             <span class="text-xs text-gray-600"><i class="fa-solid fa-temperature-arrow-up text-red-400 mr-1"></i>最高 {{ weatherData.maxTemp }}°C</span>
-                             <span class="text-xs text-gray-600"><i class="fa-solid fa-temperature-arrow-down text-blue-400 mr-1"></i>最低 {{ weatherData.minTemp }}°C</span>
-                        </div>
-                        <div class="text-xs text-gray-600 flex items-start gap-2">
-                            <i class="fa-solid fa-shirt text-sakura mt-0.5"></i>
-                            <span class="font-medium text-sakura-text">{{ weatherData.clothing }}</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-1 flex justify-between items-center px-4 text-xs text-gray-500 bg-white/40 rounded-lg py-2">
+                    <div class="mt-3 flex justify-between items-center px-4 text-xs text-gray-500 bg-white/40 rounded-lg py-2">
                         <div class="flex items-center gap-2"><i class="fa-regular fa-sun text-orange-400"></i> 日出 {{ weatherData.sunrise }}</div>
                         <div class="h-4 w-px bg-gray-300 opacity-50"></div>
                          <div class="flex items-center gap-2"><i class="fa-regular fa-moon text-indigo-400"></i> 日落 {{ weatherData.sunset }}</div>
@@ -345,7 +328,7 @@
             <!-- 行程溫馨提醒 (已修改) -->
             <div class="bg-yellow-50 text-yellow-700 text-xs px-4 py-2 rounded-xl mb-4 flex items-center border border-yellow-100 mx-2 shadow-sm">
                 <i class="fa-solid fa-circle-exclamation mr-2 text-yellow-500"></i>
-                溫馨提醒：交通時間皆為預估，實際依當天狀況為主。
+                溫馨提醒：交通時間皆為預估,依當天狀況為主。
             </div>
 
             <!-- 行程列表 -->
@@ -392,13 +375,9 @@
                                 <span class="text-sm font-black text-sakura-text bg-sakura-light px-2 py-1 rounded-lg whitespace-nowrap ml-2">{{ item.time }}</span>
                             </div>
                             
-                            <!-- [修改] 景點名稱顯示 (新增圓框圖片) -->
-                            <div class="flex items-center gap-3 mb-2 cursor-pointer group/name" @click="openMap(item.name)">
-                                <img v-if="item.image" :src="item.image" class="w-12 h-12 rounded-full object-cover shadow-sm border border-gray-100 shrink-0 group-hover/name:scale-110 transition-transform">
-                                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2 group-hover/name:text-sakura-dark transition-colors">
-                                    {{ item.name }} <i class="fa-solid fa-location-arrow text-xs text-sakura"></i>
-                                </h3>
-                            </div>
+                            <h3 @click="openMap(item.name)" class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2 cursor-pointer hover:text-sakura-dark">
+                                {{ item.name }} <i class="fa-solid fa-location-arrow text-xs text-sakura"></i>
+                            </h3>
 
                             <div class="space-y-2 text-sm text-gray-600">
                                 <div class="flex flex-wrap gap-3 text-xs">
@@ -557,48 +536,6 @@
                         </span>
                     </div>
                 </div>
-
-                <!-- [移動] 台灣虎航搭乘注意事項與說明 (整合至航班資訊內) -->
-                <div class="mt-2 pt-2 border-t border-gray-100">
-                    <details class="group">
-                        <summary class="flex justify-between items-center font-bold text-sakura-text cursor-pointer list-none outline-none select-none py-2">
-                            <span class="flex items-center text-sm"><i class="fa-solid fa-circle-exclamation mr-2 text-orange-400"></i>搭乘注意事項與說明</span>
-                            <span class="transition-transform duration-300 group-open:rotate-180 text-gray-400">
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </span>
-                        </summary>
-                        <div class="text-xs text-gray-600 mt-2 space-y-4 leading-relaxed bg-gray-50 p-3 rounded-xl animate-fade-in">
-                            <div class="flex gap-3">
-                                <div class="w-6 shrink-0 text-center"><i class="fa-solid fa-clock text-sakura-dark text-sm"></i></div>
-                                <div>
-                                    <span class="font-bold text-gray-800 block mb-0.5">報到櫃台時間</span>
-                                    起飛前 2.5 小時開放報到，<span class="text-red-500 font-bold">起飛前 45 分鐘準時關閉櫃台</span>。建議提早抵達機場辦理手續。
-                                </div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div class="w-6 shrink-0 text-center"><i class="fa-solid fa-briefcase text-sakura-dark text-sm"></i></div>
-                                <div>
-                                    <span class="font-bold text-gray-800 block mb-0.5">手提行李 (隨身)</span>
-                                    每位乘客僅可攜帶 1 件手提行李 + 1 件個人隨身物品（如手提包、電腦包），<span class="text-red-500 font-bold">兩件總重不得超過 10 公斤</span>。體積限制為 54cm x 38cm x 23cm。
-                                </div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div class="w-6 shrink-0 text-center"><i class="fa-solid fa-suitcase-rolling text-sakura-dark text-sm"></i></div>
-                                <div>
-                                    <span class="font-bold text-gray-800 block mb-0.5">托運行李</span>
-                                    依購買重量額度辦理，單件行李不得超過 30 公斤。行動電源、鋰電池、打火機(限隨身帶1個) <span class="text-red-500 font-bold">嚴禁托運</span>，請務必放入隨身行李。
-                                </div>
-                            </div>
-                             <div class="flex gap-3">
-                                <div class="w-6 shrink-0 text-center"><i class="fa-solid fa-bottle-water text-sakura-dark text-sm"></i></div>
-                                <div>
-                                    <span class="font-bold text-gray-800 block mb-0.5">液體限制 (隨身)</span>
-                                    隨身攜帶之液體、膠狀及噴霧類物品，單一容器不得超過 100ml，且需全數裝入一個 1 公升透明可密封夾鏈袋內。
-                                </div>
-                            </div>
-                        </div>
-                    </details>
-                </div>
             </div>
 
             <!-- 住宿資訊 -->
@@ -619,8 +556,8 @@
                     <li><b>注意事項</b>：
                         <ol class="list-decimal pl-4 mt-1 space-y-1 text-gray-500">
                             <li>行程含SIM卡，不用再另外購買。</li>
+                            <li>飯店因早餐不是自助式且價格昂貴，附近是心齋橋且有LOWSAN跟超市，故這次不含早餐。</li>
                             <li>自由行每日約為20000步以上，大家一起加油~回飯店休息後別忘了讓腳好好休息唷！</li>
-                            <li>個人藥品請務必記得攜帶。</li>
                         </ol>
                     </li>
                     <li><b>護照與簽證</b>：請確認護照有效期超過 6 個月，並事先填寫 Visit Japan Web。</li>
@@ -628,7 +565,7 @@
                     <li><b>禮儀</b>：電車內請保持安靜，手機調成靜音。走路請靠左側通行（大阪部分手扶梯靠右，依循前人即可）。</li>
                     <li><b>小費</b>：日本無小費文化，服務費通常已包含在帳單內。</li>
                     <li><b>垃圾</b>：街上垃圾桶很少，請隨身攜帶塑膠袋裝垃圾，回飯店再丟。</li>
-                    <li><b>支付方式</b>：現金/信用卡(TOUCH)/Pay pay</li>
+                    <li><b>支付方式</b>：現金/信用卡(TOUCK)/Pay pay</li>
                 </ul>
             </div>
 
@@ -709,12 +646,11 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <div v-for="(item, index) in filteredShoppingList" :key="item.id" class="bg-white rounded-2xl overflow-hidden shadow-card relative group">
+                <div v-for="(item, index) in filteredShoppingList" :key="index" class="bg-white rounded-2xl overflow-hidden shadow-card relative group">
                     <div class="h-32 bg-gray-100 relative overflow-hidden">
                         <img v-if="item.image" :src="item.image" class="w-full h-full object-cover">
                         <div v-else class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-image text-3xl"></i></div>
-                         <button @click="deleteShoppingItem(item.id)" class="absolute top-1 right-1 bg-white/80 w-6 h-6 rounded-full text-red-400 text-xs flex items-center justify-center shadow-sm z-20"><i class="fa-solid fa-xmark"></i></button>
-                         <button @click.stop="openModal('shopping', item)" class="absolute top-1 left-1 bg-white/80 w-6 h-6 rounded-full text-blue-400 text-xs flex items-center justify-center shadow-sm z-20"><i class="fa-solid fa-pen"></i></button>
+                         <button @click="deleteShoppingItem(index)" class="absolute top-1 right-1 bg-white/80 w-6 h-6 rounded-full text-red-400 text-xs flex items-center justify-center shadow-sm"><i class="fa-solid fa-xmark"></i></button>
                          <!-- 顯示擁有者標籤 -->
                          <span class="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm">{{ item.owner || '未指定' }}</span>
                     </div>
@@ -760,7 +696,7 @@
             </div>
 
             <div class="bg-white rounded-t-2xl shadow-card min-h-[300px]">
-                <div v-for="(item, index) in filteredExpenses" :key="item.id" class="p-4 border-b border-gray-50 flex justify-between items-center">
+                <div v-for="(item, index) in filteredExpenses" :key="index" class="p-4 border-b border-gray-50 flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg"><i :class="getExpenseIcon(item.category)" class="text-sakura-dark"></i></div>
                         <div>
@@ -771,14 +707,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="font-bold text-gray-800 font-mono">¥{{ Number(item.amount).toLocaleString() }}</p>
-                        <!-- [新增] 花費編輯與刪除按鈕 -->
-                        <div class="flex gap-2 justify-end mt-1">
-                            <button @click.stop="openModal('expense', item)" class="text-xs text-blue-400 font-bold hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            <button @click="deleteExpense(item.id)" class="text-xs text-red-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>
+                    <div class="text-right"><p class="font-bold text-gray-800 font-mono">¥{{ Number(item.amount).toLocaleString() }}</p><button @click="deleteExpense(index)" class="text-xs text-red-300 mt-1">刪除</button></div>
                 </div>
                 <div v-if="filteredExpenses.length === 0" class="text-center py-8 text-gray-400 text-sm">此分類下無紀錄</div>
             </div>
@@ -813,15 +742,7 @@
                     <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{{ note.content }}</p>
                     <div class="mt-3 flex justify-between items-end border-t border-gray-50 pt-2">
                         <span class="text-[10px] text-gray-400">{{ new Date(note.id).toLocaleDateString() }}</span>
-                        <!-- [修改] 新增編輯按鈕區塊 -->
-                        <div class="flex gap-3">
-                            <button @click.stop="openModal('notebook', note)" class="text-xs text-blue-400 hover:text-blue-600 font-bold">
-                                <i class="fa-solid fa-pen mr-1"></i>編輯
-                            </button>
-                            <button @click="deleteNote(note.id)" class="text-xs text-red-300 hover:text-red-500 font-bold">
-                                <i class="fa-solid fa-trash-can mr-1"></i>刪除
-                            </button>
-                        </div>
+                        <button @click="deleteNote(note.id)" class="text-xs text-red-300 hover:text-red-500"><i class="fa-solid fa-trash-can mr-1"></i>刪除</button>
                     </div>
                 </div>
             </div>
@@ -917,14 +838,11 @@
                 { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' }, // [新增]
             ];
 
-// [修正] 為避免錯誤迴圈，將 defaultBanner 改為穩定的 Unsplash 連結，並新增 userBanner 作為初始值
-const safeBanner = 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop';
-const userBanner = 'https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png';
-const bannerImage = ref(userBanner);
+const defaultBanner = 'https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png';
+const bannerImage = ref(defaultBanner);   
 
 const handleImageError = () => {
-  console.warn("User banner failed to load, switching to safe default.");
-  bannerImage.value = safeBanner;
+  bannerImage.value = defaultBanner;
 };          
 
             // === 倒數計時邏輯 (新增) ===
@@ -941,10 +859,9 @@ const handleImageError = () => {
             });
 
             // === 核心修改：旅伴成員設定 (移除範例成員A、B) ===
-            const travelers = ref(['公費', '翔/君', '倫/怡', '珮茹', '媽媽']);
+            const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '媽媽']);
 const shoppingTravelers = computed(() => ['全部', ...travelers.value.filter(t => t !== '公費')]);
 const shoppingOwners = computed(() => travelers.value.filter(t => t !== '公費'));
-const notebookOwners = computed(() => travelers.value.filter(t => t !== '公費')); // [修改] 筆記本專用清單，排除公費
 
 const currentShoppingFilter = ref('全部');
 const currentMemberFilter = ref(null);
@@ -1000,9 +917,7 @@ const currentMemberFilter = ref(null);
             
             const weatherData = reactive({
                 temp: '--', apparentTemp: '--', humidity: '--', windSpeed: '--', rain: '--', uvIndex: '--', 
-                sunrise: '--:--', sunset: '--:--', description: '載入中...', icon: 'fa-solid fa-spinner', iconColor: '#ccc', city: '大阪市',
-                // [新增] 最高/最低溫與穿衣建議預設值
-                maxTemp: '--', minTemp: '--', clothing: '載入中...'
+                sunrise: '--:--', sunset: '--:--', description: '載入中...', icon: 'fa-solid fa-spinner', iconColor: '#ccc', city: '大阪市'
             });
 
             // 計算當前日期的所有可選城市
@@ -1020,8 +935,7 @@ const currentMemberFilter = ref(null);
                 weatherLoading.value = true;
                 weatherData.city = cityName;
                 try {
-                    // [更新] API 請求：增加 daily=temperature_2m_max,temperature_2m_min
-                    const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo`);
+                    const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&daily=sunrise,sunset&timezone=Asia%2FTokyo`);
                     const data = await response.json();
                     
                     if (!data.current) throw new Error("No data");
@@ -1034,31 +948,15 @@ const currentMemberFilter = ref(null);
                     weatherData.windSpeed = current.wind_speed_10m;
                     weatherData.rain = current.precipitation;
                     
-                    // [新增] 處理每日最高/最低溫與穿衣建議
-                    if (daily) {
-                        weatherData.maxTemp = Math.round(daily.temperature_2m_max[0]);
-                        weatherData.minTemp = Math.round(daily.temperature_2m_min[0]);
-                        weatherData.sunrise = daily.sunrise[0].split('T')[1];
-                        weatherData.sunset = daily.sunset[0].split('T')[1];
-                        
-                        // 簡單的穿衣建議邏輯
-                        const maxT = weatherData.maxTemp;
-                        if (maxT < 15) {
-                            weatherData.clothing = "天氣寒冷 🧥 建議穿著厚外套、圍巾，注意保暖。";
-                        } else if (maxT < 20) {
-                            weatherData.clothing = "早晚溫差大 🧥 建議洋蔥式穿搭，薄長袖搭配風衣或外套。";
-                        } else if (maxT < 25) {
-                            weatherData.clothing = "溫暖舒適 👕 可穿薄長袖或短袖，帶件薄外套備用。";
-                        } else {
-                            weatherData.clothing = "天氣炎熱 ☀️ 建議穿著透氣短袖，並注意防曬補水。";
-                        }
-                    }
-
                     const wInfo = getWeatherInfo(current.weather_code, current.is_day === 1);
                     weatherData.description = wInfo.desc;
                     weatherData.icon = wInfo.icon;
                     weatherData.iconColor = wInfo.color;
                     
+                    if (daily && daily.sunrise.length > 0) {
+                        weatherData.sunrise = daily.sunrise[0].split('T')[1];
+                        weatherData.sunset = daily.sunset[0].split('T')[1];
+                    }
                     weatherData.uvIndex = (current.is_day === 1 && current.weather_code <= 2) ? '高' : '低';
 
                 } catch (error) {
@@ -1067,9 +965,6 @@ const currentMemberFilter = ref(null);
                     // Fallback data
                     weatherData.temp = 18;
                     weatherData.apparentTemp = 16;
-                    weatherData.maxTemp = 20; // 模擬數據
-                    weatherData.minTemp = 10; // 模擬數據
-                    weatherData.clothing = "早晚溫差大 (模擬數據)";
                     weatherData.humidity = 45;
                     weatherData.windSpeed = 3;
                     weatherData.rain = 0;
@@ -1180,7 +1075,6 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '🌸 櫻花百選名所',
-                    image: 'https://images.unsplash.com/photo-1590559899731-a38283956c8c?w=150&h=150&fit=crop',
                     openHours: '09:00 - 17:00 (最後入場 16:30)',
                     ticket: '天守閣 ¥600 / 西之丸庭園 ¥200',
                     description: '大阪的地標，園內種植約3000株櫻花。推薦前往「西之丸庭園」賞櫻，這裡以染井吉野櫻為主，能拍到天守閣與櫻花同框的絕美畫面。天守閣內展示豐臣秀吉的歷史文物，8樓展望台可俯瞰大阪市景。'
@@ -1262,7 +1156,6 @@ const currentMemberFilter = ref(null);
                     time: '09:10',
                     travelTime: 10,
                     transportType: 'walk',
-                    image: 'https://images.unsplash.com/photo-1599816773809-5a6792d47a46?w=150&h=150&fit=crop',
                     note: '買鹿仙貝小心被圍攻',
                     description: '從近鐵奈良站 2 號出口出來，沿著登大路往東走即達。沿途就會看到很多鹿。請注意手上的地圖或紙張，鹿可能會咬走。'
                 },
@@ -1275,7 +1168,6 @@ const currentMemberFilter = ref(null);
                     travelTime: 15,
                     transportType: 'walk',
                     note: '世界最大木造建築',
-                    image: 'https://images.unsplash.com/photo-1624253321171-1be53e12f5f4?w=150&h=150&fit=crop',
                     ticket: '¥600',
                     openHours: '07:30 - 17:30',
                     description: '穿越巨大的南大門（有金剛力士像），參觀大佛殿內的盧舍那佛。如果人不多，可以挑戰鑽「大佛鼻孔」柱子洞，聽說能保平安。'
@@ -1289,7 +1181,6 @@ const currentMemberFilter = ref(null);
                     travelTime: 20,
                     transportType: 'walk',
                     note: '參道石燈籠',
-                    image: 'https://images.unsplash.com/photo-1549646461-a47738363b7e?w=150&h=150&fit=crop',
                     description: '沿著森林參道前往，這裡氣氛比較幽靜。以數千座石燈籠和吊燈籠聞名。如果走累了，可以在參道入口附近的茶屋休息吃點東西。'
                 },
                 {
@@ -1323,7 +1214,6 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '千本鳥居',
-                    image: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?w=150&h=150&fit=crop',
                     description: '必拍千本鳥居！建議往山上走一段，人潮會變少，比較好拍照。這裡狐狸是神的使者，繪馬也是狐狸形狀的喔。'
                 },
                 {
@@ -1381,7 +1271,6 @@ const currentMemberFilter = ref(null);
                     travelTime: 15,
                     transportType: 'walk',
                     note: '清水舞台、音羽瀑布',
-                    image: 'https://images.unsplash.com/photo-1549444318-7b96620577d6?w=150&h=150&fit=crop',
                     ticket: '¥400',
                     openHours: '06:00 - 18:00',
                     description: '京都最著名的古老寺院，必看懸空的「清水舞台」。參拜後可去「地主神社」求姻緣 (若整修中則略過)，最後別忘了在「音羽瀑布」排隊喝水祈福（分別代表學業、戀愛、長壽，只能選一道喝喔）。'
@@ -1405,7 +1294,6 @@ const currentMemberFilter = ref(null);
                     time: '13:00',
                     travelTime: 15,
                     transportType: 'walk',
-                    image: 'https://images.unsplash.com/photo-1587399434857-e6f7734a36f5?w=150&h=150&fit=crop',
                     note: '藝妓與茶屋文化',
                     description: '沿著寧寧之道走到八坂神社，再前往祇園區域。花見小路兩旁是保存良好的傳統茶屋，運氣好可能會看到藝妓或舞妓經過（請勿觸碰或阻擋拍照）。午餐建議在此區域或河原町解決。'
                 },
@@ -1475,7 +1363,6 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '世界最大級水族館',
-                    image: 'https://images.unsplash.com/photo-1585257989998-d0e80a04918e?w=150&h=150&fit=crop',
                     ticket: '¥2,700',
                     openHours: '09:30 - 20:00',
                     description: '必看巨大的「太平洋」水槽與鎮館之寶——鯨鯊。館內設計是從8樓螺旋狀往下參觀，模擬從海面潛入深海的過程。旁邊的天保山摩天輪也可以順道看看。'
@@ -1500,7 +1387,6 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '大阪懷舊地標',
-                    image: 'https://images.unsplash.com/photo-1595460592923-a5c92e9d29d3?w=150&h=150&fit=crop',
                     description: '這裡充滿昭和時代的懷舊氛圍，巨大的河豚招牌是必拍景點。可以上通天閣展望台摸摸Billiken神像的腳底求好運。'
                 },
                 {
@@ -1547,7 +1433,6 @@ const currentMemberFilter = ref(null);
                     travelTime: 0,
                     transportType: 'walk',
                     note: '絕美日落與夜景',
-                    image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=150&h=150&fit=crop',
                     ticket: '¥1,800',
                     openHours: '09:00 - 22:00',
                     description: '登上 60 樓展望台，360 度俯瞰大阪全景。建議在日落前抵達，可以一次欣賞夕陽與百萬夜景。樓下的近鐵百貨也很好逛，甜點伴手禮豐富。'
@@ -1640,11 +1525,6 @@ const currentMemberFilter = ref(null);
 
             // === 購物清單邏輯更新 (成員過濾) ===
             const shoppingList = ref(JSON.parse(localStorage.getItem('sakura_shopping')) || []);
-            // [新增] 確保舊資料有 ID
-            shoppingList.value.forEach(item => {
-                if (!item.id) item.id = Date.now() + Math.random();
-            });
-
             const filteredShoppingList = computed(() => {
   if (currentShoppingFilter.value === '全部') return shoppingList.value;
   return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
@@ -1710,11 +1590,6 @@ const currentMemberFilter = ref(null);
 
             // === 花費邏輯更新 (成員過濾) ===
             const expenses = ref(JSON.parse(localStorage.getItem('sakura_expenses')) || []);
-            // [新增] 確保舊資料有 ID
-            expenses.value.forEach(item => {
-                if (!item.id) item.id = Date.now() + Math.random();
-            });
-
             const filteredExpenses = computed(() => {
                 if (!currentMemberFilter.value) return expenses.value;
                 return expenses.value.filter(item => item.owner === currentMemberFilter.value);
@@ -1722,20 +1597,9 @@ const currentMemberFilter = ref(null);
             const filteredTotalExpense = computed(() => filteredExpenses.value.reduce((sum, item) => sum + Number(item.amount), 0));
             const totalExpense = computed(() => expenses.value.reduce((sum, item) => sum + Number(item.amount), 0)); // 保留一個總計做參考
 
-            // [新增] 刪除花費項目 (使用 ID)
-            const deleteExpense = (id) => { 
-                if(confirm('刪除此紀錄？')) { 
-                    const index = expenses.value.findIndex(item => item.id === id);
-                    if (index !== -1) {
-                        expenses.value.splice(index, 1); 
-                        saveToLocal('sakura_expenses', expenses.value); 
-                    }
-                } 
-            }
-
             // === [新增] 筆記本邏輯 ===
             const notebookList = ref(JSON.parse(localStorage.getItem('sakura_notebook')) || []);
-            // [修正] 移除重複宣告的 notebookOwners
+            const notebookOwners = computed(() => travelers.value.filter(t => t !== '公費')); // [修改] 筆記本專用清單，排除公費
             const currentNotebookFilter = ref(notebookOwners.value[0]); // 預設顯示第一個人
 
             const filteredNotebookList = computed(() => {
@@ -1813,7 +1677,7 @@ const currentMemberFilter = ref(null);
   }
 
   if (type === 'shopping') {
-    modal.title = item ? '編輯購物清單' : '新增購物清單'; // [新增] 動態標題
+    modal.title = '新增購物清單';
 
     const defaultOwner =
       currentShoppingFilter.value !== '全部'
@@ -1821,25 +1685,17 @@ const currentMemberFilter = ref(null);
         : shoppingOwners.value[0]; // 第一位非公費
 
     Object.assign(formData, {
-      id: Date.now(), // [新增] 預設 ID
       name: '',
       image: '',
       bought: false,
       owner: defaultOwner
     });
-    
-    // 如果是編輯，覆蓋上面的預設值
-    if (item) {
-         Object.assign(formData, JSON.parse(JSON.stringify(item)));
-    }
     return;
   }
 
   if (type === 'expense') {
-    modal.title = item ? '編輯花費' : '新增花費'; // [修改] 支援編輯標題
-    
+    modal.title = '新增花費';
     Object.assign(formData, {
-      id: Date.now(), // [新增] 預設 ID
       date: selectedDate.value,
       category: 'food',
       method: '現金',
@@ -1847,27 +1703,16 @@ const currentMemberFilter = ref(null);
       name: '',
       owner: currentMemberFilter.value || travelers.value[1] // 預設「翔」(跳過公費)
     });
-
-    // 如果是編輯，覆蓋上面的預設值
-    if (item) {
-         Object.assign(formData, JSON.parse(JSON.stringify(item)));
-    }
     return;
   }
 
   if (type === 'notebook') {
-    modal.title = item ? '編輯筆記' : '新增筆記'; // [修改] 支援編輯標題
+    modal.title = '新增筆記';
     Object.assign(formData, {
-      id: Date.now(), // 預設 ID (新增用)
       title: '',
       content: '',
       owner: currentNotebookFilter.value || notebookOwners.value[0]
     });
-    
-    // 如果是編輯，覆蓋上面的預設值
-    if (item) {
-         Object.assign(formData, JSON.parse(JSON.stringify(item)));
-    }
     return;
   }
 };
@@ -1883,46 +1728,21 @@ const currentMemberFilter = ref(null);
                     } 
                     saveToLocal('sakura_itinerary', itineraryList.value); 
                 } else if (modal.type === 'shopping') { 
-                    if (modal.isEdit) {
-                        const index = shoppingList.value.findIndex(i => i.id === formData.id);
-                        if (index !== -1) shoppingList.value[index] = { ...formData };
-                    } else {
-                        shoppingList.value.push({ ...formData }); 
-                    }
+                    shoppingList.value.push({ ...formData }); 
                     saveToLocal('sakura_shopping', shoppingList.value); 
                 } else if (modal.type === 'expense') { 
-                    if (modal.isEdit) {
-                        const index = expenses.value.findIndex(e => e.id === formData.id);
-                        if (index !== -1) expenses.value[index] = { ...formData };
-                    } else {
-                        expenses.value.push({ ...formData }); 
-                    }
+                    expenses.value.push({ ...formData }); 
                     saveToLocal('sakura_expenses', expenses.value); 
                 } else if (modal.type === 'notebook') {
-                    // [修改] 筆記本儲存邏輯，支援編輯更新
-                    if (modal.isEdit) {
-                        const index = notebookList.value.findIndex(n => n.id === formData.id);
-                        if (index !== -1) notebookList.value[index] = { ...formData };
-                    } else {
-                        notebookList.value.push({ ...formData, id: Date.now() });
-                    }
+                    notebookList.value.push({ ...formData, id: Date.now() });
                     saveToLocal('sakura_notebook', notebookList.value);
                 }
                 closeModal(); 
             };
             const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary', itineraryList.value); closeModal(); } };
             const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary', itineraryList.value); } };
-            // [修正] 改用 ID 刪除購物項目
-            const deleteShoppingItem = (id) => { 
-                if(confirm('刪除此商品？')) { 
-                    const index = shoppingList.value.findIndex(i => i.id === id);
-                    if (index !== -1) {
-                        shoppingList.value.splice(index, 1); 
-                        saveToLocal('sakura_shopping', shoppingList.value); 
-                    }
-                } 
-            }
-            // [注意] 此處移除了舊版依賴 index 的 deleteExpense，改用上方定義的新版 deleteExpense
+            const deleteShoppingItem = (index) => { if(confirm('刪除此商品？')) { shoppingList.value.splice(index, 1); saveToLocal('sakura_shopping', shoppingList.value); } }
+            const deleteExpense = (index) => { if(confirm('刪除此紀錄？')) { expenses.value.splice(index, 1); saveToLocal('sakura_expenses', expenses.value); } }
             const handleImageUpload = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { formData.image = e.target.result; }; reader.readAsDataURL(file); };
             const moveItem = (index, direction) => { alert("拖曳排序功能需後端或更複雜的狀態管理，此為展示版本。"); };
             const openMap = (keyword) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`, '_blank'); };
