@@ -81,7 +81,7 @@
     }
 
     .weather-loading { animation: pulse-bg 1.5s infinite; }
-    @keyframes pulse-bg { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    @keyframes pulse-bg { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
     /* Sakura petals */
     .sakura-petal {
@@ -1360,18 +1360,53 @@ const compressDataURL = (dataUrl, maxW = 1280, maxH = 1280, quality = 0.7) =>
   });     
 
 const handleImageUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  try {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  // 讀檔 → 壓縮 → 存入表單
-  const dataUrl = await fileToDataURL(file);
-  const compressed = await compressDataURL(dataUrl, 1280, 1280, 0.6);
-  formData.image = compressed;
+    // 過大檔案先擋（雙保險）
+    if (file.size > 8 * 1024 * 1024) {
+      throw new Error("圖片太大，請換一張");
+    }
 
-  // 清掉 input，避免選同一張不觸發 change
-  e.target.value = "";
+    const dataUrl = await fileToDataURL(file);
+
+    const isCameraPhoto = file.size > 2_000_000;
+    const quality = isCameraPhoto ? 0.5 : 0.7;
+
+    const compressed = await compressDataURL(
+      dataUrl,
+      1280,
+      1280,
+      quality
+    );
+
+    if (!compressed || compressed.length < 1000) {
+      throw new Error("圖片壓縮失敗");
+    }
+
+    formData.image = compressed;
+
+    // 成功 → 確保不是紅燈
+    if (cloudSync.state === "error") {
+      cloudSync.state = "idle";
+      cloudSync.message = "圖片上傳成功";
+      cloudSync.error = null;
+    }
+
+    e.target.value = "";
+
+  } catch (err) {
+    console.error("❌ 圖片上傳失敗", err);
+
+    // 🔴 關鍵：亮紅燈
+    cloudSync.state = "error";
+    cloudSync.message = "圖片上傳失敗，請換一張或重試";
+    cloudSync.error = err?.message || "圖片處理錯誤";
+
+    alert("圖片上傳失敗，請換一張較小的圖片 🙏");
+  }
 };
-
       const openMap = (keyword) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`, '_blank'); };
 
       // Category helpers
@@ -1839,5 +1874,4 @@ window.__CLOUD_READY__ = new Promise((resolve) => {
   console.log("✅ Firebase ready. TRIP_ID =", TRIP_ID);
 </script>
 </body>
-</html>
 </html>
