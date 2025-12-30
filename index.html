@@ -15,6 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <script>
+
     tailwind.config = {
       theme: {
         extend: {
@@ -979,6 +980,7 @@
 </div>
 
 <script>
+  const APP_VERSION = "v15-2025-01-01-0030";
   const { createApp, ref, computed, reactive, onMounted, watch } = Vue;
 
   createApp({
@@ -1596,7 +1598,8 @@ onMounted(async () => {
   }
 
   // ✅ 就在這裡加（或放最下面也可以）
-  document.getElementById("app-version").innerText = APP_VERSION;
+const el = document.getElementById("app-version");
+if (el) el.innerText = APP_VERSION;
 });
 
 
@@ -1705,8 +1708,6 @@ window.__FULL_ITINERARY_DATA__ = [
   { id: 504, date: '2026-04-06', category: 'flight', name: '航班 IT-285 KIX->KHH', time: '12:00', travelTime: 0, transportType: 'flight', note: '起飛 12:00 / 抵達 14:00', description: '帶著滿滿的回憶（和超重的行李）回家囉！✈️ 抵達高雄後記得領取行李。' }
 ];
 </script>
-
-const APP_VERSION = "v15-2025-01-01-0030";
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
