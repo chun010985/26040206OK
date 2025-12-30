@@ -1646,9 +1646,21 @@
                 }
             };
 
-            onMounted(() => {
-                pullFromCloudOnce();
-            });
+onMounted(() => {
+    const hasLocalItinerary = !!localStorage.getItem('sakura_itinerary_v12');
+    const hasLocalShopping  = !!localStorage.getItem('sakura_shopping');
+    const hasLocalExpenses  = !!localStorage.getItem('sakura_expenses');
+    const hasLocalNotebook  = !!localStorage.getItem('sakura_notebook');
+
+    const hasAnyLocal = hasLocalItinerary || hasLocalShopping || hasLocalExpenses || hasLocalNotebook;
+
+    if (!hasAnyLocal) {
+        pullFromCloudOnce();  // 本機完全沒資料，才去雲端抓
+    } else {
+        cloudSync.state = "synced";
+        cloudSync.message = "使用本機資料（不覆蓋）";
+    }
+});
 
             let syncTimer = null;
             const scheduleSync = () => {
