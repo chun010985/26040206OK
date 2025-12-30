@@ -685,7 +685,7 @@ const handleImageError = () => {
             });
 
             // === 核心修改：旅伴成員設定 ===
-            const travelers = ref(['公費', '翔', '倫', '茹', '萍']);
+            const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '萍']);
 const shoppingTravelers = computed(() => ['全部', ...travelers.value.filter(t => t !== '公費')]);
 const shoppingOwners = computed(() => travelers.value.filter(t => t !== '公費'));
 
@@ -1428,7 +1428,7 @@ const currentMemberFilter = ref(null);
       method: '現金',
       amount: '',
       name: '',
-      owner: currentMemberFilter.value || travelers.value[1] // 預設「翔」(跳過公費)
+      owner: currentMemberFilter.value || travelers.value[1] // 預設「翔/君」(跳過公費)
     });
     return;
   }
@@ -1637,3 +1637,4 @@ console.log("🔥 firebase module script loaded");
 </script>
 </body>
 </html>
+
