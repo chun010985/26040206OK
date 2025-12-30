@@ -1759,19 +1759,28 @@ onMounted(() => {
       user = u;
   });
 
-  window.__CLOUD_GET_STATE__ = async () => {
-    // 簡單的等待機制，確保已登入
-    if (!user) await new Promise(r => setTimeout(r, 1000));
-    const snap = await getDoc(stateDoc());
-    return snap.exists() ? snap.data() : null;
-  };
+  const waitForUser = async (ms = 4000) => {
+  const start = Date.now();
+  while (!user && Date.now() - start < ms) {
+    await new Promise(r => setTimeout(r, 150));
+  }
+  return !!user;
+};
 
-  window.__CLOUD_SET_STATE__ = async (payload) => {
-    if (!user) await new Promise(r => setTimeout(r, 1000));
-    await setDoc(doc(db, "trips", TRIP_ID), { updatedAt: serverTimestamp() }, { merge: true });
-    await setDoc(stateDoc(), payload, { merge: true });
-    return true;
-  };
+window.__CLOUD_GET_STATE__ = async () => {
+  const ok = await waitForUser();
+  if (!ok) throw new Error("尚未登入，暫時不能讀取雲端");
+  const snap = await getDoc(stateDoc());
+  return snap.exists() ? snap.data() : null;
+};
+
+window.__CLOUD_SET_STATE__ = async (payload) => {
+  const ok = await waitForUser();
+  if (!ok) throw new Error("尚未登入，暫時不能寫入雲端");
+  await setDoc(doc(db, "trips", TRIP_ID), { updatedAt: serverTimestamp() }, { merge: true });
+  await setDoc(stateDoc(), payload, { merge: true });
+  return true;
+};
 
   console.log("✅ Firebase ready. TRIP_ID =", TRIP_ID);
 </script>
