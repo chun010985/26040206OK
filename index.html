@@ -1611,7 +1611,7 @@ const isNewerThanApplied =
   serverMs > (localMeta.lastAppliedServerMs || 0) ||
   clientMs > (localUpdatedAtMs || 0);
 
-if (isNewerThanApplied && isFromOther && !localIsNewer) {
+if (isNewerThanApplied) {
 
   // ✅ 關鍵：別台剛更新時，取消本機「排隊中的自動上傳」，避免舊資料蓋掉新資料
   clearTimeout(syncTimer);
