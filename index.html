@@ -1311,13 +1311,13 @@
                 { id: 504, date: '2026-04-06', category: 'flight', name: '航班 IT-285 KIX->KHH', time: '12:00', travelTime: 0, transportType: 'flight', note: '起飛 12:00 / 抵達 14:00', description: '帶著滿滿的回憶（和超重的行李）回家囉！✈️ 抵達高雄後記得領取行李。' }
             ];
 
-            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v12')) || fullItineraryData);
+            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v13')) || fullItineraryData);
             const filteredItinerary = computed(() => itineraryList.value.filter(item => item.date === selectedDate.value).sort((a, b) => a.time.localeCompare(b.time)));
             
             const resetToDefaultItinerary = () => {
                 if (confirm('確定要重置行程表嗎？這將會覆蓋您目前的變更，並載入預設的 4/2~4/6 完整行程。')) {
                     itineraryList.value = JSON.parse(JSON.stringify(fullItineraryData));
-                    saveToLocal('sakura_itinerary_v12', itineraryList.value);
+                    saveToLocal('sakura_itinerary_v13', itineraryList.value);
                     alert('行程已重置為預設狀態！');
                 }
             };
@@ -1465,7 +1465,7 @@
                 };
 
                 if (modal.type === 'itinerary') { 
-                    updateList(itineraryList, 'sakura_itinerary_v12');
+                    updateList(itineraryList, 'sakura_itinerary_v13');
                 } else if (modal.type === 'shopping') { 
                     updateList(shoppingList, 'sakura_shopping');
                 } else if (modal.type === 'expense') { 
@@ -1476,8 +1476,8 @@
                 closeModal(); 
             };
 
-            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v12', itineraryList.value); closeModal(); } };
-            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v12', itineraryList.value); } };
+            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v13', itineraryList.value); closeModal(); } };
+            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v13', itineraryList.value); } };
             // [修改] 刪除改用 ID
             const deleteShoppingItem = (id) => { if(confirm('刪除此商品？')) { shoppingList.value = shoppingList.value.filter(item => item.id !== id); saveToLocal('sakura_shopping', shoppingList.value); } }
             // [修改] 刪除改用 ID
@@ -1590,7 +1590,7 @@
                 if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
                 if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
                 
-                saveToLocal('sakura_itinerary_v12', itineraryList.value);
+                saveToLocal('sakura_itinerary_v13', itineraryList.value);
                 saveToLocal('sakura_shopping', shoppingList.value);
                 saveToLocal('sakura_expenses', expenses.value);
                 saveToLocal('sakura_notebook', notebookList.value);
@@ -1646,19 +1646,7 @@
             };
 
 onMounted(() => {
-    const hasLocalItinerary = !!localStorage.getItem('sakura_itinerary_v12');
-    const hasLocalShopping  = !!localStorage.getItem('sakura_shopping');
-    const hasLocalExpenses  = !!localStorage.getItem('sakura_expenses');
-    const hasLocalNotebook  = !!localStorage.getItem('sakura_notebook');
-
-    const hasAnyLocal = hasLocalItinerary || hasLocalShopping || hasLocalExpenses || hasLocalNotebook;
-
-    if (!hasAnyLocal) {
-        pullFromCloudOnce();  // 本機完全沒資料，才去雲端抓
-    } else {
-        cloudSync.state = "synced";
-        cloudSync.message = "使用本機資料（不覆蓋）";
-    }
+  pullFromCloudOnce(); // ✅ 每次開啟都從雲端同步
 });
 
             let syncTimer = null;
