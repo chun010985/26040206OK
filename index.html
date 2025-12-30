@@ -1544,7 +1544,10 @@ const markLocalDirty = () => {
           cloudSync.error = null;
 
           markLocalDirty();                 // ✅ 先標記本機變更時間
-const payload = buildPayload();   // ✅ 再用最新狀態產生 payload
+const payload = buildPayload();
+payload.clientUpdatedAtMs = getLocalMeta().localUpdatedAtMs || Date.now();
+payload.lastWriter = deviceId;
+
 await window.__CLOUD_SET_STATE__(payload);
 
 // ✅ 同步成功後：標記為乾淨，並記住這次 client 版本
