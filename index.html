@@ -1564,10 +1564,6 @@ cloudSync.lastSyncedAt = new Date().toISOString();
           cloudSync.message = "連線雲端中…";
           cloudSync.error = null;
 
-          const meta = getLocalMeta();
-          const lastAppliedServerMs = meta.lastAppliedServerMs || 0;
-          const lastAppliedClientMs = meta.lastAppliedClientMs || 0;
-
           if (unsubscribeRealtime) { try { unsubscribeRealtime(); } catch(e) {} unsubscribeRealtime = null; }
 
           unsubscribeRealtime = window.__CLOUD_ON_SNAPSHOT__(async (remote) => {
