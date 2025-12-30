@@ -637,14 +637,14 @@
         <ul class="text-xs text-gray-600 space-y-2 list-disc pl-4">
           <li><b>注意事項</b>：
             <ol class="list-decimal pl-4 mt-1 space-y-1 text-gray-500">
-              <li>行程含SIM卡，不用再另外購買。</li>
-              <li>飯店因早餐不是自助式且價格昂貴，附近是心齋橋且有LOWSAN跟超市，故這次不含早餐。</li>
+              <li>行程含吃到飽(請留意公平使用原則)SIM卡，不用再另外購買。</li>
+              <li>飯店因早餐不是自助式且價格昂貴，附近是心齋橋還有LOWSAN跟超市，故這次不含早餐。</li>
               <li>自由行每日約為20,000步以上，回飯店休息後別忘了讓腳好好休息!!!</li>
             </ol>
           </li>
-          <li><b>護照與簽證</b>：請確認護照有效期超過 6 個月，並事先填寫 <a href="https://services.digital.go.jp/zh-cmn-hant/visit-japan-web/" target="_blank" class="text-blue-500 underline hover:text-blue-600">Visit Japan Web</a>。</li>
+          <li><b>護照與簽證</b>：請確認護照有效期超過 6 個月，並於出發前填寫 <a href="https://services.digital.go.jp/zh-cmn-hant/visit-japan-web/" target="_blank" class="text-blue-500 underline hover:text-blue-600">Visit Japan Web</a>。</li>
           <li><b>電壓與插座</b>：日本電壓為 100V，插座為雙孔扁平（與台灣相同），通常不需轉接頭。</li>
-          <li><b>禮儀</b>：電車內請保持安靜，手機調成靜音。走路請靠左側通行（大阪部分手扶梯靠右，依循前人即可）。</li>
+          <li><b>禮儀</b>：電車內請保持安靜，手機調成靜音。走路請靠左側通行（大阪部分手扶梯靠右，依循前人即可）且日本禁止邊走邊吃。</li>
           <li><b>小費</b>：日本無小費文化，服務費通常已包含在帳單內。</li>
           <li><b>垃圾</b>：街上垃圾桶很少，請隨身攜帶塑膠袋裝垃圾，回飯店再丟。</li>
           <li><b>支付方式</b>：現金/信用卡(touch)/Pay pay</li>
@@ -1174,7 +1174,7 @@
       // 直接把你原本 fullItineraryData 內容掛回 window，避免太長重複（下面會再 set 一次）
       // （真正資料在最後一段：window.__FULL_ITINERARY_DATA__ = [...]）
 
-      const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v14')) || []);
+      const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v15')) || []);
       const filteredItinerary = computed(() => itineraryList.value.filter(item => item.date === selectedDate.value).sort((a,b)=>a.time.localeCompare(b.time)));
 
       const saveToLocal = (key, data) => localStorage.setItem(key, JSON.stringify(data));
@@ -1182,7 +1182,7 @@
       const resetToDefaultItinerary = () => {
         if (confirm('確定要重置行程表嗎？這將會覆蓋您目前的變更，並載入預設的 4/2~4/6 完整行程。')) {
           itineraryList.value = JSON.parse(JSON.stringify(window.__FULL_ITINERARY_DATA__));
-          saveToLocal('sakura_itinerary_v14', itineraryList.value);
+          saveToLocal('sakura_itinerary_v15', itineraryList.value);
           alert('行程已重置為預設狀態！');
         }
       };
@@ -1292,7 +1292,7 @@
           saveToLocal(storageKey, listRef.value);
         };
 
-        if (modal.type === 'itinerary') updateList(itineraryList, 'sakura_itinerary_v14');
+        if (modal.type === 'itinerary') updateList(itineraryList, 'sakura_itinerary_v15');
         else if (modal.type === 'shopping') updateList(shoppingList, 'sakura_shopping');
         else if (modal.type === 'expense') updateList(expenses, 'sakura_expenses');
         else if (modal.type === 'notebook') updateList(notebookList, 'sakura_notebook');
@@ -1303,7 +1303,7 @@
       const confirmDeleteItinerary = () => {
         if (confirm('確定要刪除這個行程嗎？')) {
           itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id);
-          saveToLocal('sakura_itinerary_v14', itineraryList.value);
+          saveToLocal('sakura_itinerary_v15', itineraryList.value);
           closeModal();
         }
       };
@@ -1396,7 +1396,7 @@
         if (Array.isArray(cloud.notebook)) notebookList.value = cloud.notebook;
         if (cloud.packing && typeof cloud.packing === 'object') packingData.value = cloud.packing;
 
-        saveToLocal('sakura_itinerary_v14', itineraryList.value);
+        saveToLocal('sakura_itinerary_v15', itineraryList.value);
         saveToLocal('sakura_shopping', shoppingList.value);
         saveToLocal('sakura_expenses', expenses.value);
         saveToLocal('sakura_notebook', notebookList.value);
@@ -1552,11 +1552,11 @@
         setTimeout(() => { showSplash.value = false; }, 3000);
 
         // 把預設行程灌進去（若本機沒有）
-        if (!localStorage.getItem('sakura_itinerary_v14')) {
+        if (!localStorage.getItem('sakura_itinerary_v15')) {
           itineraryList.value = JSON.parse(JSON.stringify(window.__FULL_ITINERARY_DATA__));
-          saveToLocal('sakura_itinerary_v14', itineraryList.value);
+          saveToLocal('sakura_itinerary_v15', itineraryList.value);
         } else if (itineraryList.value.length === 0) {
-          itineraryList.value = JSON.parse(localStorage.getItem('sakura_itinerary_v14') || '[]');
+          itineraryList.value = JSON.parse(localStorage.getItem('sakura_itinerary_v15') || '[]');
         }
 
         // ensure ids
