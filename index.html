@@ -2,7 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- [優化] 加入 viewport-fit=cover 以適配全螢幕手機 (如 iPhone X+) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>京阪之旅</title>
     
     <!-- Tailwind CSS -->
@@ -69,10 +70,12 @@
             max-width: 480px; /* 模擬手機寬度 */
             margin: 0 auto;
             background-color: #fafafa;
-            min-height: 100vh;
+            /* [優化] 改用 dvh 解決手機瀏覽器網址列問題 */
+            min-height: 100dvh;
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            padding-bottom: 80px; /* 避開底部導航 */
+            /* [優化] 底部留白加入安全區域計算 */
+            padding-bottom: calc(80px + env(safe-area-inset-bottom));
         }
         /* 載入動畫 */
         .weather-loading {
@@ -169,16 +172,18 @@
             @error="handleImageError" 
         >
         
-        <!-- [修正] 補回倒數計時小標籤，並更新狀態文字 -->
-        <div class="absolute top-4 right-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full text-sakura-text text-xs border border-white/50 shadow-sm flex items-center gap-2 z-20">
+        <!-- [修正] 倒數計時小標籤：加入 top 安全區域設定 -->
+        <div class="absolute right-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full text-sakura-text text-xs border border-white/50 shadow-sm flex items-center gap-2 z-20"
+             style="top: max(1rem, env(safe-area-inset-top) + 1rem);">
             <i class="fa-regular fa-clock"></i>
             <span v-if="daysUntilTrip > 0">距離出發還有 <b>{{ daysUntilTrip }}</b> 天</span>
             <span v-else-if="daysUntilTrip >= -4">美好的旅程進行中 ✨</span>
             <span v-else>旅途結束 🔚</span>
         </div>
 
-        <!-- 標題 (改為 Top-6、深色字、加入實色白底) -->
-        <div class="absolute top-6 left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm">
+        <!-- [修正] 標題：加入 top 安全區域設定，確保不被瀏海遮擋 -->
+        <div class="absolute left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm"
+             style="top: max(1.5rem, env(safe-area-inset-top) + 1.5rem);">
             <h1 class="text-3xl font-bold tracking-widest text-sakura-text">京阪之旅</h1>
             <p class="text-sm opacity-90 text-sakura-text/80">2026.04.02 - 04.06</p>
         </div>
@@ -551,6 +556,48 @@
                             <i class="fa-solid fa-utensils mr-1 text-sakura"></i>含餐
                         </span>
                     </div>
+                </div>
+
+                <!-- [移動] 台灣虎航搭乘注意事項與說明 (整合至航班資訊內) -->
+                <div class="mt-2 pt-2 border-t border-gray-100">
+                    <details class="group">
+                        <summary class="flex justify-between items-center font-bold text-sakura-text cursor-pointer list-none outline-none select-none py-2">
+                            <span class="flex items-center text-sm"><i class="fa-solid fa-circle-exclamation mr-2 text-orange-400"></i>搭乘注意事項與說明</span>
+                            <span class="transition-transform duration-300 group-open:rotate-180 text-gray-400">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </span>
+                        </summary>
+                        <div class="text-xs text-gray-600 mt-2 space-y-4 leading-relaxed bg-gray-50 p-3 rounded-xl animate-fade-in">
+                            <div class="flex gap-3">
+                                <div class="w-6 shrink-0 text-center"><i class="fa-solid fa-clock text-sakura-dark text-sm"></i></div>
+                                <div>
+                                    <span class="font-bold text-gray-800 block mb-0.5">報到櫃台時間</span>
+                                    起飛前 2.5 小時開放報到，<span class="text-red-500 font-bold">起飛前 45 分鐘準時關閉櫃台</span>。建議提早抵達機場辦理手續。
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-6 shrink-0 text-center"><i class="fa-solid fa-briefcase text-sakura-dark text-sm"></i></div>
+                                <div>
+                                    <span class="font-bold text-gray-800 block mb-0.5">手提行李 (隨身)</span>
+                                    每位乘客僅可攜帶 1 件手提行李 + 1 件個人隨身物品（如手提包、電腦包），<span class="text-red-500 font-bold">兩件總重不得超過 10 公斤</span>。體積限制為 54cm x 38cm x 23cm。
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-6 shrink-0 text-center"><i class="fa-solid fa-suitcase-rolling text-sakura-dark text-sm"></i></div>
+                                <div>
+                                    <span class="font-bold text-gray-800 block mb-0.5">托運行李</span>
+                                    依購買重量額度辦理，單件行李不得超過 30 公斤。行動電源、鋰電池、打火機(限隨身帶1個) <span class="text-red-500 font-bold">嚴禁托運</span>，請務必放入隨身行李。
+                                </div>
+                            </div>
+                             <div class="flex gap-3">
+                                <div class="w-6 shrink-0 text-center"><i class="fa-solid fa-bottle-water text-sakura-dark text-sm"></i></div>
+                                <div>
+                                    <span class="font-bold text-gray-800 block mb-0.5">液體限制 (隨身)</span>
+                                    隨身攜帶之液體、膠狀及噴霧類物品，單一容器不得超過 100ml，且需全數裝入一個 1 公升透明可密封夾鏈袋內。
+                                </div>
+                            </div>
+                        </div>
+                    </details>
                 </div>
             </div>
 
