@@ -1584,8 +1584,8 @@ cloudSync.lastSyncedAt = new Date().toISOString();
               const isFromOther = writer && writer !== deviceId;
 
               // ✅ 只有在「真的有未同步變更」時，才阻擋雲端覆蓋
-const pendingSync = !!localMeta.pendingSync;
-const localIsNewer = pendingSync && localUpdatedAtMs > clientMs;
+const pendingSync = !!localMeta.pendingSync; // 這行可以留著（不影響）
+const localIsNewer = localUpdatedAtMs >= clientMs;
 
               if (isNewerThanApplied && isFromOther && !localIsNewer) {
                 isHydratingFromCloud = true;
