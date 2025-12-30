@@ -45,6 +45,7 @@
                             '0%, 100%': { transform: 'translateY(0)' },
                             '50%': { transform: 'translateY(-10px)' },
                         },
+                        // [修改] 移除舊的 fall，改用下方更自然的動畫定義
                         syncBar: {
                             '0%': { transform: 'translateX(-100%)' },
                             '100%': { transform: 'translateX(300%)' }
@@ -69,10 +70,9 @@
         }
 
         body {
-            background-color: #fff0f5; /* 延伸底色 */
+            background-color: #fff0f5; 
             -webkit-tap-highlight-color: transparent;
         }
-        /* 隱藏滾動條但保留功能 */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -81,15 +81,14 @@
             scrollbar-width: none;
         }
         .app-container {
-            max-width: 480px; /* 模擬手機寬度 */
+            max-width: 480px; 
             margin: 0 auto;
             background-color: #fafafa;
             min-height: 100vh;
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            padding-bottom: 80px; /* 避開底部導航 */
+            padding-bottom: 80px; 
         }
-        /* 載入動畫 */
         .weather-loading {
             animation: pulse-bg 1.5s infinite;
         }
@@ -99,22 +98,46 @@
             100% { opacity: 0.6; }
         }
         
+        /* [修改] 自然飄落的櫻花 CSS */
         .sakura-petal {
             position: absolute;
             background-color: #ffb7c5;
             border-radius: 100% 0 100% 0;
-            opacity: 0.8;
-            animation-name: fall;
-            animation-timing-function: linear;
-            animation-iteration-count: infinite;
+            opacity: 0; /* 預設隱藏，動畫開始才顯示 */
+            top: -20px; /* 從畫面外開始 */
         }
 
-        @keyframes fall {
-            0% { top: -10%; transform: translateX(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 110%; transform: translateX(100px) rotate(360deg); opacity: 0; }
+        /* 定義三種不同的飄落軌跡 */
+        @keyframes fall-sway-1 {
+            0% { top: -10%; left: var(--start-left); transform: rotate(0deg) translateX(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            50% { transform: rotate(180deg) translateX(20px); }
+            90% { opacity: 0.8; }
+            100% { top: 110%; left: calc(var(--start-left) + 10%); transform: rotate(360deg) translateX(-20px); opacity: 0; }
         }
+
+        @keyframes fall-sway-2 {
+            0% { top: -10%; left: var(--start-left); transform: rotate(0deg) translateX(0); opacity: 0; }
+            20% { opacity: 0.9; }
+            60% { transform: rotate(-120deg) translateX(-30px); }
+            100% { top: 110%; left: calc(var(--start-left) - 15%); transform: rotate(-240deg) translateX(10px); opacity: 0; }
+        }
+
+        @keyframes fall-sway-3 {
+            0% { top: -10%; left: var(--start-left); transform: rotate(0deg) scale(1); opacity: 0; }
+            15% { opacity: 1; }
+            50% { transform: rotate(90deg) scale(0.8) translateX(15px); }
+            100% { top: 110%; left: calc(var(--start-left) + 5%); transform: rotate(180deg) scale(1) translateX(-5px); opacity: 0; }
+        }
+        
+        /* 應用動畫類別 */
+        .animate-fall-1 { animation: fall-sway-1 linear infinite; }
+        .animate-fall-2 { animation: fall-sway-2 linear infinite; }
+        .animate-fall-3 { animation: fall-sway-3 linear infinite; }
+        
+        /* 景深模糊效果 */
+        .blur-sm { filter: blur(1px); }
+        .blur-md { filter: blur(2px); }
     </style>
 </head>
 <body>
@@ -125,19 +148,23 @@
     <transition name="fade">
         <div v-if="showSplash" class="fixed inset-0 z-[100] bg-gradient-to-b from-[#fff0f5] to-white flex flex-col items-center justify-center overflow-hidden transition-opacity duration-700">
             
-            <!-- [已移除] 櫻花樹 SVG -->
-
-            <!-- 飄落櫻花 (CSS 動畫) - 增加數量與隨機性 -->
-            <div class="absolute inset-0 pointer-events-none z-10">
-                <span class="sakura-petal w-3 h-3 left-[10%]" style="animation-duration: 4s; animation-delay: 0s;"></span>
-                <span class="sakura-petal w-4 h-4 left-[25%]" style="animation-duration: 6s; animation-delay: 1s;"></span>
-                <span class="sakura-petal w-2 h-2 left-[40%]" style="animation-duration: 5s; animation-delay: 2s;"></span>
-                <span class="sakura-petal w-3 h-3 left-[55%]" style="animation-duration: 7s; animation-delay: 0.5s;"></span>
-                <span class="sakura-petal w-4 h-4 left-[70%]" style="animation-duration: 4.5s; animation-delay: 1.5s;"></span>
-                <span class="sakura-petal w-2 h-2 left-[15%]" style="animation-duration: 5.5s; animation-delay: 0.8s;"></span>
-                <span class="sakura-petal w-3 h-3 left-[30%]" style="animation-duration: 6.5s; animation-delay: 2.2s;"></span>
-                <span class="sakura-petal w-2 h-2 left-[60%]" style="animation-duration: 4.8s; animation-delay: 1.2s;"></span>
-                <span class="sakura-petal w-3 h-3 left-[85%]" style="animation-duration: 7.2s; animation-delay: 0.3s;"></span>
+            <!-- [修改] 優化後的櫻花飄落 HTML 結構 -->
+            <div class="absolute inset-0 pointer-events-none z-10 w-full h-full overflow-hidden">
+                <!-- 
+                   --start-left: 起始水平位置
+                   animation-duration: 飄落速度 (不同速度創造層次)
+                   animation-delay: 延遲開始 (避免同時落下)
+                -->
+                <span class="sakura-petal w-4 h-4 animate-fall-1" style="--start-left: 10%; animation-duration: 6s; animation-delay: 0s;"></span>
+                <span class="sakura-petal w-3 h-3 animate-fall-2 blur-sm" style="--start-left: 20%; animation-duration: 8s; animation-delay: 1.5s;"></span>
+                <span class="sakura-petal w-5 h-5 animate-fall-3" style="--start-left: 35%; animation-duration: 5.5s; animation-delay: 0.5s;"></span>
+                <span class="sakura-petal w-2 h-2 animate-fall-1 blur-md" style="--start-left: 50%; animation-duration: 9s; animation-delay: 2s;"></span>
+                <span class="sakura-petal w-4 h-4 animate-fall-2" style="--start-left: 65%; animation-duration: 7s; animation-delay: 1s;"></span>
+                <span class="sakura-petal w-3 h-3 animate-fall-3 blur-sm" style="--start-left: 80%; animation-duration: 6.5s; animation-delay: 3s;"></span>
+                <span class="sakura-petal w-4 h-4 animate-fall-1" style="--start-left: 90%; animation-duration: 5s; animation-delay: 0.2s;"></span>
+                <span class="sakura-petal w-2 h-2 animate-fall-2" style="--start-left: 5%; animation-duration: 7.5s; animation-delay: 4s;"></span>
+                <span class="sakura-petal w-3 h-3 animate-fall-3" style="--start-left: 45%; animation-duration: 6s; animation-delay: 2.5s;"></span>
+                <span class="sakura-petal w-5 h-5 animate-fall-1 blur-sm" style="--start-left: 75%; animation-duration: 8.5s; animation-delay: 1.2s;"></span>
             </div>
 
             <!-- Logo 與標題 -->
@@ -186,65 +213,147 @@
         <!-- === TAB 1: 每日行程表 === -->
         <div v-if="currentTab === 'itinerary'">
             
-            <!-- 天氣資訊 -->
-            <div class="bg-gradient-to-br from-blue-50 to-sakura-light/50 rounded-2xl mb-6 shadow-soft overflow-hidden transition-all duration-300 border border-white/50 relative">
+            <!-- [恢復] 簡約白底 UI 設計 (緊湊平衡版) -->
+            <div class="relative bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] mb-5 border border-gray-50 overflow-hidden group transition-all duration-300">
                 
-                <div v-if="weatherLoading" class="absolute inset-0 bg-white/50 backdrop-blur-sm z-20 flex items-center justify-center">
-                    <div class="text-sakura-dark animate-pulse flex flex-col items-center">
-                        <i class="fa-solid fa-location-dot text-2xl mb-1"></i>
-                        <span class="text-xs font-bold">更新天氣中...</span>
+                <!-- 背景裝飾光暈 -->
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-sakura-light to-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                <div class="absolute top-20 -left-10 w-24 h-24 bg-yellow-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+                <!-- 載入中遮罩 -->
+                <div v-if="weatherLoading" class="absolute inset-0 bg-white/80 backdrop-blur-md z-30 flex items-center justify-center rounded-3xl">
+                    <div class="text-sakura-dark animate-pulse flex flex-col items-center gap-1">
+                        <i class="fa-solid fa-cloud-sun text-4xl animate-bounce"></i>
+                        <span class="text-xs font-bold tracking-widest uppercase mt-1">Loading Weather</span>
                     </div>
                 </div>
 
-                <div v-if="currentDayCities.length > 1" class="flex gap-2 px-4 pt-4 overflow-x-auto no-scrollbar z-10 relative">
+                <!-- 頂部：城市切換 (更緊湊) -->
+                <div v-if="currentDayCities.length > 1" class="flex justify-end gap-1.5 mb-1 relative z-20 overflow-x-auto no-scrollbar pb-1">
                     <button 
                         v-for="city in currentDayCities" 
                         :key="city.name"
-                        @click="changeWeatherCity(city)"
-                        :class="['text-xs px-3 py-1.5 rounded-full border transition-all shadow-sm flex items-center gap-1', weatherData.city === city.name ? 'bg-white text-sakura-dark border-sakura/30 font-bold' : 'bg-white/40 text-gray-500 border-transparent hover:bg-white/60']"
+                        @click.stop="changeWeatherCity(city)"
+                        :class="['text-[10px] px-2.5 py-1 rounded-full font-bold transition-all border shadow-sm', weatherData.city === city.name ? 'bg-sakura text-white border-sakura ring-1 ring-sakura/20' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50']"
                     >
-                        <i class="fa-solid fa-location-dot text-[10px]" :class="weatherData.city === city.name ? 'text-sakura' : 'text-gray-400'"></i>
                         {{ city.name }}
                     </button>
                 </div>
 
-                <div @click="toggleWeather" class="p-4 flex items-center justify-between cursor-pointer active:bg-white/30 hover:bg-white/20 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <i :class="weatherData.icon" class="text-3xl drop-shadow-sm transition-all duration-500" :style="{color: weatherData.iconColor}"></i>
-                        <div>
-                            <p class="text-sakura-text font-bold text-lg flex items-center gap-2">
-                                {{ weatherData.city }}
-                                <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-300" :class="{'rotate-180': isWeatherExpanded}"></i>
-                            </p>
-                            <p class="text-xs text-gray-500">{{ weatherData.description }}</p>
+                <!-- 主要天氣內容 (點擊展開) - 高度壓縮與字體平衡 -->
+                <div @click="toggleWeather" class="relative z-10 cursor-pointer pt-1">
+                    <div class="flex justify-between items-center">
+                        <!-- [修改] 加上 pl-2 讓整體文字往右移 -->
+                        <div class="pl-2">
+                            <!-- 城市名稱與描述 -->
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <!-- [修改] 城市名稱改小 text-xl -->
+                                <h2 class="text-xl font-black text-gray-800 tracking-tight">{{ weatherData.city }}</h2>
+                                <!-- [修改] 描述改大 text-xs -->
+                                <span class="px-2 py-0.5 bg-gray-100 rounded-md text-xs font-bold text-gray-500 flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[6px]" :style="{color: weatherData.iconColor}"></i>
+                                    {{ weatherData.description }}
+                                </span>
+                            </div>
+                            
+                            <!-- 溫度顯示 (行高緊縮) -->
+                            <div class="flex items-end h-12">
+                                <span class="text-5xl font-black text-gray-800 tracking-tighter leading-none -ml-0.5">{{ weatherData.temp }}°</span>
+                                <!-- [修改] 最高最低溫改大 text-xs -->
+                                <div class="ml-3 flex flex-col justify-center text-xs font-bold text-gray-400 leading-tight border-l border-gray-200 pl-2 h-8">
+                                    <span class="flex items-center gap-1 mb-0.5"><i class="fa-solid fa-arrow-up text-red-300"></i>{{ weatherData.maxTemp }}°</span>
+                                    <span class="flex items-center gap-1"><i class="fa-solid fa-arrow-down text-blue-300"></i>{{ weatherData.minTemp }}°</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1 font-medium pl-0.5">體感 {{ weatherData.apparentTemp }}°C</p>
+                        </div>
+
+                        <!-- 天氣圖示 (縮小容器尺寸) -->
+                        <div class="w-14 h-14 flex items-center justify-center animate-float mr-1">
+                            <i :class="weatherData.icon" class="text-5xl drop-shadow-md transition-all duration-500" :style="{color: weatherData.iconColor}"></i>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-3xl font-bold text-sakura-text tracking-tight">{{ weatherData.temp }}<span class="text-lg align-top">°C</span></p>
-                        <p class="text-xs text-gray-500 font-medium">體感 {{ weatherData.apparentTemp }}°C</p>
+
+                    <!-- 展開提示箭頭 (更緊湊) -->
+                    <div class="flex justify-center -mt-1 opacity-30 group-hover:opacity-100 transition-opacity">
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300 text-xs" :class="{'rotate-180': isWeatherExpanded}"></i>
                     </div>
                 </div>
 
-                <div v-if="isWeatherExpanded" class="px-4 pb-4 animate-fade-in">
-                    <div class="grid grid-cols-4 gap-2 bg-white/60 rounded-xl p-3 backdrop-blur-sm shadow-inner">
-                        <div class="flex flex-col items-center justify-center p-1">
-                            <i class="fa-solid fa-droplet text-blue-400 text-sm mb-1"></i><span class="text-[10px] text-gray-400">濕度</span><span class="text-xs font-bold text-gray-600">{{ weatherData.humidity }}%</span>
+                <!-- 展開後的詳細資訊 - 減少 Padding 節省空間 -->
+                <div v-if="isWeatherExpanded" class="mt-2 pt-2 border-t border-gray-100 animate-fade-in relative z-10">
+                    
+                    <!-- 穿衣建議 (更緊湊) -->
+                    <div class="mb-2 bg-gradient-to-r from-sakura-light/30 to-white border border-sakura-light/40 rounded-xl p-2.5 shadow-sm flex gap-2.5 items-start">
+                        <div class="w-6 h-6 rounded-full bg-white text-sakura-dark flex items-center justify-center shrink-0 shadow-sm text-xs mt-0.5">
+                            <i class="fa-solid fa-shirt"></i>
                         </div>
-                        <div class="flex flex-col items-center justify-center p-1">
-                            <i class="fa-solid fa-wind text-gray-400 text-sm mb-1"></i><span class="text-[10px] text-gray-400">風速</span><span class="text-xs font-bold text-gray-600">{{ weatherData.windSpeed }}m/s</span>
-                        </div>
-                        <div class="flex flex-col items-center justify-center p-1">
-                            <i class="fa-solid fa-umbrella text-purple-400 text-sm mb-1"></i><span class="text-[10px] text-gray-400">降雨</span><span class="text-xs font-bold text-gray-600">{{ weatherData.rain }}mm</span>
-                        </div>
-                        <div class="flex flex-col items-center justify-center p-1">
-                            <i class="fa-solid fa-sun text-orange-400 text-sm mb-1"></i><span class="text-[10px] text-gray-400">紫外線</span><span class="text-xs font-bold text-gray-600">{{ weatherData.uvIndex }}</span>
+                        <div>
+                            <h5 class="text-[10px] font-bold text-sakura-dark mb-0.5 tracking-wider uppercase">Outfit Advice</h5>
+                            <p class="text-xs text-gray-600 font-medium leading-relaxed">{{ weatherData.clothing }}</p>
                         </div>
                     </div>
-                    <div class="mt-3 flex justify-between items-center px-4 text-xs text-gray-500 bg-white/40 rounded-lg py-2">
-                        <div class="flex items-center gap-2"><i class="fa-regular fa-sun text-orange-400"></i> 日出 {{ weatherData.sunrise }}</div>
-                        <div class="h-4 w-px bg-gray-300 opacity-50"></div>
-                         <div class="flex items-center gap-2"><i class="fa-regular fa-moon text-indigo-400"></i> 日落 {{ weatherData.sunset }}</div>
+
+                    <!-- 數據網格 (四格) - 減少內邊距 -->
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <div class="bg-gray-50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
+                            <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center text-xs"><i class="fa-solid fa-droplet"></i></div>
+                            <div>
+                                <div class="text-[10px] text-gray-400 font-bold uppercase leading-none mb-0.5">濕度</div>
+                                <div class="text-sm font-black text-gray-700 leading-none">{{ weatherData.humidity }}%</div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
+                            <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center text-xs"><i class="fa-solid fa-wind"></i></div>
+                            <div>
+                                <div class="text-[10px] text-gray-400 font-bold uppercase leading-none mb-0.5">風速</div>
+                                <div class="text-sm font-black text-gray-700 leading-none">{{ weatherData.windSpeed }} <span class="text-[10px] font-normal">m/s</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
+                            <div class="w-7 h-7 rounded-full bg-cyan-100 text-cyan-500 flex items-center justify-center text-xs"><i class="fa-solid fa-umbrella"></i></div>
+                            <div>
+                                <div class="text-[10px] text-gray-400 font-bold uppercase leading-none mb-0.5">降雨</div>
+                                <div class="text-sm font-black text-gray-700 leading-none">{{ weatherData.rain }} <span class="text-[10px] font-normal">mm</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
+                            <div class="w-7 h-7 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-xs"><i class="fa-solid fa-sun"></i></div>
+                            <div>
+                                <div class="text-[10px] text-gray-400 font-bold uppercase leading-none mb-0.5">紫外線</div>
+                                <div class="text-sm font-black text-gray-700 leading-none">{{ weatherData.uvIndex }}</div>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- 日出日落 (縮小高度) -->
+                    <div class="flex justify-between items-center bg-gray-50 rounded-full px-3 py-1.5 border border-gray-100 mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fa-regular fa-sun text-orange-400 text-xs"></i>
+                            <span class="text-xs font-bold text-gray-600">{{ weatherData.sunrise }}</span>
+                        </div>
+                        <div class="h-1 flex-1 mx-3 bg-gradient-to-r from-orange-200 to-indigo-200 rounded-full relative">
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white border border-orange-300 rounded-full shadow-sm"></div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-bold text-gray-600">{{ weatherData.sunset }}</span>
+                            <i class="fa-regular fa-moon text-indigo-400 text-xs"></i>
+                        </div>
+                    </div>
+
+                    <!-- [新增] 未來 3 天預報 -->
+                    <div v-if="weatherData.forecast && weatherData.forecast.length > 0" class="border-t border-gray-100 pt-2">
+                        <div class="flex justify-between gap-2">
+                            <div v-for="day in weatherData.forecast" :key="day.dayName" class="flex-1 bg-gray-50 rounded-xl p-2 flex flex-col items-center border border-transparent hover:border-sakura-light transition-colors">
+                                <span class="text-[10px] text-gray-400 font-bold mb-1">{{ day.dayName }}</span>
+                                <i :class="day.icon" class="text-lg mb-1" :style="{color: day.color}"></i>
+                                <div class="flex items-center text-xs font-black text-gray-700">
+                                    {{ day.max }}° <span class="text-[9px] text-gray-400 font-normal ml-0.5">/{{ day.min }}°</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -941,8 +1050,9 @@
             const toggleWeather = () => isWeatherExpanded.value = !isWeatherExpanded.value;
             
             const weatherData = reactive({
-                temp: '--', apparentTemp: '--', humidity: '--', windSpeed: '--', rain: '--', uvIndex: '--', 
-                sunrise: '--:--', sunset: '--:--', description: '載入中...', icon: 'fa-solid fa-spinner', iconColor: '#ccc', city: '大阪市'
+                temp: '--', maxTemp: '--', minTemp: '--', apparentTemp: '--', humidity: '--', windSpeed: '--', rain: '--', uvIndex: '--', 
+                sunrise: '--:--', sunset: '--:--', description: '載入中...', clothing: '載入中...', icon: 'fa-solid fa-spinner', iconColor: '#ccc', city: '大阪市',
+                forecast: [] // [新增] 預報陣列
             });
 
             const currentDayCities = computed(() => {
@@ -954,11 +1064,23 @@
                 fetchWeather(city.lat, city.lng, city.name);
             };
 
+            // [新增] 穿衣建議邏輯函式
+            const getClothingAdvice = (avgTemp, maxTemp, minTemp) => {
+                // 簡單的判斷邏輯，針對京阪春季天氣優化
+                if (maxTemp < 10) return "天氣寒冷，請穿著保暖大衣、圍巾、手套，建議採用洋蔥式穿法。";
+                if (maxTemp < 15) return "稍有寒意，建議穿著毛衣、風衣或是輕羽絨，早晚溫差大要注意保暖。";
+                if (maxTemp < 20) return "氣溫舒適偏涼，建議長袖上衣搭配針織衫或牛仔外套，適合走路的裝扮。";
+                if (maxTemp < 25) return "溫暖舒適，可穿薄長袖或短袖搭配薄襯衫，中午可能會覺得熱。";
+                if (maxTemp >= 25) return "天氣炎熱，請穿著透氣輕便衣物，並注意防曬與補充水分。";
+                return "氣溫變化大，建議隨身攜帶薄外套以備不時之需。";
+            };
+
             const fetchWeather = async (lat, lng, cityName) => {
                 weatherLoading.value = true;
                 weatherData.city = cityName;
                 try {
-                    const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&daily=sunrise,sunset&timezone=Asia%2FTokyo`);
+                    // [修改] API 請求加入 weather_code 到 daily 參數
+                    const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&daily=weather_code,sunrise,sunset,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo`);
                     const data = await response.json();
                     
                     if (!data.current) throw new Error("No data");
@@ -971,31 +1093,73 @@
                     weatherData.windSpeed = current.wind_speed_10m;
                     weatherData.rain = current.precipitation;
                     
+                    // [新增] 處理最高/最低溫與穿衣建議
+                    if (daily) {
+                        weatherData.maxTemp = Math.round(daily.temperature_2m_max[0]);
+                        weatherData.minTemp = Math.round(daily.temperature_2m_min[0]);
+                        if (daily.sunrise.length > 0) {
+                            weatherData.sunrise = daily.sunrise[0].split('T')[1];
+                            weatherData.sunset = daily.sunset[0].split('T')[1];
+                        }
+                        // 產生建議
+                        weatherData.clothing = getClothingAdvice(weatherData.temp, weatherData.maxTemp, weatherData.minTemp);
+
+                        // [新增] 處理未來 3 天預報 (索引 1, 2, 3)
+                        const forecastList = [];
+                        const weekDays = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+                        
+                        for (let i = 1; i <= 3; i++) {
+                            if (daily.time[i]) {
+                                const d = new Date(daily.time[i]);
+                                const dayName = weekDays[d.getDay()];
+                                const code = daily.weather_code[i];
+                                // 預報通常只顯示白天的圖示 (isDay = true)
+                                const info = getWeatherInfo(code, true);
+                                
+                                forecastList.push({
+                                    dayName: dayName,
+                                    max: Math.round(daily.temperature_2m_max[i]),
+                                    min: Math.round(daily.temperature_2m_min[i]),
+                                    icon: info.icon,
+                                    color: info.color
+                                });
+                            }
+                        }
+                        weatherData.forecast = forecastList;
+                    }
+
                     const wInfo = getWeatherInfo(current.weather_code, current.is_day === 1);
                     weatherData.description = wInfo.desc;
                     weatherData.icon = wInfo.icon;
                     weatherData.iconColor = wInfo.color;
                     
-                    if (daily && daily.sunrise.length > 0) {
-                        weatherData.sunrise = daily.sunrise[0].split('T')[1];
-                        weatherData.sunset = daily.sunset[0].split('T')[1];
-                    }
                     weatherData.uvIndex = (current.is_day === 1 && current.weather_code <= 2) ? '高' : '低';
 
                 } catch (error) {
                     console.warn("Weather API access failed (likely due to network restrictions). Using fallback data.");
                     
                     weatherData.temp = 18;
+                    weatherData.maxTemp = 20; // Fallback
+                    weatherData.minTemp = 12; // Fallback
                     weatherData.apparentTemp = 16;
                     weatherData.humidity = 45;
                     weatherData.windSpeed = 3;
                     weatherData.rain = 0;
                     weatherData.description = "晴朗 (模擬)";
+                    weatherData.clothing = "氣溫舒適偏涼，建議長袖上衣搭配針織衫或牛仔外套。(模擬數據)"; // Fallback
                     weatherData.icon = "fa-solid fa-sun";
                     weatherData.iconColor = "#fbbf24";
                     weatherData.uvIndex = "中";
                     weatherData.sunrise = "05:42";
                     weatherData.sunset = "18:15";
+                    
+                    // Fallback Forecast
+                    weatherData.forecast = [
+                        { dayName: '週六', max: 21, min: 13, icon: 'fa-solid fa-cloud-sun', color: '#fbbf24' },
+                        { dayName: '週日', max: 22, min: 14, icon: 'fa-solid fa-sun', color: '#fbbf24' },
+                        { dayName: '週一', max: 19, min: 12, icon: 'fa-solid fa-cloud-rain', color: '#60a5fa' }
+                    ];
+
                 } finally {
                     setTimeout(() => { weatherLoading.value = false; }, 300);
                 }
