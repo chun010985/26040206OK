@@ -693,7 +693,7 @@
                     <li><b>禮儀</b>：電車內請保持安靜，手機調成靜音。走路請靠左側通行（大阪部分手扶梯靠右，依循前人即可）。</li>
                     <li><b>小費</b>：日本無小費文化，服務費通常已包含在帳單內。</li>
                     <li><b>垃圾</b>：街上垃圾桶很少，請隨身攜帶塑膠袋裝垃圾，回飯店再丟。</li>
-                    <li><b>支付方式</b>：現金/信用卡(TOUCK)/Pay pay</li>
+                    <li><b>支付方式</b>：現金/信用卡(touch)/Pay pay</li>
                 </ul>
             </div>
 
@@ -776,15 +776,15 @@
                     <div class="h-32 bg-gray-100 relative overflow-hidden">
                         <img v-if="item.image" :src="item.image" class="w-full h-full object-cover">
                         <div v-else class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-image text-3xl"></i></div>
-                         
-                         <!-- [新增] 編輯按鈕 -->
-                         <div class="absolute top-1 right-1 flex gap-1">
+                          
+                          <!-- [新增] 編輯按鈕 -->
+                          <div class="absolute top-1 right-1 flex gap-1">
                              <button @click.stop="openModal('shopping', item)" class="bg-white/80 w-6 h-6 rounded-full text-gray-500 text-xs flex items-center justify-center shadow-sm hover:text-sakura-dark"><i class="fa-solid fa-pen"></i></button>
                              <!-- [修改] 刪除改用 ID -->
                              <button @click.stop="deleteShoppingItem(item.id)" class="bg-white/80 w-6 h-6 rounded-full text-red-400 text-xs flex items-center justify-center shadow-sm hover:bg-red-50"><i class="fa-solid fa-xmark"></i></button>
-                         </div>
+                          </div>
 
-                         <span class="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm">{{ item.owner || '未指定' }}</span>
+                          <span class="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm">{{ item.owner || '未指定' }}</span>
                     </div>
                     <div class="p-3">
                         <h4 class="font-bold text-gray-700 text-sm truncate">{{ item.name }}</h4>
@@ -993,7 +993,7 @@
             ];
 
             const defaultBanner = 'https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png';
-            const bannerImage = ref(defaultBanner);   
+            const bannerImage = ref(defaultBanner);    
 
             const handleImageError = () => {
               bannerImage.value = defaultBanner;
@@ -1283,16 +1283,16 @@
                 { id: 310, date: '2026-04-04', category: 'other', name: '飯店自由活動', time: '20:00', travelTime: 0, transportType: 'walk', note: '休息或整理行李', description: '經過一整天京都走路行程，腿應該很酸了，建議早點休息，或是在飯店附近超商買點宵夜。' },
                 
                 // === 4/5 (日) 海遊館 & 天王寺阿倍野 ===
-                { id: 401, date: '2026-04-05', category: 'transport', name: '移動：飯店 → 海遊館', time: '09:00', travelTime: 20, transportType: 'transit', note: '搭乘中央線 (綠線)', description: '📍 路線：\n1. 飯店步行至 本町站\n2. 搭乘地鐵中央線 (往宇宙廣場方向) 至 大阪港站 (C11)\n3. 1號或2號出口出站，步行約 5-10 分鐘抵達。' },
-                { id: 402, date: '2026-04-05', category: 'attraction', name: '海遊館', time: '09:30', travelTime: 0, transportType: 'walk', note: '世界最大級水族館', ticket: '¥2,700', openHours: '09:30 - 20:00', description: '必看巨大的「太平洋」水槽與鎮館之寶——鯨鯊。館內設計是從8樓螺旋狀往下參觀，模擬從海面潛入深海的過程。旁邊的天保山摩天輪也可以順道看看。' },
-                { id: 403, date: '2026-04-05', category: 'transport', name: '移動：海遊館 → 通天閣', time: '12:00', travelTime: 30, transportType: 'transit', note: '中央線轉堺筋線', description: '1. 大阪港站 (中央線) → 堺筋本町站 (C17)\n2. 轉乘堺筋線 (咖啡色線) → 惠美須町站 (K18)\n3. 3號出口出站，通天閣就在眼前。' },
-                { id: 404, date: '2026-04-05', category: 'attraction', name: '通天閣 & 新世界', time: '12:40', travelTime: 0, transportType: 'walk', note: '大阪懷舊地標', description: '這裡充滿昭和時代的懷舊氛圍，巨大的河豚招牌是必拍景點。可以上通天閣展望台摸摸Billiken神像的腳底求好運。' },
-                { id: 405, date: '2026-04-05', category: 'food', name: '午餐：元祖炸串', time: '13:00', travelTime: 0, transportType: 'walk', note: '禁止二次沾醬', description: '在新世界商店街享用大阪名物「炸串 (Kushikatsu)」。推薦「達摩 (Daruma)」或「八重勝」。記得醬汁是共用的，咬過後絕對不能再沾喔！' },
-                { id: 406, date: '2026-04-05', category: 'attraction', name: '天王寺動物園', time: '14:30', travelTime: 10, transportType: 'walk', note: '百年動物園', ticket: '¥500', openHours: '09:30 - 17:00', description: '從新世界步行即可抵達「新世界大門」。園區內有模擬非洲熱帶草原的生態展示區，能近距離觀察河馬、獅子等動物。' },
-                { id: 407, date: '2026-04-05', category: 'transport', name: '移動：動物園 → 阿倍野', time: '16:30', travelTime: 15, transportType: 'walk', note: '穿越天王寺公園', description: '從動物園出來，穿越寬闊漂亮的「天王寺公園 (Ten-Shiba)」草皮區，前方最高的摩天大樓就是阿倍野 HARUKAS。' },
-                { id: 408, date: '2026-04-05', category: 'attraction', name: '阿倍野 HARUKAS 300', time: '17:00', travelTime: 0, transportType: 'walk', note: '絕美日落與夜景', ticket: '¥1,800', openHours: '09:00 - 22:00', description: '登上 60 樓展望台，360 度俯瞰大阪全景。建議在日落前抵達，可以一次欣賞夕陽與百萬夜景。樓下的近鐵百貨也很好逛，甜點伴手禮豐富。' },
-                { id: 409, date: '2026-04-05', category: 'transport', name: '移動：天王寺 → 飯店', time: '19:30', travelTime: 15, transportType: 'transit', note: '御堂筋線直達', description: '從天王寺站 (M23) 搭乘御堂筋線，直達 本町站 (M18)。' },
-                { id: 410, date: '2026-04-05', category: 'other', name: '回飯店休息', time: '20:00', travelTime: 0, transportType: 'walk', note: '整理戰利品', description: '最後一晚了，記得整理行李，確認伴手禮是否買齊，明天就要回程囉。' },
+                { id: 401, date: '2026-04-05', category: 'transport', name: '移動：飯店 → 海遊館', time: '08:30', travelTime: 20, transportType: 'transit', note: '搭乘中央線 (綠線)', description: '📍 路線：\n1. 飯店步行至 本町站\n2. 搭乘地鐵中央線 (往宇宙廣場方向) 至 大阪港站 (C11)\n3. 1號或2號出口出站，步行約 5-10 分鐘抵達。' },
+                { id: 402, date: '2026-04-05', category: 'attraction', name: '海遊館', time: '09:00', travelTime: 0, transportType: 'walk', note: '世界最大級水族館', ticket: '¥2,700', openHours: '09:30 - 20:00', description: '早點到可以避開排隊人潮。必看巨大的「太平洋」水槽與鎮館之寶——鯨鯊。館內設計是從8樓螺旋狀往下參觀，模擬從海面潛入深海的過程。' },
+                { id: 403, date: '2026-04-05', category: 'transport', name: '移動：海遊館 → 通天閣', time: '11:30', travelTime: 30, transportType: 'transit', note: '中央線轉堺筋線', description: '1. 大阪港站 (中央線) → 堺筋本町站 (C17)\n2. 轉乘堺筋線 (咖啡色線) → 惠美須町站 (K18)\n3. 3號出口出站，通天閣就在眼前。' },
+                { id: 404, date: '2026-04-05', category: 'attraction', name: '通天閣 & 新世界', time: '12:10', travelTime: 0, transportType: 'walk', note: '大阪懷舊地標', description: '這裡充滿昭和時代的懷舊氛圍，巨大的河豚招牌是必拍景點。可以上通天閣展望台摸摸Billiken神像的腳底求好運。' },
+                { id: 405, date: '2026-04-05', category: 'food', name: '午餐：元祖炸串', time: '12:30', travelTime: 0, transportType: 'walk', note: '禁止二次沾醬', description: '在新世界商店街享用大阪名物「炸串 (Kushikatsu)」。推薦「達摩 (Daruma)」或「八重勝」。記得醬汁是共用的，咬過後絕對不能再沾喔！' },
+                { id: 406, date: '2026-04-05', category: 'attraction', name: '天王寺動物園', time: '14:00', travelTime: 10, transportType: 'walk', note: '百年動物園', ticket: '¥500', openHours: '09:30 - 17:00', description: '從新世界步行即可抵達「新世界大門」。園區內有模擬非洲熱帶草原的生態展示區，能近距離觀察河馬、獅子等動物。' },
+                { id: 407, date: '2026-04-05', category: 'transport', name: '移動：動物園 → 阿倍野', time: '16:00', travelTime: 15, transportType: 'walk', note: '穿越天王寺公園', description: '從動物園出來，穿越寬闊漂亮的「天王寺公園 (Ten-Shiba)」草皮區，前方最高的摩天大樓就是阿倍野 HARUKAS。' },
+                { id: 408, date: '2026-04-05', category: 'attraction', name: '阿倍野 HARUKAS 300', time: '16:30', travelTime: 0, transportType: 'walk', note: '絕美日落與夜景', ticket: '¥1,800', openHours: '09:00 - 22:00', description: '提早上展望台佔個好位置！在 60 樓展望台 360 度俯瞰大阪全景。這個時間上去可以悠閒地等待日落（約18:15），一次欣賞白天、夕陽與百萬夜景的變化。' },
+                { id: 409, date: '2026-04-05', category: 'transport', name: '移動：天王寺 → 飯店', time: '19:00', travelTime: 15, transportType: 'transit', note: '御堂筋線直達', description: '從天王寺站 (M23) 搭乘御堂筋線，直達 本町站 (M18)。' },
+                { id: 410, date: '2026-04-05', category: 'other', name: '回飯店休息', time: '19:30', travelTime: 0, transportType: 'walk', note: '整理戰利品', description: '最後一晚了，早點回飯店整理行李，確認伴手禮是否買齊，明天就要回程囉。' },
                 
                 // === 4/6 (一) 回程 ===
                 { id: 501, date: '2026-04-06', category: 'transport', name: '移動：飯店 → 關西機場', time: '08:30', travelTime: 60, transportType: 'transit', note: '地鐵轉南海電鐵', description: '1. 地鐵御堂筋線：本町 (M18) → 難波 (M20)\n2. 南海電鐵：難波 → 關西機場 (搭乘空港急行或 Rapi:t)\n💡 雖然班機是 12:00，但建議 10:00 前抵達機場比較充裕。' },
@@ -1301,13 +1301,13 @@
                 { id: 504, date: '2026-04-06', category: 'flight', name: '航班 IT-285 KIX->KHH', time: '12:00', travelTime: 0, transportType: 'flight', note: '起飛 12:00 / 抵達 14:00', description: '帶著滿滿的回憶（和超重的行李）回家囉！✈️ 抵達高雄後記得領取行李。' }
             ];
 
-            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary')) || fullItineraryData);
+            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v2')) || fullItineraryData);
             const filteredItinerary = computed(() => itineraryList.value.filter(item => item.date === selectedDate.value).sort((a, b) => a.time.localeCompare(b.time)));
             
             const resetToDefaultItinerary = () => {
                 if (confirm('確定要重置行程表嗎？這將會覆蓋您目前的變更，並載入預設的 4/2~4/6 完整行程。')) {
                     itineraryList.value = JSON.parse(JSON.stringify(fullItineraryData));
-                    saveToLocal('sakura_itinerary', itineraryList.value);
+                    saveToLocal('sakura_itinerary_v2', itineraryList.value);
                     alert('行程已重置為預設狀態！');
                 }
             };
@@ -1455,7 +1455,7 @@
                 };
 
                 if (modal.type === 'itinerary') { 
-                    updateList(itineraryList, 'sakura_itinerary');
+                    updateList(itineraryList, 'sakura_itinerary_v2');
                 } else if (modal.type === 'shopping') { 
                     updateList(shoppingList, 'sakura_shopping');
                 } else if (modal.type === 'expense') { 
@@ -1466,8 +1466,8 @@
                 closeModal(); 
             };
 
-            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary', itineraryList.value); closeModal(); } };
-            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary', itineraryList.value); } };
+            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v2', itineraryList.value); closeModal(); } };
+            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v2', itineraryList.value); } };
             // [修改] 刪除改用 ID
             const deleteShoppingItem = (id) => { if(confirm('刪除此商品？')) { shoppingList.value = shoppingList.value.filter(item => item.id !== id); saveToLocal('sakura_shopping', shoppingList.value); } }
             // [修改] 刪除改用 ID
@@ -1552,7 +1552,7 @@
                 if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
                 if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
                 
-                saveToLocal('sakura_itinerary', itineraryList.value);
+                saveToLocal('sakura_itinerary_v2', itineraryList.value);
                 saveToLocal('sakura_shopping', shoppingList.value);
                 saveToLocal('sakura_expenses', expenses.value);
                 saveToLocal('sakura_notebook', notebookList.value);
@@ -1709,6 +1709,7 @@
 </script>
 </body>
 </html>
+
 
 
 
