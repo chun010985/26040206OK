@@ -697,7 +697,7 @@
                             <li>自由行每日約為20,000步以上，回飯店休息後別忘了讓腳好好休息!!!</li>
                         </ol>
                     </li>
-                    <li><b>護照與簽證</b>：請確認護照有效期超過 6 個月，並事先填寫 <a href="https://services.digital.go.jp/zh-cmn-hant/visit-japan-web/" target="_blank" class="text-blue-500 underline hover:text-blue-600">Visit Japan Web</a>。</li>
+                    <li><b>護照與簽證</b>：請確認護照有效期超過 6 個月，並於出發前1~2天事先填寫 <a href="https://services.digital.go.jp/zh-cmn-hant/visit-japan-web/" target="_blank" class="text-blue-500 underline hover:text-blue-600">Visit Japan Web</a>。</li>
                     <li><b>電壓與插座</b>：日本電壓為 100V，插座為雙孔扁平（與台灣相同），通常不需轉接頭。</li>
                     <li><b>禮儀</b>：電車內請保持安靜，手機調成靜音。走路請靠左側通行（大阪部分手扶梯靠右，依循前人即可）。</li>
                     <li><b>小費</b>：日本無小費文化，服務費通常已包含在帳單內。</li>
@@ -1743,7 +1743,6 @@ onMounted(() => {
   const auth = getAuth(app);
 
   const TRIP_ID = "keihan_2026_0402";
-  const stateDoc = () => doc(db, "trips", TRIP_ID, "state", "main");   
 
   // 確保在登入後才允許讀寫
   let user = null;
@@ -1766,17 +1765,19 @@ onMounted(() => {
 };
 
 window.__CLOUD_GET_STATE__ = async () => {
-  const ok = await waitForUser();
-  if (!ok) throw new Error("尚未登入，暫時不能讀取雲端");
-  const snap = await getDoc(stateDoc());
+  const snap = await getDoc(doc(db, "trips", TRIP_ID));
   return snap.exists() ? snap.data() : null;
 };
 
 window.__CLOUD_SET_STATE__ = async (payload) => {
-  const ok = await waitForUser();
-  if (!ok) throw new Error("尚未登入，暫時不能寫入雲端");
-  await setDoc(doc(db, "trips", TRIP_ID), { updatedAt: serverTimestamp() }, { merge: true });
-  await setDoc(stateDoc(), payload, { merge: true });
+  await setDoc(
+    doc(db, "trips", TRIP_ID),
+    {
+      ...payload,
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
+  );
   return true;
 };
 
