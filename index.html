@@ -1,3 +1,5 @@
+V14修改
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1414,13 +1416,13 @@
         }, 120);
       });
 
-      const markLocalDirty = () => {
-        const meta = getLocalMeta();
-        meta.localUpdatedAtMs = Date.now();
-        meta.lastWriter = deviceId;
-        setLocalMeta(meta);
-      };
-
+const markLocalDirty = () => {
+  const meta = getLocalMeta();
+  meta.localUpdatedAtMs = Date.now();
+  meta.lastWriter = deviceId;
+  meta.pendingSync = true; // ✅ 新增：代表本機有「尚未同步」的變更
+  setLocalMeta(meta);
+};
       const manualCloudSync = async () => {
         try {
           if (isHydratingFromCloud) return;
@@ -1431,11 +1433,16 @@
 
           const payload = buildPayload();
           markLocalDirty();
-          await window.__CLOUD_SET_STATE__(payload);
+await window.__CLOUD_SET_STATE__(payload);
 
-          cloudSync.state = "synced";
-          cloudSync.message = "已同步到雲端";
-          cloudSync.lastSyncedAt = new Date().toISOString();
+// ✅ 新增：同步成功後，本機狀態改成「乾淨」
+const meta = getLocalMeta();
+meta.pendingSync = false;
+setLocalMeta(meta);
+
+cloudSync.state = "synced";
+cloudSync.message = "已同步到雲端";
+cloudSync.lastSyncedAt = new Date().toISOString();
         } catch (err) {
           cloudSync.state = "error";
           cloudSync.message = "同步失敗，點這裡重試";
@@ -1488,22 +1495,29 @@
               const isNewerThanApplied = (serverMs > (localMeta.lastAppliedServerMs || 0)) || (clientMs > (localMeta.lastAppliedClientMs || 0));
               const isFromOther = writer && writer !== deviceId;
 
-              // 若本機有「更晚」的改動，就不自動覆蓋，等它自己推上去
-              const localIsNewer = localUpdatedAtMs && localUpdatedAtMs > clientMs;
+              // ✅ 只有在「真的有未同步變更」時，才阻擋雲端覆蓋
+const pendingSync = !!localMeta.pendingSync;
+const localIsNewer = pendingSync && localUpdatedAtMs > clientMs;
 
               if (isNewerThanApplied && isFromOther && !localIsNewer) {
                 isHydratingFromCloud = true;
                 applyCloudToLocal(remote);
                 isHydratingFromCloud = false;
 
-                const newMeta = getLocalMeta();
-                newMeta.lastAppliedServerMs = serverMs;
-                newMeta.lastAppliedClientMs = clientMs;
-                setLocalMeta(newMeta);
+               const newMeta = getLocalMeta();
+newMeta.lastAppliedServerMs = serverMs;
+newMeta.lastAppliedClientMs = clientMs;
 
-                cloudSync.state = "synced";
-                cloudSync.message = "已從雲端同步";
-                cloudSync.lastSyncedAt = new Date().toISOString();
+// ✅ 套用雲端後，本機也視為「同一份版本」，避免下次誤判
+newMeta.localUpdatedAtMs = clientMs;
+newMeta.pendingSync = false;
+
+setLocalMeta(newMeta);
+
+cloudSync.state = "synced";
+cloudSync.message = "已從雲端同步";
+cloudSync.lastSyncedAt = new Date().toISOString();
+
               } else {
                 // 只更新已看到的 server time，避免一直重覆判斷
                 const newMeta = getLocalMeta();
@@ -1744,4 +1758,3 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
-
