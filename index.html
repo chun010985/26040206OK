@@ -1673,7 +1673,12 @@ setTimeout(async () => {
   cloudSync.state = "synced";
   cloudSync.message = "雲端連線完成";
   cloudSync.lastSyncedAt = new Date().toISOString();
-}, 0);
+} catch (err) {
+  cloudSync.state = "error";
+  cloudSync.message = "雲端連線失敗，點這裡重試";
+  cloudSync.error = err?.message || String(err);
+}
+};
 
 // init
 onMounted(async () => {
