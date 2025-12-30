@@ -32,6 +32,16 @@
                     boxShadow: {
                         'soft': '0 4px 20px -2px rgba(255, 183, 197, 0.4)',
                         'card': '0 2px 10px rgba(0,0,0,0.05)',
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
                     }
                 }
             }
@@ -80,12 +90,74 @@
         .fade-enter-from, .fade-leave-to {
             opacity: 0;
         }
+
+        /* [新增] 開場動畫相關 CSS */
+        .splash-leave-active {
+            transition: opacity 0.8s ease;
+        }
+        .splash-leave-to {
+            opacity: 0;
+        }
+        
+        .sakura-petal {
+            position: absolute;
+            background-color: #ffb7c5;
+            border-radius: 100% 0 100% 0;
+            opacity: 0.8;
+            /* 修正動畫屬性，移除這裡的 duration，改由 inline style 控制 */
+            animation-name: fall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes fall {
+            0% { top: -10%; transform: translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 110%; transform: translateX(100px) rotate(360deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
 
 <div id="app" class="app-container">
     
+    <!-- [新增] 開場動畫 (Splash Screen) -->
+    <transition name="splash">
+        <div v-if="showSplash" class="fixed inset-0 z-[100] bg-[#fff0f5] flex flex-col items-center justify-center overflow-hidden">
+            <!-- 裝飾背景圓圈 -->
+            <div class="absolute w-96 h-96 bg-white/40 rounded-full blur-3xl animate-pulse"></div>
+            
+            <!-- 飄落櫻花 (CSS 動畫) - 已修正動畫時間設定方式 -->
+            <div class="absolute inset-0 pointer-events-none">
+                <span class="sakura-petal w-3 h-3 left-[10%]" style="animation-duration: 4s; animation-delay: 0s;"></span>
+                <span class="sakura-petal w-4 h-4 left-[30%]" style="animation-duration: 6s; animation-delay: 1s;"></span>
+                <span class="sakura-petal w-2 h-2 left-[70%]" style="animation-duration: 5s; animation-delay: 2s;"></span>
+                <span class="sakura-petal w-3 h-3 left-[50%]" style="animation-duration: 7s; animation-delay: 0.5s;"></span>
+                <span class="sakura-petal w-4 h-4 left-[85%]" style="animation-duration: 4.5s; animation-delay: 1.5s;"></span>
+                <span class="sakura-petal w-2 h-2 left-[20%]" style="animation-duration: 5.5s; animation-delay: 3s;"></span>
+                <span class="sakura-petal w-3 h-3 left-[60%]" style="animation-duration: 6.5s; animation-delay: 2.5s;"></span>
+                <span class="sakura-petal w-2 h-2 left-[90%]" style="animation-duration: 5s; animation-delay: 0.2s;"></span>
+            </div>
+
+            <!-- Logo 與標題 -->
+            <div class="relative z-10 text-center animate-float">
+                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-soft border-4 border-white">
+                    <i class="fa-solid fa-plane-departure text-4xl text-sakura-dark"></i>
+                </div>
+                <h1 class="text-4xl font-black text-sakura-text tracking-[0.3em] mb-3 ml-2">京阪之旅</h1>
+                <div class="inline-block px-4 py-1 bg-white/60 rounded-full backdrop-blur-sm">
+                    <p class="text-sm font-bold text-sakura-dark tracking-widest">READY FOR TRIP</p>
+                </div>
+            </div>
+
+            <!-- 底部載入文字 -->
+            <div class="absolute bottom-12 text-sakura-text/50 text-xs font-bold animate-pulse">
+                正在打包美好回憶...
+            </div>
+        </div>
+    </transition>
+
     <!-- 1. 頁首 Banner -->
     <header class="relative h-[250px] w-full overflow-hidden bg-gray-200 group">
         <!-- 圖片來源綁定 bannerImage 變數 -->
@@ -97,10 +169,7 @@
             @error="handleImageError" 
         >
         
-        <!-- [已移除] 漸層遮罩 -->
-        <!-- <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none"></div> -->
-        
-        <!-- 倒數計時小標籤 (改為白底、深色字、無陰影風格) -->
+        <!-- [修正] 補回倒數計時小標籤 -->
         <div class="absolute top-4 right-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full text-sakura-text text-xs border border-white/50 shadow-sm flex items-center gap-2 z-20">
             <i class="fa-regular fa-clock"></i>
             <span v-if="daysUntilTrip > 0">距離出發還有 <b>{{ daysUntilTrip }}</b> 天</span>
@@ -258,7 +327,7 @@
             <!-- 行程溫馨提醒 -->
             <div class="bg-yellow-50 text-yellow-700 text-xs px-4 py-2 rounded-xl mb-4 flex items-center border border-yellow-100 mx-2 shadow-sm">
                 <i class="fa-solid fa-circle-exclamation mr-2 text-yellow-500"></i>
-                溫馨提醒：交通時間皆為預估僅供參考，實際依現場為主(可調整)。
+                溫馨提醒：交通時間皆為預估，請保留彈性時間。
             </div>
 
             <!-- 行程列表 -->
@@ -482,9 +551,9 @@
                 <ul class="text-xs text-gray-600 space-y-2 list-disc pl-4">
                     <li><b>注意事項</b>：
                         <ol class="list-decimal pl-4 mt-1 space-y-1 text-gray-500">
-                            <li>行程含5日吃到飽SIM卡，不用再另外購買。</li>
-                            <li>自由行每日約為20,000步以上，會比較辛苦回飯店休息後別忘了讓腳好好休息唷!!!</li>
-                            <li>個人藥品請務必記得攜帶，容易暈機也要記得提前吃暈機藥~。</li>
+                            <li>行程含SIM卡，不用再另外購買。</li>
+                            <li>自由行每日約為20000步以上，大家一起加油~回飯店休息後別忘了讓腳好好休息唷！</li>
+                            <li>個人藥品請務必記得攜帶。</li>
                         </ol>
                     </li>
                     <li><b>護照與簽證</b>：請確認護照有效期超過 6 個月，並事先填寫 Visit Japan Web。</li>
@@ -492,23 +561,65 @@
                     <li><b>禮儀</b>：電車內請保持安靜，手機調成靜音。走路請靠左側通行（大阪部分手扶梯靠右，依循前人即可）。</li>
                     <li><b>小費</b>：日本無小費文化，服務費通常已包含在帳單內。</li>
                     <li><b>垃圾</b>：街上垃圾桶很少，請隨身攜帶塑膠袋裝垃圾，回飯店再丟。</li>
-                    <li><b>支付方式</b>：現金/信用卡(Touch)/Pay pay，信用卡會有國外刷卡手續費約1.5%</li>
+                    <li><b>支付方式</b>：現金/信用卡(TOUCK)/Pay pay</li>
                 </ul>
             </div>
 
-            <!-- [新增] 重置行程資料按鈕 -->
-            <div class="mt-6 text-center">
-                <button @click="resetToDefaultItinerary" class="bg-gray-100 text-gray-500 text-xs px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> 重置並載入預設行程 (如果行程不見請按此)
-                </button>
+            <!-- [新增] 行李檢查清單 (分人 + 新增功能 + 間距縮短) -->
+            <div class="bg-white rounded-2xl p-5 shadow-card">
+                <h3 class="font-bold text-sakura-text mb-3 border-b pb-2 flex justify-between items-center">
+                    <span><i class="fa-solid fa-suitcase-rolling mr-2 text-sakura"></i>行李檢查清單</span>
+                </h3>
+                
+                <!-- 行李清單：人員切換 (已加入 justify-center 置中) -->
+                <div class="flex gap-2 overflow-x-auto no-scrollbar mb-3 pb-1 justify-center">
+                    <button 
+                        v-for="person in packingPeople" 
+                        :key="person"
+                        @click="currentPackingFilter = person"
+                        :class="[
+                            'px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border',
+                            (currentPackingFilter === person) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200'
+                        ]"
+                    >
+                        {{ person }}
+                    </button>
+                </div>
+
+                <!-- 行李清單：內容 (間距縮小：space-y-0.5, py-0) -->
+                <div class="space-y-0.5 mb-4">
+                    <div v-if="!packingData[currentPackingFilter] || packingData[currentPackingFilter].length === 0" class="text-center text-gray-400 py-4 text-xs">
+                        <i class="fa-solid fa-clipboard-check mb-1"></i><br>目前沒有項目
+                    </div>
+                    <div v-for="(item, index) in packingData[currentPackingFilter]" :key="item.id" class="flex items-center gap-3 py-0.5 px-2 rounded-lg transition-colors hover:bg-gray-50 group border border-transparent hover:border-gray-100">
+                        <label class="flex items-center gap-3 flex-1 cursor-pointer">
+                            <div class="relative flex items-center justify-center">
+                                <input type="checkbox" v-model="item.checked" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-md checked:bg-sakura checked:border-sakura transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs absolute opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
+                            </div>
+                            <span :class="{'line-through text-gray-400': item.checked, 'text-gray-600': !item.checked}" class="text-sm font-medium transition-colors select-none">
+                                {{ item.text }}
+                            </span>
+                        </label>
+                        <button @click="removePackingItem(index)" class="text-gray-300 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 行李清單：新增 -->
+                <div class="flex gap-2">
+                    <input type="text" v-model="newPackingItem" placeholder="新增檢查項目..." class="flex-1 bg-gray-50 rounded-lg px-3 py-2 text-sm outline-none border focus:border-sakura" @keyup.enter="addPackingItem">
+                    <button @click="addPackingItem" class="bg-sakura text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i></button>
+                </div>
             </div>
         </div>
 
         <!-- === TAB 3: 購物清單 (新增成員過濾) === -->
         <div v-if="currentTab === 'shopping'">
             
-            <!-- 成員過濾器 -->
-<div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1">
+            <!-- 成員過濾器 (已加入 justify-center 置中) -->
+<div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1 justify-center">
   <button
     v-for="traveler in shoppingTravelers"
     :key="traveler"
@@ -555,8 +666,8 @@
         <!-- === TAB 4: 花費 (新增成員過濾) === -->
         <div v-if="currentTab === 'expense'">
             
-            <!-- 成員過濾器 -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1">
+            <!-- 成員過濾器 (已加入 justify-center 置中) -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1 justify-center">
                 <button 
                     v-for="traveler in travelers" 
                     :key="traveler"
@@ -597,6 +708,42 @@
                 <div v-if="filteredExpenses.length === 0" class="text-center py-8 text-gray-400 text-sm">此分類下無紀錄</div>
             </div>
             <button @click="openModal('expense')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
+        </div>
+
+        <!-- === [新增] TAB 5: 個人筆記本 === -->
+        <div v-if="currentTab === 'notebook'">
+            <!-- 成員過濾器 (已加入 justify-center 置中) -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1 justify-center">
+                <button 
+                    v-for="traveler in travelers" 
+                    :key="traveler"
+                    @click="currentNotebookFilter = traveler"
+                    :class="[
+                        'px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors border',
+                        (currentNotebookFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200'
+                    ]"
+                >
+                    {{ traveler }}
+                </button>
+            </div>
+
+            <!-- 筆記列表 -->
+            <div class="grid gap-3 pb-24">
+                <div v-if="filteredNotebookList.length === 0" class="text-center py-10 text-gray-400">
+                    <i class="fa-solid fa-book-open text-4xl mb-3 opacity-50"></i>
+                    <p>這裡空空的，記點什麼吧！</p>
+                </div>
+                <div v-for="note in filteredNotebookList" :key="note.id" class="bg-white p-4 rounded-2xl shadow-card relative group border-l-4 border-sakura-light">
+                    <h4 class="font-bold text-gray-800 mb-1">{{ note.title }}</h4>
+                    <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{{ note.content }}</p>
+                    <div class="mt-3 flex justify-between items-end border-t border-gray-50 pt-2">
+                        <span class="text-[10px] text-gray-400">{{ new Date(note.id).toLocaleDateString() }}</span>
+                        <button @click="deleteNote(note.id)" class="text-xs text-red-300 hover:text-red-500"><i class="fa-solid fa-trash-can mr-1"></i>刪除</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button @click="openModal('notebook')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
         </div>
 
     </main>
@@ -651,6 +798,13 @@
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">付款方式</label><div class="flex gap-2"><label class="flex-1 bg-gray-50 p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer has-[:checked]:bg-sakura-light has-[:checked]:text-sakura-dark"><input type="radio" v-model="formData.method" value="現金" class="hidden"><i class="fa-solid fa-coins"></i> 現金</label><label class="flex-1 bg-gray-50 p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer has-[:checked]:bg-sakura-light has-[:checked]:text-sakura-dark"><input type="radio" v-model="formData.method" value="信用卡" class="hidden"><i class="fa-solid fa-credit-card"></i> 信用卡</label></div></div>
             </div>
 
+            <!-- [新增] 筆記本 Modal -->
+            <div v-if="modal.type === 'notebook'" class="space-y-4">
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">筆記擁有者</label><select v-model="formData.owner" class="w-full bg-blue-50 text-blue-800 font-bold rounded-xl p-3 border-blue-200"><option v-for="t in travelers" :value="t">{{ t }}</option></select></div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">標題</label><input type="text" v-model="formData.title" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none" placeholder="例如：想買的東西、注意事項..."></div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">內容</label><textarea v-model="formData.content" class="w-full bg-gray-50 rounded-xl p-3 border outline-none h-40" placeholder="寫點什麼..."></textarea></div>
+            </div>
+
             <button @click="submitForm" class="w-full bg-sakura text-white font-bold py-4 rounded-xl mt-6 shadow-soft hover:bg-sakura-dark transition-colors">{{ modal.isEdit ? '儲存變更' : '新增' }}</button>
         </div>
     </div>
@@ -661,12 +815,23 @@
 
     createApp({
         setup() {
+            // [新增] 狀態變數：控制 Splash 顯示
+            const showSplash = ref(true);
+
+            // [新增] 在 onMounted 設定 5 秒後隱藏動畫
+            onMounted(() => {
+                setTimeout(() => {
+                    showSplash.value = false;
+                }, 5000); // 改為 5 秒後淡出
+            });
+
             const currentTab = ref('itinerary');
             const tabs = [
                 { id: 'itinerary', name: '行程表', icon: 'fa-solid fa-map-location-dot' },
                 { id: 'info', name: '資訊', icon: 'fa-solid fa-circle-info' },
                 { id: 'shopping', name: '購物清單', icon: 'fa-solid fa-basket-shopping' },
                 { id: 'expense', name: '花費', icon: 'fa-solid fa-yen-sign' },
+                { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' }, // [新增]
             ];
 
 const defaultBanner = 'https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png';
@@ -689,12 +854,12 @@ const handleImageError = () => {
                 return diffDays;
             });
 
-            // === 核心修改：旅伴成員設定 ===
-            const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '萍(媽媽)']);
-const shoppingTravelers = computed(() => travelers.value.filter(t => t !== '公費'));
+            // === 核心修改：旅伴成員設定 (移除範例成員A、B) ===
+            const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '媽媽']);
+const shoppingTravelers = computed(() => ['全部', ...travelers.value.filter(t => t !== '公費')]);
 const shoppingOwners = computed(() => travelers.value.filter(t => t !== '公費'));
 
-const currentShoppingFilter = ref(travelers.value.find(t => t !== '公費'));
+const currentShoppingFilter = ref('全部');
 const currentMemberFilter = ref(null);
 
             // === 核心修改：日期資料 (包含多個地點設定) ===
@@ -1120,7 +1285,7 @@ const currentMemberFilter = ref(null);
                     id: 305,
                     date: '2026-04-04',
                     category: 'attraction',
-                    name: '八阪神社、祇園 & 花見小路',
+                    name: '祇園 & 花見小路',
                     time: '13:00',
                     travelTime: 15,
                     transportType: 'walk',
@@ -1360,6 +1525,64 @@ const currentMemberFilter = ref(null);
   return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
 });
 
+            // === [新增] 行李清單邏輯 (分人 + 新增功能) ===
+            const defaultPackingItems = [
+                '護照 (有效期6個月以上)',
+                'Visit Japan Web QRcode 截圖',
+                '網卡 / eSIM 設定',
+                '日幣現金 / 信用卡',
+                '行動電源 (需隨身攜帶)',
+                '個人常備藥 / 暈機藥',
+                '牙刷牙膏 (日本部分飯店不主動提供)'
+            ];
+
+            // 獨立的行李清單人員名單
+            const packingPeople = ref(['士翔', '侑君', '士倫', '欣怡', '珮茹', '媽媽']);
+            const currentPackingFilter = ref(packingPeople.value[0]);
+            
+            // 嘗試讀取舊資料 (sakura_packing) 或新資料 (sakura_packing_v2_obj)
+            const rawPacking = JSON.parse(localStorage.getItem('sakura_packing_v2_obj'));
+            const packingData = ref(rawPacking || {});
+
+            // 初始化：確保每個人都有清單
+            // 注意：這裡改用 packingPeople 來初始化資料
+            packingPeople.value.forEach(person => {
+                if (!packingData.value[person]) {
+                    packingData.value[person] = defaultPackingItems.map((text, i) => ({
+                        id: Date.now() + i + Math.random(),
+                        text,
+                        checked: false
+                    }));
+                }
+            });
+
+            // 監聽變動並儲存
+            watch(packingData, (newVal) => {
+                localStorage.setItem('sakura_packing_v2_obj', JSON.stringify(newVal));
+            }, { deep: true });
+
+            const newPackingItem = ref('');
+            const addPackingItem = () => {
+                if (!newPackingItem.value.trim()) return;
+                const person = currentPackingFilter.value;
+                if (!packingData.value[person]) packingData.value[person] = [];
+                
+                packingData.value[person].push({
+                    id: Date.now(),
+                    text: newPackingItem.value,
+                    checked: false
+                });
+                newPackingItem.value = '';
+            };
+
+            const removePackingItem = (index) => {
+                if(confirm('確定移除此項目？')) {
+                    const person = currentPackingFilter.value;
+                    packingData.value[person].splice(index, 1);
+                }
+            };
+
+
             // === 花費邏輯更新 (成員過濾) ===
             const expenses = ref(JSON.parse(localStorage.getItem('sakura_expenses')) || []);
             const filteredExpenses = computed(() => {
@@ -1368,6 +1591,22 @@ const currentMemberFilter = ref(null);
             });
             const filteredTotalExpense = computed(() => filteredExpenses.value.reduce((sum, item) => sum + Number(item.amount), 0));
             const totalExpense = computed(() => expenses.value.reduce((sum, item) => sum + Number(item.amount), 0)); // 保留一個總計做參考
+
+            // === [新增] 筆記本邏輯 ===
+            const notebookList = ref(JSON.parse(localStorage.getItem('sakura_notebook')) || []);
+            const currentNotebookFilter = ref(travelers.value[0]); // 預設顯示第一個人(包含公費)
+
+            const filteredNotebookList = computed(() => {
+                return notebookList.value.filter(note => note.owner === currentNotebookFilter.value)
+                    .sort((a, b) => b.id - a.id); // 新的在上面
+            });
+
+            const deleteNote = (id) => {
+                if(confirm('確定刪除這則筆記？')) {
+                    notebookList.value = notebookList.value.filter(n => n.id !== id);
+                    saveToLocal('sakura_notebook', notebookList.value);
+                }
+            };
 
             const exchange = reactive({ jpy: '', twd: '' });
             const calcTwd = () => { exchange.twd = exchange.jpy ? Math.round(exchange.jpy * 0.218) : ''; }
@@ -1433,14 +1672,44 @@ const currentMemberFilter = ref(null);
       method: '現金',
       amount: '',
       name: '',
-      owner: currentMemberFilter.value || travelers.value[1] // 預設「翔/君」(跳過公費)
+      owner: currentMemberFilter.value || travelers.value[1] // 預設「翔」(跳過公費)
+    });
+    return;
+  }
+
+  if (type === 'notebook') {
+    modal.title = '新增筆記';
+    Object.assign(formData, {
+      title: '',
+      content: '',
+      owner: currentNotebookFilter.value || travelers.value[0]
     });
     return;
   }
 };
 
             const closeModal = () => modal.show = false;
-            const submitForm = () => { if (modal.type === 'itinerary') { if (modal.isEdit) { const index = itineraryList.value.findIndex(i => i.id === formData.id); if (index !== -1) itineraryList.value[index] = { ...formData }; } else { itineraryList.value.push({ ...formData, id: Date.now() }); } saveToLocal('sakura_itinerary', itineraryList.value); } else if (modal.type === 'shopping') { shoppingList.value.push({ ...formData }); saveToLocal('sakura_shopping', shoppingList.value); } else if (modal.type === 'expense') { expenses.value.push({ ...formData }); saveToLocal('sakura_expenses', expenses.value); } closeModal(); };
+            const submitForm = () => { 
+                if (modal.type === 'itinerary') { 
+                    if (modal.isEdit) { 
+                        const index = itineraryList.value.findIndex(i => i.id === formData.id); 
+                        if (index !== -1) itineraryList.value[index] = { ...formData }; 
+                    } else { 
+                        itineraryList.value.push({ ...formData, id: Date.now() }); 
+                    } 
+                    saveToLocal('sakura_itinerary', itineraryList.value); 
+                } else if (modal.type === 'shopping') { 
+                    shoppingList.value.push({ ...formData }); 
+                    saveToLocal('sakura_shopping', shoppingList.value); 
+                } else if (modal.type === 'expense') { 
+                    expenses.value.push({ ...formData }); 
+                    saveToLocal('sakura_expenses', expenses.value); 
+                } else if (modal.type === 'notebook') {
+                    notebookList.value.push({ ...formData, id: Date.now() });
+                    saveToLocal('sakura_notebook', notebookList.value);
+                }
+                closeModal(); 
+            };
             const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary', itineraryList.value); closeModal(); } };
             const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary', itineraryList.value); } };
             const deleteShoppingItem = (index) => { if(confirm('刪除此商品？')) { shoppingList.value.splice(index, 1); saveToLocal('sakura_shopping', shoppingList.value); } }
@@ -1474,6 +1743,7 @@ const buildPayload = () => ({
   itinerary: itineraryList.value,
   shopping: shoppingList.value,
   expenses: expenses.value,
+  notebook: notebookList.value, // [新增]
   updatedAt: new Date().toISOString()
 });
 
@@ -1484,11 +1754,13 @@ const applyCloudToLocal = (cloud) => {
   if (Array.isArray(cloud.itinerary)) itineraryList.value = cloud.itinerary;
   if (Array.isArray(cloud.shopping))  shoppingList.value  = cloud.shopping;
   if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
+  if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook; // [新增]
 
   // 同步到 localStorage（讓下次開啟速度快）
   saveToLocal('sakura_itinerary', itineraryList.value);
   saveToLocal('sakura_shopping', shoppingList.value);
   saveToLocal('sakura_expenses', expenses.value);
+  saveToLocal('sakura_notebook', notebookList.value); // [新增]
   
   lastCloudUpdatedAt = cloud.updatedAt || null;
 };
@@ -1560,6 +1832,9 @@ const scheduleSync = () => {
 watch(itineraryList, scheduleSync, { deep: true });
 watch(shoppingList, scheduleSync, { deep: true });
 watch(expenses, scheduleSync, { deep: true });
+watch(notebookList, scheduleSync, { deep: true }); // [新增]
+// 加入 packingData 到雲端同步監聽 (雖然雲端結構可能還沒支援，但本地儲存已完成)
+watch(packingData, scheduleSync, { deep: true });
 
             const getCategoryLabel = (cat) => ({ attraction: '景點', food: '美食', shopping: '購物', accommodation: '住宿', flight: '航班', transport: '交通', other: '其他' }[cat] || '其他');
             const getCategoryColor = (cat) => ({ attraction: 'bg-red-100 text-red-500', food: 'bg-orange-100 text-orange-500', shopping: 'bg-pink-100 text-pink-500', accommodation: 'bg-purple-100 text-purple-500', transport: 'bg-green-100 text-green-600' }[cat] || 'bg-gray-100 text-gray-500');
@@ -1570,6 +1845,9 @@ watch(expenses, scheduleSync, { deep: true });
   currentTab, tabs, days, selectedDate, filteredItinerary, modal, formData, openModal, closeModal, submitForm,
   shoppingList, filteredShoppingList,
   expenses, filteredExpenses, totalExpense, filteredTotalExpense,
+  packingData, currentPackingFilter, newPackingItem, addPackingItem, removePackingItem, // 匯出 packing 相關
+  packingPeople, // 匯出獨立的行李清單人員名單
+  notebookList, filteredNotebookList, currentNotebookFilter, deleteNote, // 匯出 notebook 相關
   exchange, calcTwd, today,
   getCategoryLabel, getCategoryColor, getTransportIcon, getExpenseIcon,
   editItinerary: (item) => openModal('itinerary', item),
@@ -1584,7 +1862,8 @@ watch(expenses, scheduleSync, { deep: true });
   handleImageError,daysUntilTrip,
   cloudSync,
   manualCloudSync,
-  resetToDefaultItinerary
+  resetToDefaultItinerary,
+  showSplash
 };
 }
 
@@ -1642,5 +1921,6 @@ console.log("🔥 firebase module script loaded");
 </script>
 </body>
 </html>
+
 
 
