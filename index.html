@@ -984,7 +984,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v15-2025-12-31-0109";
+const APP_VERSION = "v15-2025-01-01-0120";
   const { createApp, ref, computed, reactive, onMounted, watch } = Vue;
 
   createApp({
@@ -1332,13 +1332,45 @@ const appVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'version
       const deleteShoppingItem = (id) => { if (confirm('刪除此商品？')) { shoppingList.value = shoppingList.value.filter(i => i.id !== id); saveToLocal('sakura_shopping', shoppingList.value); } };
       const deleteExpense = (id) => { if (confirm('刪除此紀錄？')) { expenses.value = expenses.value.filter(i => i.id !== id); saveToLocal('sakura_expenses', expenses.value); } };
 
-      const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => { formData.image = ev.target.result; };
-        reader.readAsDataURL(file);
-      };
+const fileToDataURL = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = reject;
+  reader.readAsDataURL(file);
+});
+
+const compressDataURL = (dataUrl, maxW = 1280, maxH = 1280, quality = 0.7) =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      const ratio = Math.min(maxW / w, maxH / h, 1);
+      w = Math.round(w * ratio);
+      h = Math.round(h * ratio);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+
+      // 轉成 jpg（體積會小很多）
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.src = dataUrl;
+  });     
+
+const handleImageUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // 讀檔 → 壓縮 → 存入表單
+  const dataUrl = await fileToDataURL(file);
+  const compressed = await compressDataURL(dataUrl, 1280, 1280, 0.6);
+  formData.image = compressed;
+
+  // 清掉 input，避免選同一張不觸發 change
+  e.target.value = "";
+};
 
       const openMap = (keyword) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`, '_blank'); };
 
@@ -1807,4 +1839,5 @@ window.__CLOUD_READY__ = new Promise((resolve) => {
   console.log("✅ Firebase ready. TRIP_ID =", TRIP_ID);
 </script>
 </body>
+</html>
 </html>
