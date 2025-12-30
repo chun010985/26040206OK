@@ -1333,6 +1333,7 @@ if (!window.__APP_ALREADY_STARTED__) {
             });
 
 const pullFromCloudOnce = async () => {
+  isHydratingFromCloud = true;   // 🔒 開鎖
   cloudSync.state = "syncing";
   cloudSync.message = "從雲端讀取中…";
   try {
@@ -1345,6 +1346,10 @@ const pullFromCloudOnce = async () => {
   } catch (e) {
     cloudSync.state = "error";
     cloudSync.message = "雲端讀取失敗，點我重試";
+  } finally {
+    setTimeout(() => {
+      isHydratingFromCloud = false; // 🔓 解鎖
+    }, 300);
   }
 };
 
@@ -1632,11 +1637,10 @@ const manualCloudSync = async () => {
             });
 
            const applyCloudToLocal = (cloud) => {
-  if (!cloud || !Array.isArray(cloud.itinerary) || cloud.itinerary.length === 0) {
-    itineraryList.value = JSON.parse(JSON.stringify(fullItineraryData));
-    saveToLocal('sakura_itinerary_v14', itineraryList.value);
-    return;
-  }
+if (!cloud || !Array.isArray(cloud.itinerary) || cloud.itinerary.length === 0) {
+  // ❗ 不覆蓋本機（避免被洗掉）
+  return;
+}
 
   const newItinerary = [...cloud.itinerary];
 
@@ -1664,11 +1668,12 @@ onMounted(async () => {
 });
 
             let syncTimer = null;
-            const scheduleSync = () => {
-                if (isHydratingFromCloud) return;
-                clearTimeout(syncTimer);
-                syncTimer = setTimeout(() => manualCloudSync(), 2000); // 改為 2 秒防抖
-            };
+
+           const scheduleSync = () => {
+  if (isHydratingFromCloud) return; // ❌ 初始化期間不准同步
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => manualCloudSync(), 2000);
+};
 
             watch(itineraryList, scheduleSync, { deep: true });
             watch(shoppingList, scheduleSync, { deep: true });
