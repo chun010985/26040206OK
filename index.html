@@ -1417,6 +1417,7 @@ const handleImageUpload = async (e) => {
 
       // ===== Cloud Sync (多設備同步 + 即時更新) =====
       const cloudSync = reactive({ state: "idle", message: "尚未同步", lastSyncedAt: null, error: null });
+const isLocked = computed(() => cloudSync.state === "syncing" || isHydratingFromCloud);
 
       const cloudSyncDotClass = computed(() => {
         switch (cloudSync.state) {
@@ -1537,9 +1538,12 @@ cloudSync.lastSyncedAt = new Date().toISOString();
         }
       };
 
-     const scheduleSync = () => {
+    const scheduleSync = () => {
+  if (cloudSync.state === "syncing") return; // ✅ 關鍵新增
+
   if (isHydratingFromCloud) return;
-  if (isBooting) return;          // ✅ 新增：初始化時不要把本機標成「最新」
+  if (isBooting) return;
+
   markLocalDirty();
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => manualCloudSync(), 1200);
