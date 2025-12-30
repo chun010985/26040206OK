@@ -1174,7 +1174,7 @@
       // 直接把你原本 fullItineraryData 內容掛回 window，避免太長重複（下面會再 set 一次）
       // （真正資料在最後一段：window.__FULL_ITINERARY_DATA__ = [...]）
 
-      const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v15')) || []);
+      const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v14')) || []);
       const filteredItinerary = computed(() => itineraryList.value.filter(item => item.date === selectedDate.value).sort((a,b)=>a.time.localeCompare(b.time)));
 
       const saveToLocal = (key, data) => localStorage.setItem(key, JSON.stringify(data));
@@ -1182,7 +1182,7 @@
       const resetToDefaultItinerary = () => {
         if (confirm('確定要重置行程表嗎？這將會覆蓋您目前的變更，並載入預設的 4/2~4/6 完整行程。')) {
           itineraryList.value = JSON.parse(JSON.stringify(window.__FULL_ITINERARY_DATA__));
-          saveToLocal('sakura_itinerary_v15', itineraryList.value);
+          saveToLocal('sakura_itinerary_v14', itineraryList.value);
           alert('行程已重置為預設狀態！');
         }
       };
@@ -1292,7 +1292,7 @@
           saveToLocal(storageKey, listRef.value);
         };
 
-        if (modal.type === 'itinerary') updateList(itineraryList, 'sakura_itinerary_v15');
+        if (modal.type === 'itinerary') updateList(itineraryList, 'sakura_itinerary_v14');
         else if (modal.type === 'shopping') updateList(shoppingList, 'sakura_shopping');
         else if (modal.type === 'expense') updateList(expenses, 'sakura_expenses');
         else if (modal.type === 'notebook') updateList(notebookList, 'sakura_notebook');
@@ -1303,7 +1303,7 @@
       const confirmDeleteItinerary = () => {
         if (confirm('確定要刪除這個行程嗎？')) {
           itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id);
-          saveToLocal('sakura_itinerary_v15', itineraryList.value);
+          saveToLocal('sakura_itinerary_v14', itineraryList.value);
           closeModal();
         }
       };
@@ -1396,7 +1396,7 @@
         if (Array.isArray(cloud.notebook)) notebookList.value = cloud.notebook;
         if (cloud.packing && typeof cloud.packing === 'object') packingData.value = cloud.packing;
 
-        saveToLocal('sakura_itinerary_v15', itineraryList.value);
+        saveToLocal('sakura_itinerary_v14', itineraryList.value);
         saveToLocal('sakura_shopping', shoppingList.value);
         saveToLocal('sakura_expenses', expenses.value);
         saveToLocal('sakura_notebook', notebookList.value);
@@ -1552,11 +1552,11 @@
         setTimeout(() => { showSplash.value = false; }, 3000);
 
         // 把預設行程灌進去（若本機沒有）
-        if (!localStorage.getItem('sakura_itinerary_v15')) {
+        if (!localStorage.getItem('sakura_itinerary_v14')) {
           itineraryList.value = JSON.parse(JSON.stringify(window.__FULL_ITINERARY_DATA__));
-          saveToLocal('sakura_itinerary_v15', itineraryList.value);
+          saveToLocal('sakura_itinerary_v14', itineraryList.value);
         } else if (itineraryList.value.length === 0) {
-          itineraryList.value = JSON.parse(localStorage.getItem('sakura_itinerary_v15') || '[]');
+          itineraryList.value = JSON.parse(localStorage.getItem('sakura_itinerary_v14') || '[]');
         }
 
         // ensure ids
