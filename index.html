@@ -1332,6 +1332,38 @@ if (!window.__APP_ALREADY_STARTED__) {
                 return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
             });
 
+const pullFromCloudOnce = async () => {
+  cloudSync.state = "syncing";
+  cloudSync.message = "從雲端讀取中…";
+  try {
+    await waitForCloudFns();
+    const cloud = await window.__CLOUD_GET_STATE__();
+    applyCloudToLocal(cloud);
+    cloudSync.state = "synced";
+    cloudSync.lastSyncedAt = Date.now();
+    cloudSync.message = "已載入";
+  } catch (e) {
+    cloudSync.state = "error";
+    cloudSync.message = "雲端讀取失敗，點我重試";
+  }
+};
+
+const manualCloudSync = async () => {
+  if (cloudSync.state === "syncing") return;
+  cloudSync.state = "syncing";
+  cloudSync.message = "同步中…";
+  try {
+    await waitForCloudFns();
+    await window.__CLOUD_SET_STATE__(buildPayload());
+    cloudSync.state = "synced";
+    cloudSync.lastSyncedAt = Date.now();
+    cloudSync.message = "同步完成";
+  } catch (e) {
+    cloudSync.state = "error";
+    cloudSync.message = "同步失敗，點我重試";
+  }
+};
+
             // === 行李清單 ===
             const defaultPackingItems = [
                 '護照 (有效期6個月以上)', 'Visit Japan Web QRcode 截圖', '網卡 / eSIM', '日幣現金 / 信用卡', 
@@ -1600,44 +1632,35 @@ if (!window.__APP_ALREADY_STARTED__) {
             });
 
            const applyCloudToLocal = (cloud) => {
-  // ✅ 雲端沒資料：不要覆蓋本機，直接用預設完整行程
   if (!cloud || !Array.isArray(cloud.itinerary) || cloud.itinerary.length === 0) {
     itineraryList.value = JSON.parse(JSON.stringify(fullItineraryData));
     saveToLocal('sakura_itinerary_v14', itineraryList.value);
     return;
   }
 
-  let newItinerary = Array.isArray(cloud.itinerary) ? [...cloud.itinerary] : [];
+  const newItinerary = [...cloud.itinerary];
 
-  // ✅ 保底：確保 05:00 集合存在
-  const hasAirportMeetup = newItinerary.some(i => i.id === 0);
-  if (!hasAirportMeetup) {
+  if (!newItinerary.some(i => i.id === 0)) {
     const meetupItem = fullItineraryData.find(i => i.id === 0);
     if (meetupItem) newItinerary.push(meetupItem);
   }
 
-  // ✅ 重新排序（以 time 為主）
   newItinerary.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
 
-  // ✅ 套用到本機狀態
   itineraryList.value = newItinerary;
   if (Array.isArray(cloud.shopping))  shoppingList.value  = cloud.shopping;
   if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
   if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
 
-  // ✅ 寫回 localStorage（避免刷新後又回去）
   saveToLocal('sakura_itinerary_v14', itineraryList.value);
   saveToLocal('sakura_shopping', shoppingList.value);
   saveToLocal('sakura_expenses', expenses.value);
   saveToLocal('sakura_notebook', notebookList.value);
-
-  // 記錄雲端時間（如果你想顯示小小時間用）
-  lastCloudUpdatedAt = cloud.updatedAt || null;
 };
 
 
-onMounted(() => {
-  pullFromCloudOnce(); // ✅ 每次開啟都從雲端同步
+onMounted(async () => {
+  await pullFromCloudOnce();
 });
 
             let syncTimer = null;
@@ -1686,6 +1709,8 @@ onMounted(() => {
                 cloudSyncIconClass,
                 cloudSyncTitle,
                 cloudSyncSubTitle,
+pullFromCloudOnce,
+  manualCloudSync,
                 isTigerairInfoExpanded // 匯出狀態變數
             };
         }
