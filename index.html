@@ -1601,12 +1601,12 @@ const startRealtimeCloud = async () => {
     const writer = remote.lastWriter || null;
 
     const localMeta = getLocalMeta();
-    const localUpdatedAtMs = localMeta.localUpdatedAtMs || 0;
+const localUpdatedAtMs = localMeta.localUpdatedAtMs || 0;
 
-    // ✅ 最終同步規則：只要雲端版本比本機「已套用版本」新，就套用
+// ✅ 只用「時間」判斷，不看 pending、不看 writer
 const isNewerThanApplied =
   serverMs > (localMeta.lastAppliedServerMs || 0) ||
-  clientMs > (localMeta.lastAppliedClientMs || 0);
+  clientMs > (localUpdatedAtMs || 0);
 
 if (isNewerThanApplied && isFromOther && !localIsNewer) {
 
