@@ -1603,26 +1603,28 @@ const startRealtimeCloud = async () => {
     const localMeta = getLocalMeta();
     const localUpdatedAtMs = localMeta.localUpdatedAtMs || 0;
 
-    const isNewerThanApplied =
-      serverMs > (localMeta.lastAppliedServerMs || 0) ||
-      clientMs > (localMeta.lastAppliedClientMs || 0);
+    // ✅ 最終同步規則：只要雲端版本比本機「已套用版本」新，就套用
+const isNewerThanApplied =
+  serverMs > (localMeta.lastAppliedServerMs || 0) ||
+  clientMs > (localMeta.lastAppliedClientMs || 0);
 
-    const isFromOther = writer && writer !== deviceId;
-    const pendingSync = !!localMeta.pendingSync;
-    const localIsNewer = pendingSync && localUpdatedAtMs > clientMs;
+if (isNewerThanApplied) {
+  isHydratingFromCloud = true;
+  applyCloudToLocal(remote);
+  isHydratingFromCloud = false;
 
-    if (isNewerThanApplied && isFromOther && !localIsNewer) {
-      isHydratingFromCloud = true;
-      applyCloudToLocal(remote);
-      isHydratingFromCloud = false;
+  const newMeta = getLocalMeta();
+  newMeta.lastAppliedServerMs = serverMs;
+  newMeta.lastAppliedClientMs = clientMs;
+  newMeta.localUpdatedAtMs = clientMs;
+  newMeta.pendingSync = false;
+  setLocalMeta(newMeta);
 
-      const newMeta = getLocalMeta();
-      newMeta.lastAppliedServerMs = serverMs;
-      newMeta.lastAppliedClientMs = clientMs;
-      newMeta.localUpdatedAtMs = clientMs;
-      newMeta.pendingSync = false;
-      setLocalMeta(newMeta);
-    }
+  cloudSync.state = "synced";
+  cloudSync.message = "已從雲端同步";
+  cloudSync.lastSyncedAt = new Date().toISOString();
+  return;
+}
 
     cloudSync.state = "synced";
     cloudSync.message = "即時同步中";
