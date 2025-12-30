@@ -1607,7 +1607,7 @@ if (!window.__APP_ALREADY_STARTED__) {
     return;
   }
 
-  let newItinerary = cloud.itinerary;
+  let newItinerary = Array.isArray(cloud.itinerary) ? [...cloud.itinerary] : [];
 
   // ✅ 保底：確保 05:00 集合存在
   const hasAirportMeetup = newItinerary.some(i => i.id === 0);
@@ -1616,86 +1616,25 @@ if (!window.__APP_ALREADY_STARTED__) {
     if (meetupItem) newItinerary.push(meetupItem);
   }
 
-  // 重新排序
-  newItinerary.sort((a, b) => a.time.localeCompare(b.time));
+  // ✅ 重新排序（以 time 為主）
+  newItinerary.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
 
+  // ✅ 套用到本機狀態
   itineraryList.value = newItinerary;
   if (Array.isArray(cloud.shopping))  shoppingList.value  = cloud.shopping;
   if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
   if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
 
+  // ✅ 寫回 localStorage（避免刷新後又回去）
   saveToLocal('sakura_itinerary_v14', itineraryList.value);
   saveToLocal('sakura_shopping', shoppingList.value);
   saveToLocal('sakura_expenses', expenses.value);
   saveToLocal('sakura_notebook', notebookList.value);
 
+  // 記錄雲端時間（如果你想顯示小小時間用）
   lastCloudUpdatedAt = cloud.updatedAt || null;
 };
-                    return item;
-                });
 
-                // 重新排序
-                newItinerary.sort((a, b) => a.time.localeCompare(b.time));
-
-                itineraryList.value = newItinerary;
-                if (Array.isArray(cloud.shopping))  shoppingList.value  = cloud.shopping;
-                if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
-                if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
-                
-                saveToLocal('sakura_itinerary_v14', itineraryList.value);
-                saveToLocal('sakura_shopping', shoppingList.value);
-                saveToLocal('sakura_expenses', expenses.value);
-                saveToLocal('sakura_notebook', notebookList.value);
-                
-                lastCloudUpdatedAt = cloud.updatedAt || null;
-            };
-
-            const pullFromCloudOnce = async () => {
-                try {
-                    await waitForCloudFns();
-                    cloudSync.state = "syncing";
-                    cloudSync.message = "從雲端載入中…";
-                    cloudSync.error = null;
-
-                    const cloud = await window.__CLOUD_GET_STATE__();
-                    isHydratingFromCloud = true;
-                    applyCloudToLocal(cloud);
-                    isHydratingFromCloud = false;
-
-                    cloudSync.state = "synced";
-                    cloudSync.message = cloud ? "已從雲端載入" : "雲端目前沒有資料";
-                    cloudSync.lastSyncedAt = new Date().toISOString();
-                } catch (err) {
-                    console.error("pullFromCloudOnce failed:", err);
-                    isHydratingFromCloud = false;
-                    cloudSync.state = "error";
-                    cloudSync.message = "雲端載入失敗，點這裡重試";
-                    cloudSync.error = err?.message || String(err);
-                }
-            };
-
-            const pushToCloud = async () => {
-                await waitForCloudFns();
-                await window.__CLOUD_SET_STATE__(buildPayload());
-            };
-
-            const manualCloudSync = async () => {
-                try {
-                    if (isHydratingFromCloud) return;
-                    cloudSync.state = "syncing";
-                    cloudSync.message = "同步中…";
-                    cloudSync.error = null;
-                    await pushToCloud();
-                    cloudSync.state = "synced";
-                    cloudSync.message = "已同步到雲端";
-                    cloudSync.lastSyncedAt = new Date().toISOString();
-                } catch (err) {
-                    console.error(err);
-                    cloudSync.state = "error";
-                    cloudSync.message = "同步失敗，點這裡重試";
-                    cloudSync.error = err?.message || String(err);
-                }
-            };
 
 onMounted(() => {
   pullFromCloudOnce(); // ✅ 每次開啟都從雲端同步
