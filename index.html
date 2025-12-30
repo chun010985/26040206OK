@@ -322,9 +322,13 @@
        right: 8px;
        font-size: 10px;
        color: #999;
-       opacity: 0.7;
-       z-index: 9999;
+       opacity: 0.85;
+       z-index: 999999;
+       background: rgba(255,255,255,0.75);
+       padding: 2px 6px;
+       border-radius: 999px;
      ">
+  版本：{{ appVersion }}
 </div>
 
 
@@ -980,12 +984,13 @@
 </div>
 
 <script>
-  const APP_VERSION = "v15-2025-01-01-0030";
+const APP_VERSION = "v15-2025-01-01-0030";
   const { createApp, ref, computed, reactive, onMounted, watch } = Vue;
 
   createApp({
     setup() {
       const showSplash = ref(true);
+const appVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'version?';
 
       const currentTab = ref('itinerary');
       const tabs = [
@@ -1624,6 +1629,7 @@ if (el) el.innerText = APP_VERSION;
   isBooting = false;
 })();
       return {
+appVersion,
         showSplash,
         currentTab, tabs,
         days, selectedDate,
