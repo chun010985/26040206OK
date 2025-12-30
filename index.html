@@ -964,173 +964,550 @@
 
 <script>
 
-setup() {
+<script>
+if (!window.__APP_ALREADY_STARTED__) {
+  window.__APP_ALREADY_STARTED__ = true;
 
-    /* ========= 基本狀態 ========= */
-    const showSplash = ref(true);
-    const currentTab = ref('itinerary');
+  const { createApp, ref, computed, reactive, onMounted, watch } = Vue;
 
-    const tabs = [
-        { id: 'itinerary', name: '行程表', icon: 'fa-solid fa-map-location-dot' },
-        { id: 'info', name: '資訊', icon: 'fa-solid fa-circle-info' },
-        { id: 'shopping', name: '購物清單', icon: 'fa-solid fa-basket-shopping' },
-        { id: 'expense', name: '花費', icon: 'fa-solid fa-yen-sign' },
-        { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' },
-    ];
+  createApp({
+    setup() {
+      /* ========= 基本狀態 ========= */
+      const showSplash = ref(true);
+      const currentTab = ref("itinerary");
 
-    const defaultBanner = 'https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png';
-    const bannerImage = ref(defaultBanner);
-    const handleImageError = () => { bannerImage.value = defaultBanner; };
+      const tabs = [
+        { id: "itinerary", name: "行程表", icon: "fa-solid fa-map-location-dot" },
+        { id: "info", name: "資訊", icon: "fa-solid fa-circle-info" },
+        { id: "shopping", name: "購物清單", icon: "fa-solid fa-basket-shopping" },
+        { id: "expense", name: "花費", icon: "fa-solid fa-yen-sign" },
+        { id: "notebook", name: "筆記本", icon: "fa-solid fa-book" },
+      ];
 
-    const isTigerairInfoExpanded = ref(false);
+      const defaultBanner =
+        "https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png";
+      const bannerImage = ref(defaultBanner);
+      const handleImageError = () => (bannerImage.value = defaultBanner);
 
-    /* ========= 日期 ========= */
-    const tripStartDate = new Date('2026-04-02T00:00:00');
-    const daysUntilTrip = computed(() => {
-        const today = new Date();
-        const start = new Date(tripStartDate);
-        today.setHours(0,0,0,0);
-        start.setHours(0,0,0,0);
+      const isTigerairInfoExpanded = ref(false);
+
+      /* ========= 倒數 ========= */
+      const tripStartDate = new Date("2026-04-02T00:00:00");
+      const daysUntilTrip = computed(() => {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const start = new Date(
+          tripStartDate.getFullYear(),
+          tripStartDate.getMonth(),
+          tripStartDate.getDate()
+        );
         return Math.ceil((start - today) / 86400000);
-    });
+      });
 
-    const days = [
-        { dateStr: '2026-04-02', displayDate: '4/2', dayOfWeek: '週四', mainCity: '大阪市',
-          locations: [{ name: '大阪市', lat: 34.6937, lng: 135.5023 }] },
-        { dateStr: '2026-04-03', displayDate: '4/3', dayOfWeek: '週五', mainCity: '奈良/京都',
+      /* ========= 日期 ========= */
+      const days = [
+        {
+          dateStr: "2026-04-02",
+          displayDate: "4/2",
+          dayOfWeek: "週四",
+          mainCity: "大阪市",
+          locations: [{ name: "大阪市", lat: 34.6937, lng: 135.5023 }],
+        },
+        {
+          dateStr: "2026-04-03",
+          displayDate: "4/3",
+          dayOfWeek: "週五",
+          mainCity: "奈良/京都",
           locations: [
-            { name: '大阪市', lat: 34.6937, lng: 135.5023 },
-            { name: '奈良市', lat: 34.6851, lng: 135.8048 },
-            { name: '京都市', lat: 35.0116, lng: 135.7681 }
-          ]},
-        { dateStr: '2026-04-04', displayDate: '4/4', dayOfWeek: '週六', mainCity: '京都市',
-          locations: [{ name: '京都市', lat: 35.0116, lng: 135.7681 }] },
-        { dateStr: '2026-04-05', displayDate: '4/5', dayOfWeek: '週日', mainCity: '大阪市',
-          locations: [{ name: '大阪市', lat: 34.6937, lng: 135.5023 }] },
-        { dateStr: '2026-04-06', displayDate: '4/6', dayOfWeek: '週一', mainCity: '關西機場',
-          locations: [{ name: '泉佐野市(機場)', lat: 34.4320, lng: 135.2304 }] },
-    ];
+            { name: "大阪市", lat: 34.6937, lng: 135.5023 },
+            { name: "奈良市", lat: 34.6851, lng: 135.8048 },
+            { name: "京都市", lat: 35.0116, lng: 135.7681 },
+          ],
+        },
+        {
+          dateStr: "2026-04-04",
+          displayDate: "4/4",
+          dayOfWeek: "週六",
+          mainCity: "京都市",
+          locations: [{ name: "京都市", lat: 35.0116, lng: 135.7681 }],
+        },
+        {
+          dateStr: "2026-04-05",
+          displayDate: "4/5",
+          dayOfWeek: "週日",
+          mainCity: "大阪市",
+          locations: [{ name: "大阪市", lat: 34.6937, lng: 135.5023 }],
+        },
+        {
+          dateStr: "2026-04-06",
+          displayDate: "4/6",
+          dayOfWeek: "週一",
+          mainCity: "關西機場",
+          locations: [{ name: "泉佐野市(機場)", lat: 34.432, lng: 135.2304 }],
+        },
+      ];
+      const selectedDate = ref("2026-04-02");
 
-    const selectedDate = ref('2026-04-02');
+      /* ========= 行程（本機優先） ========= */
+      const itineraryList = ref(JSON.parse(localStorage.getItem("sakura_itinerary_v14")) || []);
+      const filteredItinerary = computed(() =>
+        (itineraryList.value || [])
+          .filter((i) => i.date === selectedDate.value)
+          .sort((a, b) => (a.time || "").localeCompare(b.time || ""))
+      );
 
-    /* ========= 行程 ========= */
-    const fullItineraryData = JSON.parse(JSON.stringify(window.fullItineraryData || []));
-    const itineraryList = ref(
-        JSON.parse(localStorage.getItem('sakura_itinerary_v14')) || fullItineraryData
-    );
+      /* ========= 購物 / 花費 / 筆記（本機） ========= */
+      const travelers = ref(["公費", "翔/君", "倫/怡", "茹", "媽媽"]);
+      const shoppingTravelers = computed(() => ["全部", ...travelers.value.filter((t) => t !== "公費")]);
+      const shoppingOwners = computed(() => travelers.value.filter((t) => t !== "公費"));
 
-    const filteredItinerary = computed(() =>
-        itineraryList.value
-            .filter(i => i.date === selectedDate.value)
-            .sort((a,b) => a.time.localeCompare(b.time))
-    );
+      const currentShoppingFilter = ref("全部");
+      const shoppingList = ref(JSON.parse(localStorage.getItem("sakura_shopping")) || []);
+      const filteredShoppingList = computed(() => {
+        if (currentShoppingFilter.value === "全部") return shoppingList.value;
+        return shoppingList.value.filter((i) => i.owner === currentShoppingFilter.value);
+      });
 
-    /* ========= 購物 / 花費 / 筆記 ========= */
-    const shoppingList = ref(JSON.parse(localStorage.getItem('sakura_shopping')) || []);
-    const expenses = ref(JSON.parse(localStorage.getItem('sakura_expenses')) || []);
-    const notebookList = ref(JSON.parse(localStorage.getItem('sakura_notebook')) || []);
+      const currentMemberFilter = ref(null);
+      const expenses = ref(JSON.parse(localStorage.getItem("sakura_expenses")) || []);
+      const filteredExpenses = computed(() => {
+        if (!currentMemberFilter.value) return expenses.value;
+        return expenses.value.filter((i) => i.owner === currentMemberFilter.value);
+      });
+      const filteredTotalExpense = computed(() =>
+        filteredExpenses.value.reduce((sum, i) => sum + Number(i.amount || 0), 0)
+      );
 
-    /* ========= ID 修補 ========= */
-    const saveToLocal = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+      const notebookList = ref(JSON.parse(localStorage.getItem("sakura_notebook")) || []);
+      const notebookOwners = computed(() => travelers.value.filter((t) => t !== "公費"));
+      const currentNotebookFilter = ref(notebookOwners.value[0] || "");
+      const filteredNotebookList = computed(() =>
+        notebookList.value
+          .filter((n) => n.owner === currentNotebookFilter.value)
+          .sort((a, b) => (b.id || 0) - (a.id || 0))
+      );
 
-    const ensureIds = (list, key) => {
-        let changed = false;
-        list.value.forEach((i, idx) => {
-            if (!i.id) {
-                i.id = Date.now() + idx + Math.random();
-                changed = true;
+      const deleteNote = (id) => {
+        if (!confirm("確定刪除這則筆記？")) return;
+        notebookList.value = notebookList.value.filter((n) => n.id !== id);
+        localStorage.setItem("sakura_notebook", JSON.stringify(notebookList.value));
+      };
+
+      /* ========= 匯率（你畫面有用到） ========= */
+      const exchange = reactive({ jpy: "", twd: "" });
+      const currentRate = ref(0.218);
+      const today = new Date().toLocaleDateString();
+
+      const calcTwd = () => {
+        exchange.twd = exchange.jpy ? Math.round(Number(exchange.jpy) * currentRate.value) : "";
+      };
+      const calcJpy = () => {
+        exchange.jpy = exchange.twd ? Math.round(Number(exchange.twd) / currentRate.value) : "";
+      };
+
+      /* ========= 天氣（你畫面有用到的狀態，先給預設） ========= */
+      const isWeatherExpanded = ref(false);
+      const weatherLoading = ref(false);
+      const toggleWeather = () => (isWeatherExpanded.value = !isWeatherExpanded.value);
+
+      const weatherData = reactive({
+        city: "大阪市",
+        temp: "--",
+        maxTemp: "--",
+        minTemp: "--",
+        apparentTemp: "--",
+        humidity: "--",
+        windSpeed: "--",
+        rain: "--",
+        uvIndex: "--",
+        sunrise: "--:--",
+        sunset: "--:--",
+        description: "載入中...",
+        clothing: "載入中...",
+        icon: "fa-solid fa-cloud",
+        iconColor: "#9ca3af",
+        forecast: [],
+      });
+
+      const currentDayCities = computed(() => {
+        const d = days.find((x) => x.dateStr === selectedDate.value);
+        return d ? d.locations : [];
+      });
+
+      const changeWeatherCity = (city) => {
+        // 你原本有 fetchWeather 的完整版本在別段的話可以接回來
+        weatherData.city = city.name;
+      };
+
+      /* ========= 行程卡片用到的函數 ========= */
+      const openMap = (keyword) => {
+        window.open(
+          `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`,
+          "_blank"
+        );
+      };
+
+      const getCategoryLabel = (cat) =>
+        ({
+          attraction: "景點",
+          food: "美食",
+          shopping: "購物",
+          accommodation: "住宿",
+          flight: "航班",
+          transport: "交通",
+          other: "其他",
+        }[cat] || "其他");
+
+      const getCategoryColor = (cat) =>
+        ({
+          attraction: "bg-red-100 text-red-500",
+          food: "bg-orange-100 text-orange-500",
+          shopping: "bg-pink-100 text-pink-500",
+          accommodation: "bg-purple-100 text-purple-500",
+          transport: "bg-green-100 text-green-600",
+        }[cat] || "bg-gray-100 text-gray-500");
+
+      const getTransportIcon = (type) =>
+        type === "walk" ? "fa-solid fa-person-walking" : "fa-solid fa-train-subway";
+
+      const getExpenseIcon = (cat) =>
+        `fa-solid ${
+          {
+            transport: "fa-train",
+            food: "fa-utensils",
+            accommodation: "fa-bed",
+            ticket: "fa-ticket",
+            shopping: "fa-bag-shopping",
+            other: "fa-circle",
+          }[cat] || "fa-circle"
+        }`;
+
+      /* ========= Modal（你畫面有用到） ========= */
+      const modal = reactive({ show: false, type: "", title: "", isEdit: false });
+      const formData = reactive({});
+
+      const closeModal = () => (modal.show = false);
+
+      const openModal = (type, item = null) => {
+        modal.type = type;
+        modal.show = true;
+        modal.isEdit = !!item;
+
+        Object.keys(formData).forEach((k) => delete formData[k]);
+
+        if (item) {
+          modal.title = "編輯";
+          Object.assign(formData, JSON.parse(JSON.stringify(item)));
+          return;
+        }
+
+        if (type === "shopping") {
+          modal.title = "新增購物清單";
+          Object.assign(formData, {
+            id: Date.now(),
+            name: "",
+            image: "",
+            bought: false,
+            owner:
+              currentShoppingFilter.value !== "全部"
+                ? currentShoppingFilter.value
+                : (shoppingOwners.value[0] || ""),
+          });
+        } else if (type === "expense") {
+          modal.title = "新增花費";
+          Object.assign(formData, {
+            id: Date.now(),
+            date: selectedDate.value,
+            category: "food",
+            method: "現金",
+            amount: "",
+            name: "",
+            owner: currentMemberFilter.value || travelers.value[1],
+          });
+        } else if (type === "notebook") {
+          modal.title = "新增筆記";
+          Object.assign(formData, {
+            id: Date.now(),
+            title: "",
+            content: "",
+            owner: currentNotebookFilter.value || (notebookOwners.value[0] || ""),
+          });
+        } else if (type === "itinerary") {
+          modal.title = "新增行程";
+          Object.assign(formData, {
+            id: Date.now(),
+            date: selectedDate.value,
+            category: "attraction",
+            transportType: "walk",
+            travelTime: 15,
+            name: "",
+            time: "10:00",
+            note: "",
+            description: "",
+            openHours: "",
+            ticket: "",
+          });
+        }
+      };
+
+      const handleImageUpload = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => (formData.image = ev.target.result);
+        reader.readAsDataURL(file);
+      };
+
+      const submitForm = () => {
+        const save = (key, listRef) => localStorage.setItem(key, JSON.stringify(listRef.value));
+
+        if (modal.type === "shopping") {
+          const idx = shoppingList.value.findIndex((i) => i.id === formData.id);
+          if (idx >= 0) shoppingList.value[idx] = { ...formData };
+          else shoppingList.value.push({ ...formData });
+          save("sakura_shopping", shoppingList);
+        }
+
+        if (modal.type === "expense") {
+          const idx = expenses.value.findIndex((i) => i.id === formData.id);
+          if (idx >= 0) expenses.value[idx] = { ...formData };
+          else expenses.value.push({ ...formData });
+          save("sakura_expenses", expenses);
+        }
+
+        if (modal.type === "notebook") {
+          const idx = notebookList.value.findIndex((i) => i.id === formData.id);
+          if (idx >= 0) notebookList.value[idx] = { ...formData };
+          else notebookList.value.push({ ...formData });
+          save("sakura_notebook", notebookList);
+        }
+
+        if (modal.type === "itinerary") {
+          const idx = itineraryList.value.findIndex((i) => i.id === formData.id);
+          if (idx >= 0) itineraryList.value[idx] = { ...formData };
+          else itineraryList.value.push({ ...formData });
+          save("sakura_itinerary_v14", itineraryList);
+        }
+
+        closeModal();
+      };
+
+      const confirmDeleteItinerary = () => {
+        if (!confirm("確定刪除這個行程嗎？")) return;
+        itineraryList.value = itineraryList.value.filter((i) => i.id !== formData.id);
+        localStorage.setItem("sakura_itinerary_v14", JSON.stringify(itineraryList.value));
+        closeModal();
+      };
+
+      const deleteShoppingItem = (id) => {
+        if (!confirm("刪除此商品？")) return;
+        shoppingList.value = shoppingList.value.filter((i) => i.id !== id);
+        localStorage.setItem("sakura_shopping", JSON.stringify(shoppingList.value));
+      };
+
+      const deleteExpense = (id) => {
+        if (!confirm("刪除此紀錄？")) return;
+        expenses.value = expenses.value.filter((i) => i.id !== id);
+        localStorage.setItem("sakura_expenses", JSON.stringify(expenses.value));
+      };
+
+      /* ========= 雲端同步 ========= */
+      const cloudSync = reactive({
+        state: "idle", // idle | syncing | synced | error
+        message: "尚未同步",
+        lastSyncedAt: null,
+        error: null,
+      });
+
+      const cloudSyncDotClass = computed(() => {
+        switch (cloudSync.state) {
+          case "syncing":
+            return "bg-yellow-400 animate-pulse";
+          case "error":
+            return "bg-red-500 cursor-pointer";
+          case "synced":
+            return "bg-green-500";
+          default:
+            return "bg-gray-300";
+        }
+      });
+
+      const waitForCloudFns = () =>
+        new Promise((resolve, reject) => {
+          const start = Date.now();
+          const timer = setInterval(() => {
+            const ok =
+              typeof window.__CLOUD_GET_STATE__ === "function" &&
+              typeof window.__CLOUD_SET_STATE__ === "function";
+            if (ok) {
+              clearInterval(timer);
+              resolve(true);
             }
-        });
-        if (changed) saveToLocal(key, list.value);
-    };
-
-    /* ========= 雲端同步 ========= */
-    const cloudSync = reactive({
-        state: 'idle',
-        message: '尚未同步',
-        lastSyncedAt: null
-    });
-
-    let isHydratingFromCloud = false;
-
-    const waitForCloudFns = () =>
-        new Promise((res, rej) => {
-            const t = setInterval(() => {
-                if (window.__CLOUD_GET_STATE__ && window.__CLOUD_SET_STATE__) {
-                    clearInterval(t); res();
-                }
-            }, 100);
-            setTimeout(() => rej(), 8000);
+            if (Date.now() - start > 8000) {
+              clearInterval(timer);
+              reject(new Error("Cloud functions not ready"));
+            }
+          }, 100);
         });
 
-    const buildPayload = () => ({
+      const buildPayload = () => ({
         itinerary: itineraryList.value,
         shopping: shoppingList.value,
         expenses: expenses.value,
         notebook: notebookList.value,
-        updatedAt: Date.now()
-    });
+        updatedAt: Date.now(),
+      });
 
-    const applyCloudToLocal = (cloud) => {
-        if (!cloud || !Array.isArray(cloud.itinerary) || cloud.itinerary.length === 0) return;
+      const applyCloudToLocal = (cloud) => {
+        if (!cloud) return;
+        if (!Array.isArray(cloud.itinerary) || cloud.itinerary.length === 0) return; // ✅ 不用空覆蓋本機
         itineraryList.value = cloud.itinerary;
-        shoppingList.value = cloud.shopping || [];
-        expenses.value = cloud.expenses || [];
-        notebookList.value = cloud.notebook || [];
-        saveToLocal('sakura_itinerary_v14', itineraryList.value);
-        saveToLocal('sakura_shopping', shoppingList.value);
-        saveToLocal('sakura_expenses', expenses.value);
-        saveToLocal('sakura_notebook', notebookList.value);
-    };
+        if (Array.isArray(cloud.shopping)) shoppingList.value = cloud.shopping;
+        if (Array.isArray(cloud.expenses)) expenses.value = cloud.expenses;
+        if (Array.isArray(cloud.notebook)) notebookList.value = cloud.notebook;
 
-    const pullFromCloudOnce = async () => {
+        localStorage.setItem("sakura_itinerary_v14", JSON.stringify(itineraryList.value));
+        localStorage.setItem("sakura_shopping", JSON.stringify(shoppingList.value));
+        localStorage.setItem("sakura_expenses", JSON.stringify(expenses.value));
+        localStorage.setItem("sakura_notebook", JSON.stringify(notebookList.value));
+      };
+
+      let isHydratingFromCloud = false;
+
+      const pullFromCloudOnce = async () => {
         isHydratingFromCloud = true;
         try {
-            await waitForCloudFns();
-            const cloud = await window.__CLOUD_GET_STATE__();
-            applyCloudToLocal(cloud);
-            cloudSync.state = 'synced';
-            cloudSync.lastSyncedAt = Date.now();
-            cloudSync.message = '已同步';
-        } catch {
-            cloudSync.state = 'error';
-            cloudSync.message = '同步失敗';
+          await waitForCloudFns();
+          const cloud = await window.__CLOUD_GET_STATE__();
+          applyCloudToLocal(cloud);
+          cloudSync.state = "synced";
+          cloudSync.lastSyncedAt = Date.now();
+          cloudSync.message = "已載入";
+        } catch (e) {
+          cloudSync.state = "error";
+          cloudSync.message = "雲端讀取失敗，點我重試";
+          cloudSync.error = e;
         } finally {
-            setTimeout(() => isHydratingFromCloud = false, 300);
+          setTimeout(() => (isHydratingFromCloud = false), 300);
         }
-    };
+      };
 
-    /* ========= onMounted（只能有一個） ========= */
-    onMounted(async () => {
-        setTimeout(() => showSplash.value = false, 3000);
+      const manualCloudSync = async () => {
+        if (cloudSync.state === "syncing") return;
+        cloudSync.state = "syncing";
+        cloudSync.message = "同步中…";
+        try {
+          await waitForCloudFns();
+          await window.__CLOUD_SET_STATE__(buildPayload());
+          cloudSync.state = "synced";
+          cloudSync.lastSyncedAt = Date.now();
+          cloudSync.message = "同步完成";
+        } catch (e) {
+          cloudSync.state = "error";
+          cloudSync.message = "同步失敗，點我重試";
+          cloudSync.error = e;
+        }
+      };
 
-        ensureIds(shoppingList, 'sakura_shopping');
-        ensureIds(expenses, 'sakura_expenses');
-        ensureIds(notebookList, 'sakura_notebook');
+      // 自動同步（避免剛拉完就推回去打架）
+      let syncTimer = null;
+      const scheduleSync = () => {
+        if (isHydratingFromCloud) return;
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => manualCloudSync(), 1200);
+      };
 
+      watch(itineraryList, scheduleSync, { deep: true });
+      watch(shoppingList, scheduleSync, { deep: true });
+      watch(expenses, scheduleSync, { deep: true });
+      watch(notebookList, scheduleSync, { deep: true });
+
+      onMounted(async () => {
+        setTimeout(() => (showSplash.value = false), 3000);
         await pullFromCloudOnce();
-    });
+      });
 
-    return {
+      return {
+        // header / tabs
         showSplash,
-        currentTab, tabs,
-        days, selectedDate, filteredItinerary,
-        bannerImage, handleImageError,
+        currentTab,
+        tabs,
+        bannerImage,
+        handleImageError,
         daysUntilTrip,
+
+        // date & itinerary
+        days,
+        selectedDate,
+        itineraryList,
+        filteredItinerary,
+        openMap,
+        getCategoryLabel,
+        getCategoryColor,
+        getTransportIcon,
+
+        // shopping
+        travelers,
+        shoppingTravelers,
+        shoppingOwners,
+        currentShoppingFilter,
+        shoppingList,
+        filteredShoppingList,
+        deleteShoppingItem,
+
+        // expense
+        currentMemberFilter,
+        expenses,
+        filteredExpenses,
+        filteredTotalExpense,
+        currentRate,
+        getExpenseIcon,
+        deleteExpense,
+
+        // notebook
+        notebookList,
+        notebookOwners,
+        currentNotebookFilter,
+        filteredNotebookList,
+        deleteNote,
+
+        // exchange
+        exchange,
+        calcTwd,
+        calcJpy,
+        today,
+
+        // weather (UI needs these)
+        isWeatherExpanded,
+        toggleWeather,
+        weatherLoading,
+        weatherData,
+        currentDayCities,
+        changeWeatherCity,
+
+        // tigerair
+        isTigerairInfoExpanded,
+
+        // modal
+        modal,
+        formData,
+        openModal,
+        closeModal,
+        submitForm,
+        confirmDeleteItinerary,
+        handleImageUpload,
+
+        // cloud
         cloudSync,
+        cloudSyncDotClass,
+        manualCloudSync,
         pullFromCloudOnce,
-        isTigerairInfoExpanded
-    };
+      };
+    },
+  }).mount("#app");
 }
+</script>
 
-
-<style>
-    @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .animate-slide-up { animation: slide-up 0.3s ease-out forwards; }
-    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-    .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
-    .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-</style>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
