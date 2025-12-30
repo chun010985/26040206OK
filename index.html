@@ -1551,7 +1551,7 @@ await window.__CLOUD_SET_STATE__(payload);
 const meta = getLocalMeta();
 meta.pendingSync = false;
 meta.lastAppliedClientMs = meta.localUpdatedAtMs;
-meta.lastWriter = deviceId;
+meta.lastAppliedServerMs = Date.now();
 
 cloudSync.state = "synced";
 cloudSync.message = "已同步到雲端";
