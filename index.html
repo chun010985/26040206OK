@@ -1355,9 +1355,10 @@
       };
       const setLocalMeta = (obj) => localStorage.setItem(localMetaKey, JSON.stringify(obj || {}));
 
-      let isHydratingFromCloud = false;
-      let syncTimer = null;
-      let unsubscribeRealtime = null;
+     let isHydratingFromCloud = false;
+let isBooting = true;            // ✅ 新增：開機保護期
+let syncTimer = null;
+let unsubscribeRealtime = null;
 
       const ensureIdsInPlainArray = (arr) => {
         let changed = false;
@@ -1448,12 +1449,13 @@ cloudSync.lastSyncedAt = new Date().toISOString();
         }
       };
 
-      const scheduleSync = () => {
-        if (isHydratingFromCloud) return;
-        markLocalDirty();
-        clearTimeout(syncTimer);
-        syncTimer = setTimeout(() => manualCloudSync(), 1200);
-      };
+     const scheduleSync = () => {
+  if (isHydratingFromCloud) return;
+  if (isBooting) return;          // ✅ 新增：初始化時不要把本機標成「最新」
+  markLocalDirty();
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => manualCloudSync(), 1200);
+};
 
       // Watch local changes
       watch(itineraryList, scheduleSync, { deep: true });
@@ -1563,13 +1565,17 @@ cloudSync.lastSyncedAt = new Date().toISOString();
       onMounted(async () => {
         setTimeout(() => { showSplash.value = false; }, 3000);
 
-        // 把預設行程灌進去（若本機沒有）
-        if (!localStorage.getItem('sakura_itinerary_v14')) {
-          itineraryList.value = JSON.parse(JSON.stringify(window.__FULL_ITINERARY_DATA__));
-          saveToLocal('sakura_itinerary_v14', itineraryList.value);
-        } else if (itineraryList.value.length === 0) {
-          itineraryList.value = JSON.parse(localStorage.getItem('sakura_itinerary_v14') || '[]');
-        }
+        // 把預設行程灌進去（本機沒有 or 本機是空陣列 都要灌）
+const rawItin = localStorage.getItem('sakura_itinerary_v14');
+let parsedItin = [];
+try { parsedItin = rawItin ? JSON.parse(rawItin) : []; } catch (e) { parsedItin = []; }
+
+if (!rawItin || !Array.isArray(parsedItin) || parsedItin.length === 0) {
+  itineraryList.value = JSON.parse(JSON.stringify(window.__FULL_ITINERARY_DATA__));
+  saveToLocal('sakura_itinerary_v14', itineraryList.value);
+} else {
+  itineraryList.value = parsedItin;
+}
 
         // ensure ids
         if (ensureIdsInPlainArray(shoppingList.value)) saveToLocal('sakura_shopping', shoppingList.value);
@@ -1585,8 +1591,8 @@ cloudSync.lastSyncedAt = new Date().toISOString();
 if (window.__CLOUD_READY__) {
   await window.__CLOUD_READY__;
 }
-startRealtimeCloud();
-      });
+await startRealtimeCloud();
+isBooting = false;
 
       return {
         showSplash,
