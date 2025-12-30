@@ -1483,7 +1483,6 @@
             // [修改] 刪除改用 ID
             const deleteExpense = (id) => { if(confirm('刪除此紀錄？')) { expenses.value = expenses.value.filter(item => item.id !== id); saveToLocal('sakura_expenses', expenses.value); } }
             const handleImageUpload = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { formData.image = e.target.result; }; reader.readAsDataURL(file); };
-            const moveItem = (index, direction) => { alert("拖曳排序功能需後端或更複雜的狀態管理，此為展示版本。"); };
             const openMap = (keyword) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`, '_blank'); };
             const saveToLocal = (key, data) => localStorage.setItem(key, JSON.stringify(data));
 
@@ -1691,7 +1690,6 @@ onMounted(() => {
                 getCategoryLabel, getCategoryColor, getTransportIcon, getExpenseIcon,
                 editItinerary: (item) => openModal('itinerary', item),
                 confirmDeleteItinerary, deleteItineraryItem, deleteShoppingItem, deleteExpense,
-                handleImageUpload, moveItem, openMap,
                 isWeatherExpanded, toggleWeather, weatherData, weatherLoading,
                 travelers, shoppingTravelers, shoppingOwners,
                 currentShoppingFilter,  
