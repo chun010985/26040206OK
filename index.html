@@ -324,10 +324,10 @@
                 </button>
             </div>
 
-            <!-- 行程溫馨提醒 -->
+            <!-- 行程溫馨提醒 (已修改) -->
             <div class="bg-yellow-50 text-yellow-700 text-xs px-4 py-2 rounded-xl mb-4 flex items-center border border-yellow-100 mx-2 shadow-sm">
                 <i class="fa-solid fa-circle-exclamation mr-2 text-yellow-500"></i>
-                溫馨提醒：交通時間皆為預估，請保留彈性時間。
+                溫馨提醒：交通時間皆為預估,依當天狀況為主。
             </div>
 
             <!-- 行程列表 -->
@@ -410,11 +410,14 @@
 
         <!-- === TAB 2: 資訊 === -->
         <div v-if="currentTab === 'info'" class="space-y-6 pb-20">
-            <!-- 匯率換算 -->
+            <!-- 匯率換算 (已更新：雙向輸入 + 自動匯率) -->
             <div class="bg-white rounded-2xl p-5 shadow-card">
                 <h3 class="font-bold text-sakura-text mb-4 border-b pb-2 flex justify-between items-center">
                     <span><i class="fa-solid fa-coins mr-2 text-yellow-500"></i>匯率換算</span>
-                    <span class="text-xs text-gray-400 font-normal">更新: {{ today }}</span>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-400 font-normal block">更新: {{ today }}</span>
+                        <span v-if="currentRate" class="text-[10px] text-sakura-dark font-bold">1 JPY ≈ {{ currentRate }} TWD</span>
+                    </div>
                 </h3>
                 <div class="flex items-center gap-4">
                     <div class="flex-1">
@@ -424,7 +427,7 @@
                     <i class="fa-solid fa-arrow-right-arrow-left text-gray-300"></i>
                     <div class="flex-1">
                         <label class="text-xs text-gray-500 mb-1 block">台幣 (TWD)</label>
-                        <input type="number" v-model="exchange.twd" readonly class="w-full bg-sakura-light rounded-xl p-3 font-bold text-sakura-text" placeholder="NT$">
+                        <input type="number" v-model="exchange.twd" @input="calcJpy" class="w-full bg-sakura-light rounded-xl p-3 font-bold text-sakura-text outline-none focus:ring-2 focus:ring-sakura" placeholder="NT$">
                     </div>
                 </div>
             </div>
@@ -452,7 +455,7 @@
                         <div class="flex flex-col items-center w-1/3 px-2">
                             <span class="text-[10px] text-gray-400 mb-2 font-bold">2h 55m</span>
                             <div class="w-full h-0.5 bg-gray-300 relative flex items-center justify-center">
-                                <i class="fa-solid fa-plane text-blue-400 text-sm absolute bg-blue-50 px-1 rotate-90"></i>
+                                <i class="fa-solid fa-plane-departure text-blue-400 text-sm absolute bg-blue-50 px-1"></i>
                             </div>
                             <span class="text-[10px] text-blue-400 mt-1">直飛</span>
                         </div>
@@ -502,7 +505,7 @@
                         <div class="flex flex-col items-center w-1/3 px-2">
                             <span class="text-[10px] text-gray-400 mb-2 font-bold">3h 0m</span>
                             <div class="w-full h-0.5 bg-gray-300 relative flex items-center justify-center">
-                                <i class="fa-solid fa-plane text-sakura text-sm absolute bg-sakura-light/40 px-1 rotate-90"></i>
+                                <i class="fa-solid fa-plane-departure text-sakura text-sm absolute bg-sakura-light/40 px-1"></i>
                             </div>
                             <span class="text-[10px] text-sakura mt-1">直飛</span>
                         </div>
@@ -561,7 +564,7 @@
                     <li><b>禮儀</b>：電車內請保持安靜，手機調成靜音。走路請靠左側通行（大阪部分手扶梯靠右，依循前人即可）。</li>
                     <li><b>小費</b>：日本無小費文化，服務費通常已包含在帳單內。</li>
                     <li><b>垃圾</b>：街上垃圾桶很少，請隨身攜帶塑膠袋裝垃圾，回飯店再丟。</li>
-                    <li><b>支付方式</b>：現金/信用卡(TOUCK)/Pay pay</li>
+                    <li><b>支付方式</b>：現金/信用卡(TOUCH)/Pay pay</li>
                 </ul>
             </div>
 
@@ -688,7 +691,7 @@
                     {{ currentMemberFilter ? currentMemberFilter + ' 的花費' : '目前總花費' }} (JPY)
                 </p>
                 <h2 class="text-4xl font-bold font-mono">¥ {{ filteredTotalExpense.toLocaleString() }}</h2>
-                <p class="text-xs opacity-70 mt-2">約 TWD {{ Math.round(filteredTotalExpense * 0.218).toLocaleString() }}</p>
+                <p class="text-xs opacity-70 mt-2">約 TWD {{ Math.round(filteredTotalExpense * (currentRate || 0.218)).toLocaleString() }}</p>
             </div>
 
             <div class="bg-white rounded-t-2xl shadow-card min-h-[300px]">
@@ -715,7 +718,7 @@
             <!-- 成員過濾器 (已加入 justify-center 置中) -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1 justify-center">
                 <button 
-                    v-for="traveler in travelers" 
+                    v-for="traveler in notebookOwners" 
                     :key="traveler"
                     @click="currentNotebookFilter = traveler"
                     :class="[
@@ -800,7 +803,7 @@
 
             <!-- [新增] 筆記本 Modal -->
             <div v-if="modal.type === 'notebook'" class="space-y-4">
-                <div><label class="block text-xs font-bold text-gray-500 mb-1">筆記擁有者</label><select v-model="formData.owner" class="w-full bg-blue-50 text-blue-800 font-bold rounded-xl p-3 border-blue-200"><option v-for="t in travelers" :value="t">{{ t }}</option></select></div>
+                <div><label class="block text-xs font-bold text-gray-500 mb-1">筆記擁有者</label><select v-model="formData.owner" class="w-full bg-blue-50 text-blue-800 font-bold rounded-xl p-3 border-blue-200"><option v-for="t in notebookOwners" :value="t">{{ t }}</option></select></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">標題</label><input type="text" v-model="formData.title" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none" placeholder="例如：想買的東西、注意事項..."></div>
                 <div><label class="block text-xs font-bold text-gray-500 mb-1">內容</label><textarea v-model="formData.content" class="w-full bg-gray-50 rounded-xl p-3 border outline-none h-40" placeholder="寫點什麼..."></textarea></div>
             </div>
@@ -834,11 +837,14 @@
                 { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' }, // [新增]
             ];
 
-const defaultBanner = 'https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png';
-const bannerImage = ref(defaultBanner);   
+// [修正] 為避免錯誤迴圈，將 defaultBanner 改為穩定的 Unsplash 連結，並新增 userBanner 作為初始值
+const safeBanner = 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop';
+const userBanner = 'https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png';
+const bannerImage = ref(userBanner);
 
 const handleImageError = () => {
-  bannerImage.value = defaultBanner;
+  console.warn("User banner failed to load, switching to safe default.");
+  bannerImage.value = safeBanner;
 };          
 
             // === 倒數計時邏輯 (新增) ===
@@ -855,9 +861,10 @@ const handleImageError = () => {
             });
 
             // === 核心修改：旅伴成員設定 (移除範例成員A、B) ===
-            const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '媽媽']);
+            const travelers = ref(['公費', '翔/君', '倫/怡', '珮茹', '媽媽']);
 const shoppingTravelers = computed(() => ['全部', ...travelers.value.filter(t => t !== '公費')]);
 const shoppingOwners = computed(() => travelers.value.filter(t => t !== '公費'));
+const notebookOwners = computed(() => travelers.value.filter(t => t !== '公費')); // [修改] 筆記本專用清單，排除公費
 
 const currentShoppingFilter = ref('全部');
 const currentMemberFilter = ref(null);
@@ -1001,6 +1008,7 @@ const currentMemberFilter = ref(null);
                 if (dayInfo && dayInfo.locations.length > 0) {
                     changeWeatherCity(dayInfo.locations[0]);
                 }
+                fetchExchangeRate(); // [新增] 載入匯率
             });
 
             // === 其他功能保持不變 ===
@@ -1594,7 +1602,7 @@ const currentMemberFilter = ref(null);
 
             // === [新增] 筆記本邏輯 ===
             const notebookList = ref(JSON.parse(localStorage.getItem('sakura_notebook')) || []);
-            const currentNotebookFilter = ref(travelers.value[0]); // 預設顯示第一個人(包含公費)
+            const currentNotebookFilter = ref(notebookOwners.value[0]); // 預設顯示第一個人
 
             const filteredNotebookList = computed(() => {
                 return notebookList.value.filter(note => note.owner === currentNotebookFilter.value)
@@ -1608,8 +1616,31 @@ const currentMemberFilter = ref(null);
                 }
             };
 
+            // === 匯率邏輯 (更新：雙向 + 自動抓取) ===
             const exchange = reactive({ jpy: '', twd: '' });
-            const calcTwd = () => { exchange.twd = exchange.jpy ? Math.round(exchange.jpy * 0.218) : ''; }
+            const currentRate = ref(0.218); // 預設匯率
+
+            // 抓取即時匯率
+            const fetchExchangeRate = async () => {
+                try {
+                    const response = await fetch('https://api.exchangerate-api.com/v4/latest/JPY');
+                    const data = await response.json();
+                    if (data && data.rates && data.rates.TWD) {
+                        currentRate.value = data.rates.TWD;
+                    }
+                } catch (e) {
+                    console.error("匯率更新失敗，使用預設值", e);
+                }
+            };
+
+            const calcTwd = () => { 
+                exchange.twd = exchange.jpy ? Math.round(exchange.jpy * currentRate.value) : ''; 
+            }
+            
+            const calcJpy = () => { 
+                exchange.jpy = exchange.twd ? Math.round(exchange.twd / currentRate.value) : ''; 
+            }
+
             const today = new Date().toLocaleDateString();
             const modal = reactive({ show: false, type: '', title: '', isEdit: false });
             const formData = reactive({});
@@ -1682,7 +1713,7 @@ const currentMemberFilter = ref(null);
     Object.assign(formData, {
       title: '',
       content: '',
-      owner: currentNotebookFilter.value || travelers.value[0]
+      owner: currentNotebookFilter.value || notebookOwners.value[0]
     });
     return;
   }
@@ -1847,8 +1878,8 @@ watch(packingData, scheduleSync, { deep: true });
   expenses, filteredExpenses, totalExpense, filteredTotalExpense,
   packingData, currentPackingFilter, newPackingItem, addPackingItem, removePackingItem, // 匯出 packing 相關
   packingPeople, // 匯出獨立的行李清單人員名單
-  notebookList, filteredNotebookList, currentNotebookFilter, deleteNote, // 匯出 notebook 相關
-  exchange, calcTwd, today,
+  notebookList, filteredNotebookList, currentNotebookFilter, notebookOwners, deleteNote, // 匯出 notebook 相關
+  exchange, calcTwd, calcJpy, currentRate, today,
   getCategoryLabel, getCategoryColor, getTransportIcon, getExpenseIcon,
   editItinerary: (item) => openModal('itinerary', item),
   confirmDeleteItinerary, deleteItineraryItem, deleteShoppingItem, deleteExpense,
@@ -1921,6 +1952,3 @@ console.log("🔥 firebase module script loaded");
 </script>
 </body>
 </html>
-
-
-
