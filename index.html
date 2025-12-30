@@ -1248,6 +1248,7 @@
 
             const fullItineraryData = [
                 // === 4/2 (四) ===
+                { id: 0, date: '2026-04-02', category: 'other', name: '高雄小港機場集合', time: '05:00', travelTime: 0, transportType: 'walk', note: '國際航廈出境大廳', description: '準備啟程出發囉！🎉 請務必準時集合，準備辦理登機手續。記得再次檢查護照與必備證件！' },
                 { id: 1, date: '2026-04-02', category: 'flight', name: '航班 IT-284 KHH->KIX', time: '07:00', travelTime: 0, transportType: 'flight', note: '起飛 07:00 / 抵達 10:55 (預計出關 11:30)' },
                 { id: 2, date: '2026-04-02', category: 'transport', name: '移動：關西機場 → 難波', time: '11:40', travelTime: 45, transportType: 'transit', note: '已事先購票', description: '📍 路線：南海電鐵空港急行 (Nankai Airport Exp.)\n🚉 區間：關西機場站 (Kansai Airport) → 南海難波站 (Namba)\n💡 提示：出站後依指示前往地鐵御堂筋線。' },
                 { id: 3, date: '2026-04-02', category: 'transport', name: '移動：難波 → 本町 (飯店)', time: '12:40', travelTime: 15, transportType: 'transit', note: '轉乘御堂筋線 (紅線)', description: '🚉 區間：難波站 (M20) → 本町站 (M18)\n🚶 步行：由 11 號或 12 號出口出站，步行約 3-5 分鐘抵達飯店。' },
@@ -1301,13 +1302,13 @@
                 { id: 504, date: '2026-04-06', category: 'flight', name: '航班 IT-285 KIX->KHH', time: '12:00', travelTime: 0, transportType: 'flight', note: '起飛 12:00 / 抵達 14:00', description: '帶著滿滿的回憶（和超重的行李）回家囉！✈️ 抵達高雄後記得領取行李。' }
             ];
 
-            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v2')) || fullItineraryData);
+            const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v3')) || fullItineraryData);
             const filteredItinerary = computed(() => itineraryList.value.filter(item => item.date === selectedDate.value).sort((a, b) => a.time.localeCompare(b.time)));
             
             const resetToDefaultItinerary = () => {
                 if (confirm('確定要重置行程表嗎？這將會覆蓋您目前的變更，並載入預設的 4/2~4/6 完整行程。')) {
                     itineraryList.value = JSON.parse(JSON.stringify(fullItineraryData));
-                    saveToLocal('sakura_itinerary_v2', itineraryList.value);
+                    saveToLocal('sakura_itinerary_v3', itineraryList.value);
                     alert('行程已重置為預設狀態！');
                 }
             };
@@ -1455,7 +1456,7 @@
                 };
 
                 if (modal.type === 'itinerary') { 
-                    updateList(itineraryList, 'sakura_itinerary_v2');
+                    updateList(itineraryList, 'sakura_itinerary_v3');
                 } else if (modal.type === 'shopping') { 
                     updateList(shoppingList, 'sakura_shopping');
                 } else if (modal.type === 'expense') { 
@@ -1466,8 +1467,8 @@
                 closeModal(); 
             };
 
-            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v2', itineraryList.value); closeModal(); } };
-            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v2', itineraryList.value); } };
+            const confirmDeleteItinerary = () => { if (confirm('確定要刪除這個行程嗎？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== formData.id); saveToLocal('sakura_itinerary_v3', itineraryList.value); closeModal(); } };
+            const deleteItineraryItem = (id) => { if (confirm('確定要直接刪除此行程？')) { itineraryList.value = itineraryList.value.filter(i => i.id !== id); saveToLocal('sakura_itinerary_v3', itineraryList.value); } };
             // [修改] 刪除改用 ID
             const deleteShoppingItem = (id) => { if(confirm('刪除此商品？')) { shoppingList.value = shoppingList.value.filter(item => item.id !== id); saveToLocal('sakura_shopping', shoppingList.value); } }
             // [修改] 刪除改用 ID
@@ -1552,7 +1553,7 @@
                 if (Array.isArray(cloud.expenses))  expenses.value      = cloud.expenses;
                 if (Array.isArray(cloud.notebook))  notebookList.value  = cloud.notebook;
                 
-                saveToLocal('sakura_itinerary_v2', itineraryList.value);
+                saveToLocal('sakura_itinerary_v3', itineraryList.value);
                 saveToLocal('sakura_shopping', shoppingList.value);
                 saveToLocal('sakura_expenses', expenses.value);
                 saveToLocal('sakura_notebook', notebookList.value);
@@ -1709,7 +1710,3 @@
 </script>
 </body>
 </html>
-
-
-
-
