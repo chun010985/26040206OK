@@ -1582,7 +1582,10 @@ cloudSync.lastSyncedAt = new Date().toISOString();
         fetchExchangeRate();
 
         // cloud realtime
-        startRealtimeCloud();
+if (window.__CLOUD_READY__) {
+  await window.__CLOUD_READY__;
+}
+startRealtimeCloud();
       });
 
       return {
@@ -1696,9 +1699,17 @@ window.__FULL_ITINERARY_DATA__ = [
   const stateDocRef = () => doc(db, "trips", TRIP_ID, "state", "main");
   const tripMetaRef = () => doc(db, "trips", TRIP_ID);
 
-  let user = null;
+let user = null;
+
+window.__CLOUD_READY__ = new Promise((resolve) => {
   signInAnonymously(auth).catch(() => {});
-  onAuthStateChanged(auth, (u) => { user = u; });
+  onAuthStateChanged(auth, (u) => {
+    if (u) {
+      user = u;
+      resolve(true);   // ✅ 明確告訴外面：Firebase 登入完成
+    }
+  });
+});
 
   const waitForUser = async (ms = 6000) => {
     const start = Date.now();
