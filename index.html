@@ -1629,23 +1629,26 @@ cloudSync.lastSyncedAt = new Date().toISOString();
   }
 }); // ✅ 這個一定要有
 
-    const first = await window.__CLOUD_GET_STATE__();
-if (first && first.lastWriter !== deviceId) {
-  isHydratingFromCloud = true;
-  applyCloudToLocal(first);
-  isHydratingFromCloud = false;
+    // ⛔ 不要直接 await，改用 setTimeout 包起來
+setTimeout(async () => {
+  const first = await window.__CLOUD_GET_STATE__();
+  if (first && first.lastWriter !== deviceId) {
+    isHydratingFromCloud = true;
+    applyCloudToLocal(first);
+    isHydratingFromCloud = false;
 
-  const newMeta = getLocalMeta();
-  newMeta.lastAppliedServerMs = first.serverUpdatedAtMs || 0;
-  newMeta.lastAppliedClientMs = first.clientUpdatedAtMs || 0;
-  newMeta.localUpdatedAtMs = first.clientUpdatedAtMs || 0;
-  newMeta.pendingSync = false;
-  setLocalMeta(newMeta);
-}
+    const newMeta = getLocalMeta();
+    newMeta.lastAppliedServerMs = first.serverUpdatedAtMs || 0;
+    newMeta.lastAppliedClientMs = first.clientUpdatedAtMs || 0;
+    newMeta.localUpdatedAtMs = first.clientUpdatedAtMs || 0;
+    newMeta.pendingSync = false;
+    setLocalMeta(newMeta);
+  }
 
-cloudSync.state = "synced";
-cloudSync.message = "雲端連線完成";
-cloudSync.lastSyncedAt = new Date().toISOString();
+  cloudSync.state = "synced";
+  cloudSync.message = "雲端連線完成";
+  cloudSync.lastSyncedAt = new Date().toISOString();
+}, 0);
 
 // init
 onMounted(async () => {
