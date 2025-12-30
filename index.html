@@ -1076,8 +1076,31 @@
             };
 
             const fetchWeather = async (lat, lng, cityName) => {
-                weatherLoading.value = true;
+                // [新增] 快取機制
+                const cacheKey = `weather_cache_v1_${cityName}_${lat}`;
+                const cachedRaw = localStorage.getItem(cacheKey);
+                const now = Date.now();
+                const CACHE_TIME = 1000 * 60 * 30; // 快取 30 分鐘
+
                 weatherData.city = cityName;
+
+                if (cachedRaw) {
+                    try {
+                        const { timestamp, data } = JSON.parse(cachedRaw);
+                        if (now - timestamp < CACHE_TIME) {
+                            console.log(`Using cached weather for ${cityName}`);
+                            Object.assign(weatherData, data);
+                            weatherLoading.value = false;
+                            return;
+                        }
+                    } catch (e) {
+                        console.error("Cache parse error", e);
+                        localStorage.removeItem(cacheKey);
+                    }
+                }
+
+                weatherLoading.value = true;
+                
                 try {
                     // [修改] API 請求加入 weather_code 到 daily 參數
                     const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&daily=weather_code,sunrise,sunset,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo`);
@@ -1135,6 +1158,12 @@
                     
                     weatherData.uvIndex = (current.is_day === 1 && current.weather_code <= 2) ? '高' : '低';
 
+                    // [新增] 寫入快取
+                    localStorage.setItem(cacheKey, JSON.stringify({
+                        timestamp: now,
+                        data: { ...weatherData }
+                    }));
+
                 } catch (error) {
                     console.warn("Weather API access failed (likely due to network restrictions). Using fallback data.");
                     
@@ -1161,7 +1190,8 @@
                     ];
 
                 } finally {
-                    setTimeout(() => { weatherLoading.value = false; }, 300);
+                    // [修改] 縮短等待時間，讓體驗更順暢 (從 300ms 改為 200ms)
+                    setTimeout(() => { weatherLoading.value = false; }, 200);
                 }
             };
 
@@ -1646,3 +1676,5 @@
 </script>
 </body>
 </html>
+</html>
+
