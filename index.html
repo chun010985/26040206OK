@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -961,11 +961,11 @@
             // 狀態變數：控制 Splash 顯示
             const showSplash = ref(true);
 
-            // 在 onMounted 設定 5 秒後隱藏動畫
+            // 在 onMounted 設定 3 秒後隱藏動畫
             onMounted(() => {
                 setTimeout(() => {
                     showSplash.value = false;
-                }, 5000); // 5 秒後淡出
+                }, 3000); // 3 秒後淡出
                 
                 // [資料遷移] 確保所有舊資料都有 ID
                 const ensureIds = (list, key) => {
@@ -1736,4 +1736,3 @@
 </script>
 </body>
 </html>
-
