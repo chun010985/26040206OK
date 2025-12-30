@@ -327,7 +327,7 @@
             <!-- 行程溫馨提醒 (已修改) -->
             <div class="bg-yellow-50 text-yellow-700 text-xs px-4 py-2 rounded-xl mb-4 flex items-center border border-yellow-100 mx-2 shadow-sm">
                 <i class="fa-solid fa-circle-exclamation mr-2 text-yellow-500"></i>
-                溫馨提醒：交通時間皆為預估,依當天狀況為主。
+                溫馨提醒：交通時間皆為預估，實際依當天狀況為主。
             </div>
 
             <!-- 行程列表 -->
@@ -696,7 +696,7 @@
             </div>
 
             <div class="bg-white rounded-t-2xl shadow-card min-h-[300px]">
-                <div v-for="(item, index) in filteredExpenses" :key="index" class="p-4 border-b border-gray-50 flex justify-between items-center">
+                <div v-for="(item, index) in filteredExpenses" :key="item.id" class="p-4 border-b border-gray-50 flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg"><i :class="getExpenseIcon(item.category)" class="text-sakura-dark"></i></div>
                         <div>
@@ -707,7 +707,14 @@
                             </p>
                         </div>
                     </div>
-                    <div class="text-right"><p class="font-bold text-gray-800 font-mono">¥{{ Number(item.amount).toLocaleString() }}</p><button @click="deleteExpense(index)" class="text-xs text-red-300 mt-1">刪除</button></div>
+                    <div class="text-right">
+                        <p class="font-bold text-gray-800 font-mono">¥{{ Number(item.amount).toLocaleString() }}</p>
+                        <!-- [新增] 花費編輯與刪除按鈕 -->
+                        <div class="flex gap-2 justify-end mt-1">
+                            <button @click.stop="openModal('expense', item)" class="text-xs text-blue-400 font-bold hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
+                            <button @click="deleteExpense(item.id)" class="text-xs text-red-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
                 </div>
                 <div v-if="filteredExpenses.length === 0" class="text-center py-8 text-gray-400 text-sm">此分類下無紀錄</div>
             </div>
@@ -1607,12 +1614,28 @@ const currentMemberFilter = ref(null);
 
             // === 花費邏輯更新 (成員過濾) ===
             const expenses = ref(JSON.parse(localStorage.getItem('sakura_expenses')) || []);
+            // [新增] 確保舊資料有 ID
+            expenses.value.forEach(item => {
+                if (!item.id) item.id = Date.now() + Math.random();
+            });
+
             const filteredExpenses = computed(() => {
                 if (!currentMemberFilter.value) return expenses.value;
                 return expenses.value.filter(item => item.owner === currentMemberFilter.value);
             });
             const filteredTotalExpense = computed(() => filteredExpenses.value.reduce((sum, item) => sum + Number(item.amount), 0));
             const totalExpense = computed(() => expenses.value.reduce((sum, item) => sum + Number(item.amount), 0)); // 保留一個總計做參考
+
+            // [新增] 刪除花費項目 (使用 ID)
+            const deleteExpense = (id) => { 
+                if(confirm('刪除此紀錄？')) { 
+                    const index = expenses.value.findIndex(item => item.id === id);
+                    if (index !== -1) {
+                        expenses.value.splice(index, 1); 
+                        saveToLocal('sakura_expenses', expenses.value); 
+                    }
+                } 
+            }
 
             // === [新增] 筆記本邏輯 ===
             const notebookList = ref(JSON.parse(localStorage.getItem('sakura_notebook')) || []);
@@ -1717,8 +1740,10 @@ const currentMemberFilter = ref(null);
   }
 
   if (type === 'expense') {
-    modal.title = '新增花費';
+    modal.title = item ? '編輯花費' : '新增花費'; // [修改] 支援編輯標題
+    
     Object.assign(formData, {
+      id: Date.now(), // [新增] 預設 ID
       date: selectedDate.value,
       category: 'food',
       method: '現金',
@@ -1726,6 +1751,11 @@ const currentMemberFilter = ref(null);
       name: '',
       owner: currentMemberFilter.value || travelers.value[1] // 預設「翔」(跳過公費)
     });
+
+    // 如果是編輯，覆蓋上面的預設值
+    if (item) {
+         Object.assign(formData, JSON.parse(JSON.stringify(item)));
+    }
     return;
   }
 
@@ -1765,7 +1795,12 @@ const currentMemberFilter = ref(null);
                     }
                     saveToLocal('sakura_shopping', shoppingList.value); 
                 } else if (modal.type === 'expense') { 
-                    expenses.value.push({ ...formData }); 
+                    if (modal.isEdit) {
+                        const index = expenses.value.findIndex(e => e.id === formData.id);
+                        if (index !== -1) expenses.value[index] = { ...formData };
+                    } else {
+                        expenses.value.push({ ...formData }); 
+                    }
                     saveToLocal('sakura_expenses', expenses.value); 
                 } else if (modal.type === 'notebook') {
                     // [修改] 筆記本儲存邏輯，支援編輯更新
@@ -1791,7 +1826,7 @@ const currentMemberFilter = ref(null);
                     }
                 } 
             }
-            const deleteExpense = (index) => { if(confirm('刪除此紀錄？')) { expenses.value.splice(index, 1); saveToLocal('sakura_expenses', expenses.value); } }
+            // [注意] 此處移除了舊版依賴 index 的 deleteExpense，改用上方定義的新版 deleteExpense
             const handleImageUpload = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { formData.image = e.target.result; }; reader.readAsDataURL(file); };
             const moveItem = (index, direction) => { alert("拖曳排序功能需後端或更複雜的狀態管理，此為展示版本。"); };
             const openMap = (keyword) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`, '_blank'); };
