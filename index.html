@@ -382,9 +382,8 @@
                 <div v-for="(item, index) in filteredItinerary" :key="item.id" class="relative pl-4 border-l-2 border-sakura-light">
                     <!-- 行程卡片 -->
                     <div 
-                        class="bg-white rounded-2xl p-4 shadow-card active:scale-[0.98] transition-transform relative group"
+                        class="bg-white rounded-2xl p-4 shadow-card relative group"
                         :class="{'border-l-4 border-sakura': item.category !== 'flight', 'bg-blue-50 border-l-4 border-blue-400': item.category === 'flight'}"
-                        @click="editItinerary(item)"
                     >
                         <div v-if="item.category === 'flight'">
                              <div class="flex justify-between items-start mb-2">
@@ -445,7 +444,7 @@
                     <p>本日尚無行程</p>
                 </div>
 
-                 <button @click="openModal('itinerary')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
+                 <!-- [移除] 新增行程按鈕 -->
             </div>
         </div>
 
@@ -1676,5 +1675,3 @@
 </script>
 </body>
 </html>
-</html>
-
