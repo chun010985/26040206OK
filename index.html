@@ -975,27 +975,22 @@ if (!window.__APP_ALREADY_STARTED__) {
             const showSplash = ref(true);
 
             // 在 onMounted 設定 3 秒後隱藏動畫
-            onMounted(() => {
-                setTimeout(() => {
-                    showSplash.value = false;
-                }, 3000); // 3 秒後淡出
-                
-                // [資料遷移] 確保所有舊資料都有 ID
-                const ensureIds = (list, key) => {
-                    let updated = false;
-                    list.value.forEach((item, index) => {
-                        if (!item.id) {
-                            item.id = Date.now() + index + Math.random(); // 產生唯一 ID
-                            updated = true;
-                        }
-                    });
-                    if (updated) saveToLocal(key, list.value);
-                };
-                ensureIds(shoppingList, 'sakura_shopping');
-                ensureIds(expenses, 'sakura_expenses');
-                ensureIds(notebookList, 'sakura_notebook');
-            });
+const ensureIds = (list, key) => {
+    let updated = false;
+    list.value.forEach((item, index) => {
+        if (!item.id) {
+            item.id = Date.now() + index + Math.random();
+            updated = true;
+        }
+    });
+    if (updated) saveToLocal(key, list.value);
+};
 
+onMounted(() => {
+    setTimeout(() => {
+        showSplash.value = false;
+    }, 3000);
+});
             const currentTab = ref('itinerary');
             const tabs = [
                 { id: 'itinerary', name: '行程表', icon: 'fa-solid fa-map-location-dot' },
@@ -1112,7 +1107,7 @@ if (!window.__APP_ALREADY_STARTED__) {
 
             const fetchWeather = async (lat, lng, cityName) => {
                 // [新增] 快取機制
-                const cacheKey = `weather_cache_v1_${cityName}_${lat}`;
+const cacheKey = `weather_cache_v1_${cityName}_${lat}_${lng}`;
                 const cachedRaw = localStorage.getItem(cacheKey);
                 const now = Date.now();
                 const CACHE_TIME = 1000 * 60 * 30; // 快取 30 分鐘
@@ -1332,10 +1327,10 @@ if (!window.__APP_ALREADY_STARTED__) {
                 return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
             });
 
+let isHydratingFromCloud = false;
+
 const pullFromCloudOnce = async () => {
-  isHydratingFromCloud = true;   // 🔒 開鎖
-  cloudSync.state = "syncing";
-  cloudSync.message = "從雲端讀取中…";
+  isHydratingFromCloud = true;
   try {
     await waitForCloudFns();
     const cloud = await window.__CLOUD_GET_STATE__();
@@ -1348,7 +1343,7 @@ const pullFromCloudOnce = async () => {
     cloudSync.message = "雲端讀取失敗，點我重試";
   } finally {
     setTimeout(() => {
-      isHydratingFromCloud = false; // 🔓 解鎖
+      isHydratingFromCloud = false;
     }, 300);
   }
 };
@@ -1434,6 +1429,11 @@ const manualCloudSync = async () => {
                     saveToLocal('sakura_notebook', notebookList.value);
                 }
             };
+
+                ensureIds(shoppingList, 'sakura_shopping');
+                ensureIds(expenses, 'sakura_expenses');
+                ensureIds(notebookList, 'sakura_notebook');
+            });
 
             // === 匯率 ===
             const exchange = reactive({ jpy: '', twd: '' });
@@ -1633,7 +1633,7 @@ const manualCloudSync = async () => {
                 shopping: shoppingList.value,
                 expenses: expenses.value,
                 notebook: notebookList.value,
-                updatedAt: new Date().toISOString()
+updatedAt: Date.now()
             });
 
            const applyCloudToLocal = (cloud) => {
@@ -1715,7 +1715,6 @@ onMounted(async () => {
                 cloudSyncTitle,
                 cloudSyncSubTitle,
 pullFromCloudOnce,
-  manualCloudSync,
                 isTigerairInfoExpanded // 匯出狀態變數
             };
         }
@@ -1776,22 +1775,22 @@ pullFromCloudOnce,
 };
 
 window.__CLOUD_GET_STATE__ = async () => {
+  const ok = await waitForUser(5000);
+  if (!ok) throw new Error("Auth not ready");
   const snap = await getDoc(doc(db, "trips", TRIP_ID));
   return snap.exists() ? snap.data() : null;
 };
 
 window.__CLOUD_SET_STATE__ = async (payload) => {
+  const ok = await waitForUser(5000);
+  if (!ok) throw new Error("Auth not ready");
   await setDoc(
     doc(db, "trips", TRIP_ID),
-    {
-      ...payload,
-      updatedAt: serverTimestamp()
-    },
+    { ...payload, updatedAt: serverTimestamp() },
     { merge: true }
   );
   return true;
 };
-
   console.log("✅ Firebase ready. TRIP_ID =", TRIP_ID);
 </script>
 </body>
