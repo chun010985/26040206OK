@@ -1219,10 +1219,34 @@ const appVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'version
       // 直接把你原本 fullItineraryData 內容掛回 window，避免太長重複（下面會再 set 一次）
       // （真正資料在最後一段：window.__FULL_ITINERARY_DATA__ = [...]）
 
-      const itineraryList = ref(JSON.parse(localStorage.getItem('sakura_itinerary_v14')) || []);
+      const itineraryList = ref(loadFromLocal('sakura_itinerary_v14', []));
       const filteredItinerary = computed(() => itineraryList.value.filter(item => item.date === selectedDate.value).sort((a,b)=>a.time.localeCompare(b.time)));
 
-      const saveToLocal = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+      const safeParse = (raw, fallback) => {
+  try {
+    // localStorage 可能出現 null、"undefined"、""、或壞 JSON
+    if (raw == null) return fallback;
+    if (raw === "undefined" || raw === "") return fallback;
+    const v = JSON.parse(raw);
+    return (v === undefined ? fallback : v);
+  } catch (e) {
+    return fallback;
+  }
+};
+
+const loadFromLocal = (key, fallback) => {
+  return safeParse(localStorage.getItem(key), fallback);
+};
+
+const saveToLocal = (key, data) => {
+  // 防止把 undefined 存進去變成 "undefined"
+  if (data === undefined) {
+    localStorage.removeItem(key);
+    return;
+  }
+  localStorage.setItem(key, JSON.stringify(data));
+};
+
 
       const resetToDefaultItinerary = () => {
         if (confirm('確定要重置行程表嗎？這將會覆蓋您目前的變更，並載入預設的 4/2~4/6 完整行程。')) {
@@ -1232,13 +1256,13 @@ const appVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'version
         }
       };
 
-      const shoppingList = ref(JSON.parse(localStorage.getItem('sakura_shopping')) || []);
+      const shoppingList  = ref(loadFromLocal('sakura_shopping', []));
       const filteredShoppingList = computed(() => {
         if (currentShoppingFilter.value === '全部') return shoppingList.value;
         return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
       });
 
-      const expenses = ref(JSON.parse(localStorage.getItem('sakura_expenses')) || []);
+      const expenses      = ref(loadFromLocal('sakura_expenses', []));
       const filteredExpenses = computed(() => {
         if (!currentMemberFilter.value) return expenses.value;
         return expenses.value.filter(item => item.owner === currentMemberFilter.value);
@@ -1246,7 +1270,7 @@ const appVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'version
       const filteredTotalExpense = computed(() => filteredExpenses.value.reduce((sum, item) => sum + Number(item.amount), 0));
       const totalExpense = computed(() => expenses.value.reduce((sum, item) => sum + Number(item.amount), 0));
 
-      const notebookList = ref(JSON.parse(localStorage.getItem('sakura_notebook')) || []);
+      const notebookList  = ref(loadFromLocal('sakura_notebook', []));
       const notebookOwners = computed(() => travelers.value.filter(t => t !== '公費'));
       const currentNotebookFilter = ref(notebookOwners.value[0]);
       const filteredNotebookList = computed(() => notebookList.value.filter(note => note.owner === currentNotebookFilter.value).sort((a,b)=>b.id-a.id));
@@ -1266,7 +1290,7 @@ const appVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'version
       const packingPeople = ref(['士翔', '侑君', '士倫', '欣怡', '珮茹', '媽媽']);
       const currentPackingFilter = ref(packingPeople.value[0]);
       const rawPacking = JSON.parse(localStorage.getItem('sakura_packing_v2_obj'));
-      const packingData = ref(rawPacking || {});
+      const packingData   = ref(loadFromLocal('sakura_packing_v2_obj', {}));
       packingPeople.value.forEach(person => {
         if (!packingData.value[person]) {
           packingData.value[person] = defaultPackingItems.map((text, i) => ({ id: Date.now() + i + Math.random(), text, checked: false }));
