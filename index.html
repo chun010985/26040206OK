@@ -136,10 +136,13 @@
 
   <main class="relative -mt-10 bg-[#fafafa] rounded-t-[40px] px-4 pt-4 min-h-[500px] z-10">
 
-    <!-- Cloud Status -->
+    <!-- Cloud Status: 修正燈號邏輯 -->
+    <!-- 黃燈: 正在儲存(isSaving) 或 連線中(connecting) -->
+    <!-- 紅燈: 錯誤(error) -->
+    <!-- 綠燈: 連線成功(connected) 且 無動作 -->
     <div class="fixed top-4 left-4 z-50 flex items-center gap-2" @click="reconnectFirebase">
       <div class="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.2)] border border-white transition-all duration-500"
-           :class="firebaseStatus === 'connected' ? 'bg-green-400' : (firebaseStatus === 'error' ? 'bg-red-500 animate-pulse' : 'bg-yellow-400')">
+           :class="isSaving ? 'bg-yellow-400 animate-pulse' : (firebaseStatus === 'error' ? 'bg-red-500' : (firebaseStatus === 'connected' ? 'bg-green-400' : 'bg-yellow-400'))">
       </div>
       <span v-if="isSaving || migrationStatus" class="text-[10px] bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-gray-600 font-bold shadow-sm border border-gray-100">
         {{ migrationStatus || '同步中...' }}
@@ -738,7 +741,7 @@ window.__FULL_ITINERARY_DATA__ = [
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
-  const TRIP_ID = "keihan_2026_0402_v7_final_check";
+  const TRIP_ID = "keihan_2026_0402_v8_final";
 
   createApp({
     setup() {
@@ -748,9 +751,9 @@ window.__FULL_ITINERARY_DATA__ = [
       const tabs = [
         { id: 'itinerary', name: '行程表', icon: 'fa-solid fa-map-location-dot' },
         { id: 'info', name: '資訊', icon: 'fa-solid fa-circle-info' },
-        { id: 'shopping', name: '購物', icon: 'fa-solid fa-basket-shopping' },
+        { id: 'shopping', name: '購物清單', icon: 'fa-solid fa-basket-shopping' },
         { id: 'expense', name: '花費', icon: 'fa-solid fa-yen-sign' },
-        { id: 'notebook', name: '筆記', icon: 'fa-solid fa-book' },
+        { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' },
       ];
       const bannerImage = ref('https://i.ibb.co/8nZ43bCk/Gemini-Generated-Image-nki8ufnki8ufnki8.png');
       const handleImageError = () => { bannerImage.value = 'https://via.placeholder.com/480x250?text=Trip'; };
@@ -945,8 +948,10 @@ window.__FULL_ITINERARY_DATA__ = [
 
             await setDoc(docRef, payload, { merge: true });
             closeModal();
+            firebaseStatus.value = 'connected'; // Reset on success
         } catch(e) {
             console.error(e);
+            firebaseStatus.value = 'error'; // Set error state
             alert("儲存失敗: " + e.message);
         } finally {
             isSaving.value = false;
@@ -1089,11 +1094,51 @@ window.__FULL_ITINERARY_DATA__ = [
       const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            formData.image = evt.target.result; 
-        };
-        reader.readAsDataURL(file);
+
+        // Check size (2MB = 2 * 1024 * 1024 bytes)
+        const maxSize = 2 * 1024 * 1024;
+
+        if (file.size > maxSize) {
+            // Compress
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Resize logic (optional, but good for compression)
+                    const maxDim = 1280;
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Compress to JPEG with 0.3 quality (更保險的壓縮比，確保大圖也能上傳)
+                    formData.image = canvas.toDataURL('image/jpeg', 0.3);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // Normal upload
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                formData.image = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
       };
       
       const openMap = (name) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`);
