@@ -124,9 +124,11 @@
     <img :src="bannerImage" class="w-full h-full object-cover transition-opacity duration-500" @error="handleImageError">
     <div class="absolute top-4 right-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full text-sakura-text text-xs border border-white/50 shadow-sm flex items-center gap-2 z-20">
       <i class="fa-regular fa-clock"></i>
-      <span v-if="daysUntilTrip > 0">距離出發 <b>{{ daysUntilTrip }}</b> 天</span>
-      <span v-else-if="daysUntilTrip === 0">就是今天！出發！✈️</span>
-      <span v-else>旅程第 {{ Math.abs(daysUntilTrip) + 1 }} 天</span>
+      <!-- 修正倒數計時邏輯 -->
+      <span v-if="daysUntilTrip > 0">距離出發還有 <b>{{ daysUntilTrip }}</b> 天</span>
+      <span v-else-if="daysUntilTrip >= -3">旅程第 {{ Math.abs(daysUntilTrip) + 1 }} 天</span>
+      <span v-else-if="daysUntilTrip === -4">旅程結束，平安返家 🏠</span>
+      <span v-else>旅程已圓滿結束</span>
     </div>
     <div class="absolute top-6 left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm">
       <h1 class="text-3xl font-bold tracking-widest text-sakura-text">京阪之旅</h1>
