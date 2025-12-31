@@ -578,8 +578,9 @@
           <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{{ note.content }}</p>
           <div class="mt-3 flex justify-between items-end border-t border-gray-50 pt-2">
             <span class="text-[10px] text-gray-400">{{ note.owner }}</span>
-            <div class="flex gap-2">
-                <button @click.stop="deleteNote(note.id)" class="text-xs text-red-300 hover:text-red-500"><i class="fa-solid fa-trash-can mr-1"></i>刪除</button>
+            <div class="flex gap-3">
+                <button @click.stop="openModal('notebook', note)" class="text-xs text-gray-400 hover:text-sakura-dark font-bold"><i class="fa-solid fa-pen mr-1"></i>編輯</button>
+                <button @click.stop="deleteNote(note.id)" class="text-xs text-red-300 hover:text-red-500 font-bold"><i class="fa-solid fa-trash-can mr-1"></i>刪除</button>
             </div>
           </div>
         </div>
@@ -743,7 +744,7 @@ window.__FULL_ITINERARY_DATA__ = [
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
-  const TRIP_ID = "keihan_2026_0402_v8_final";
+  const TRIP_ID = "keihan_2026_0402_v9_edit";
 
   createApp({
     setup() {
@@ -904,19 +905,13 @@ window.__FULL_ITINERARY_DATA__ = [
 
       const currentPackingFilter = ref('士翔');
       
-      // 優化：行李清單排序 (舊資料在上，新資料在下，剛新增未同步的在最下)
       const filteredPackingList = computed(() => {
         return packingList.value
           .filter(p => p.owner === currentPackingFilter.value)
           .sort((a, b) => {
              const getScore = (item) => {
-                 // 1. 舊資料/預設資料 (無 createdAt) -> 排最上面 (0)
                  if (item.createdAt === undefined) return 0;
-                 
-                 // 2. 剛新增，尚未同步到雲端 (createdAt 為 null) -> 排最下面 (無限大)
                  if (item.createdAt === null) return 99999999999;
-                 
-                 // 3. 已同步資料 -> 依照時間排序 (時間越晚數字越大，排越下面)
                  return item.createdAt.seconds || 0;
              };
              return getScore(a) - getScore(b);
