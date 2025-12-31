@@ -903,7 +903,26 @@ window.__FULL_ITINERARY_DATA__ = [
       const totalExpense = computed(() => expenses.value.reduce((sum, item) => sum + Number(item.amount||0), 0)); 
 
       const currentPackingFilter = ref('士翔');
-      const filteredPackingList = computed(() => packingList.value.filter(p => p.owner === currentPackingFilter.value));
+      
+      // 優化：行李清單排序 (舊資料在上，新資料在下，剛新增未同步的在最下)
+      const filteredPackingList = computed(() => {
+        return packingList.value
+          .filter(p => p.owner === currentPackingFilter.value)
+          .sort((a, b) => {
+             const getScore = (item) => {
+                 // 1. 舊資料/預設資料 (無 createdAt) -> 排最上面 (0)
+                 if (item.createdAt === undefined) return 0;
+                 
+                 // 2. 剛新增，尚未同步到雲端 (createdAt 為 null) -> 排最下面 (無限大)
+                 if (item.createdAt === null) return 99999999999;
+                 
+                 // 3. 已同步資料 -> 依照時間排序 (時間越晚數字越大，排越下面)
+                 return item.createdAt.seconds || 0;
+             };
+             return getScore(a) - getScore(b);
+          });
+      });
+
       const newPackingItem = ref('');
 
       const filteredNotebookList = computed(() => notebookList.value.filter(n => n.owner === currentNotebookFilter.value));
