@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -290,12 +289,17 @@
         </div>
       </div>
       
-      <!-- 更新行程內容按鈕 -->
-      <div class="text-center pb-20 pt-4">
-        <button @click="updateItineraryContentOnly" class="text-[12px] text-gray-400 underline hover:text-sakura-dark transition-colors font-bold block mx-auto mb-2">
+      <!-- 更新與修復按鈕區域 -->
+      <div class="text-center pb-20 pt-8 space-y-3">
+        <button @click="updateItineraryContentOnly" class="text-[12px] text-gray-400 underline hover:text-sakura-dark transition-colors font-bold flex items-center justify-center mx-auto">
             <i class="fa-solid fa-arrows-rotate mr-1"></i>更新行程內容 (保留其他資料)
         </button>
-        <div class="text-[10px] text-gray-300">資料庫版本: {{ TRIP_ID }}</div>
+        
+        <button @click="fixDuplicates" class="text-[12px] text-red-300 underline hover:text-red-500 transition-colors font-bold flex items-center justify-center mx-auto">
+            <i class="fa-solid fa-wrench mr-1"></i>修復重複行程 (若出現重複請點此)
+        </button>
+
+        <div class="text-[10px] text-gray-300 pt-2">資料庫版本: {{ TRIP_ID }}</div>
       </div>
     </div>
 
@@ -866,17 +870,56 @@ window.__FULL_ITINERARY_DATA__ = [
           const itinToUpload = window.__FULL_ITINERARY_DATA__ || [];
           
           try {
-             // 策略：直接覆蓋相同 ID 的行程文件
              if (Array.isArray(itinToUpload)) {
                   for (const item of itinToUpload) {
                       const id = item.id ? String(item.id) : Date.now().toString();
-                      // 使用 merge: true 確保安全，雖然我們是要換掉內容
                       await setDoc(doc(db, 'trips', TRIP_ID, 'itinerary', id), item, { merge: true });
                   }
               }
-              alert("行程資料已更新完畢！");
+              alert("行程資料已更新完畢！若發現重複行程，請使用下方的「修復重複行程」按鈕。");
           } catch(e) {
               alert("更新失敗：" + e.message);
+          } finally {
+              migrationStatus.value = "";
+          }
+      };
+
+      // 修復重複行程功能
+      const fixDuplicates = async () => {
+          if(!confirm('這將會掃描並刪除行程表中名稱與日期完全重複的項目，僅保留一筆。確定執行？')) return;
+          
+          migrationStatus.value = "正在掃描重複項目...";
+          try {
+              const q = collection(db, 'trips', TRIP_ID, 'itinerary');
+              const snapshot = await getDocs(q);
+              const items = [];
+              snapshot.forEach(doc => items.push({ _docId: doc.id, ...doc.data() }));
+
+              let deletedCount = 0;
+              const seedData = window.__FULL_ITINERARY_DATA__ || [];
+
+              // 針對每一個種子資料，去檢查 DB 裡是否有重複的
+              for (const seed of seedData) {
+                  // 找出 DB 中名稱跟日期一樣的
+                  const duplicates = items.filter(i => i.name === seed.name && i.date === seed.date);
+                  
+                  if (duplicates.length > 1) {
+                      // 優先保留 ID 吻合的，若無則保留第一筆
+                      const exactMatch = duplicates.find(d => String(d._docId) === String(seed.id));
+                      const targetToKeep = exactMatch || duplicates[0];
+
+                      for (const dup of duplicates) {
+                          if (dup !== targetToKeep) {
+                              await deleteDoc(doc(db, 'trips', TRIP_ID, 'itinerary', dup._docId));
+                              deletedCount++;
+                          }
+                      }
+                  }
+              }
+              
+              alert(deletedCount > 0 ? `修復完成！共移除了 ${deletedCount} 個重複項目。` : "檢查完畢，沒有發現重複的項目。");
+          } catch(e) {
+              alert("修復失敗：" + e.message);
           } finally {
               migrationStatus.value = "";
           }
@@ -1211,6 +1254,7 @@ window.__FULL_ITINERARY_DATA__ = [
         deleteShoppingItem, toggleShoppingCheck,
         addPackingItem, togglePackingCheck, deletePackingItem, deleteNote,
         updateItineraryContentOnly, // 確保回傳更新函數
+        fixDuplicates, // 新增修復重複函數
         forceResetData, // 確保回傳重置函數
         TRIP_ID, // Expose for template
 
@@ -1226,5 +1270,4 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
-
 
