@@ -610,11 +610,13 @@
   </nav>
 
   <!-- ✨✨✨ AI FEATURES FLOATING BUTTON ✨✨✨ -->
-  <button @click="toggleAiChat" class="fixed bottom-40 right-6 w-12 h-12 bg-gradient-to-br from-ai to-ai-dark text-white rounded-full shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform z-30 group">
+  <button @click="toggleAiChat" 
+          class="fixed right-6 w-10 h-10 bg-gradient-to-br from-ai to-ai-dark text-white rounded-full shadow-lg flex items-center justify-center text-base hover:scale-110 transition-all duration-300 z-30 group"
+          :class="['shopping', 'expense', 'notebook'].includes(currentTab) ? 'bottom-40' : 'bottom-24'">
     <i class="fa-solid fa-robot animate-pulse-fast"></i>
-    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+    <span class="absolute -top-1 -right-1 flex h-2 w-2">
       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-      <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
     </span>
   </button>
 
@@ -1469,3 +1471,4 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
+
