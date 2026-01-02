@@ -566,14 +566,16 @@
         <div v-if="filteredNotebookList.length === 0" class="text-center py-10 text-gray-400">
           <i class="fa-solid fa-book-open text-4xl mb-3 opacity-50"></i><p>這裡空空的，記點什麼吧！</p>
         </div>
-        <div v-for="note in filteredNotebookList" :key="note.id" class="bg-white p-4 rounded-2xl shadow-card relative group border-l-4 border-sakura-light" @click="openModal('notebook', note)">
+        <!-- 移除外層 div 的 @click 事件，使其點擊無反應 -->
+        <div v-for="note in filteredNotebookList" :key="note.id" class="bg-white p-4 rounded-2xl shadow-card relative group border-l-4 border-sakura-light">
           <h4 class="font-bold text-gray-800 mb-1">{{ note.title }}</h4>
           <p class="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{{ note.content }}</p>
           <div class="mt-3 flex justify-between items-end border-t border-gray-50 pt-2">
             <span class="text-[10px] text-gray-400">{{ note.owner }}</span>
             <div class="flex gap-3">
-                <button @click.stop="openModal('notebook', note)" class="text-xs text-gray-400 hover:text-sakura-dark font-bold"><i class="fa-solid fa-pen mr-1"></i>編輯</button>
-                <button @click.stop="deleteNote(note.id)" class="text-xs text-red-300 hover:text-red-500 font-bold"><i class="fa-solid fa-trash-can mr-1"></i>刪除</button>
+                <!-- 編輯按鈕保留點擊事件 -->
+                <button @click="openModal('notebook', note)" class="text-xs text-gray-400 hover:text-sakura-dark font-bold"><i class="fa-solid fa-pen mr-1"></i>編輯</button>
+                <button @click="deleteNote(note.id)" class="text-xs text-red-300 hover:text-red-500 font-bold"><i class="fa-solid fa-trash-can mr-1"></i>刪除</button>
             </div>
           </div>
         </div>
@@ -672,9 +674,9 @@ window.__FULL_ITINERARY_DATA__ = [
   { id: 4, date: '2026-04-02', category: 'accommodation', name: '東急 Stay 大阪本町', time: '13:00', travelTime: 0, transportType: 'walk', note: '先寄放行李', description: '先在大廳寄放行李，輕裝出發！' },
   
   // === 補回：黑門市場行程 (已更新描述) ===
-  { id: 41, date: '2026-04-02', category: 'transport', name: '本町 → 日本橋 (黑門市場)', time: '13:15', travelTime: 15, transportType: 'transit', note: '地鐵或計程車', description: '🚉 區間：地鐵堺筋線 (Sakaisuji Line) 至 日本橋站 (K17)。\n🚶 步行：由10號出口步行約2-3分鐘即抵達黑門市場。' },
+  { id: 41, date: '2026-04-02', category: 'transport', name: '本町 → 日本橋 (黑門市場)', time: '13:15', travelTime: 15, transportType: 'transit', note: '地鐵或計程車', description: '搭乘地鐵堺筋線 (Sakaisuji Line) 至 日本橋站 (K17)，10號出口步行即達黑門市場。' },
   { id: 42, date: '2026-04-02', category: 'food', name: '午餐：黑門市場', time: '13:30', travelTime: 0, transportType: 'walk', note: '大阪的廚房', openHours: '09:00 - 18:00', description: '大啖海鮮、和牛、關東煮！推薦嘗試現烤扇貝、鮪魚生魚片、豆漿濃郁的豆乳。請在店家指定的內用區或立食區享用，請勿邊走邊吃。' },
-  { id: 43, date: '2026-04-02', category: 'transport', name: '日本橋 → 大阪城公園', time: '15:00', travelTime: 30, transportType: 'transit', note: '堺筋線（咖啡色）轉中央線（綠色）', description: '🚉 區間：日本橋站 (K17) 搭乘 堺筋線 (咖啡色) 至 堺筋本町站 (K15) 轉乘至 森之宮站 (C19) 。\n🚶 步行：3-B出口出站即為大阪城公園入口（噴水池區）。' },
+  { id: 43, date: '2026-04-02', category: 'transport', name: '日本橋 → 大阪城公園', time: '15:00', travelTime: 30, transportType: 'transit', note: '千日前線轉谷町線', description: '📍 轉乘指引：\n1. 日本橋站 (S17) 搭乘 千日前線 (粉紅色) 往南巽方向 (搭1站)。\n2. 抵達 谷町九丁目站 (S18) 下車，依指標站內轉乘 谷町線 (紫色)。\n3. 搭乘往大日方向 (搭2站)，至 谷町四丁目站 (T23) 下車。\n4. 走 1-B 或 9 號出口，步行約 15 分鐘可抵達大阪城大手門入口。' },
   // ========================
 
   { id: 6, date: '2026-04-02', category: 'attraction', name: '大阪城公園 & 天守閣', time: '15:30', travelTime: 0, transportType: 'walk', note: '🌸 櫻花百選名所', openHours: '09:00 - 17:00 (最後入場 16:30)', ticket: '天守閣 ¥600', description: '大阪的地標，園內種植約3000株櫻花。推薦前往「西之丸庭園」賞櫻，這裡以染井吉野櫻為主，能拍到天守閣與櫻花同框的絕美畫面。天守閣內展示豐臣秀吉的歷史文物，8樓展望台可俯瞰大阪市景。' },
@@ -1270,5 +1272,3 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
-
-
