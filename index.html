@@ -37,13 +37,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
   <!-- Vue 3 (Global Build) -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- Markdown Parser for AI responses -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            sakura: { light: '#fff0f5', DEFAULT: '#ffb7c5', dark: '#2EA9DF', text: '#5d4037' }
+            sakura: { light: '#fff0f5', DEFAULT: '#ffb7c5', dark: '#2EA9DF', text: '#5d4037' },
+            ai: { light: '#e0f2fe', DEFAULT: '#0ea5e9', dark: '#0284c7' }
           },
           fontFamily: { sans: ['"Zen Maru Gothic"', 'sans-serif'] },
           boxShadow: { 'soft': '0 4px 20px -2px rgba(255, 183, 197, 0.4)', 'card': '0 2px 10px rgba(0,0,0,0.05)' },
@@ -52,6 +55,7 @@
             'fade-in': 'fadeIn 0.3s ease-out forwards',
             'slide-up': 'slideUp 0.3s ease-out forwards',
             'fall-1': 'fall-sway-1 6s linear infinite',
+            'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
           },
           keyframes: {
             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
@@ -76,6 +80,14 @@
     .app-container { max-width: 480px; margin: 0 auto; background-color: #fafafa; min-height: 100vh; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); padding-bottom: 80px; }
     .sakura-petal { position: absolute; background-color: #ffb7c5; border-radius: 100% 0 100% 0; opacity: 0; top: -20px; }
     .blur-sm { filter: blur(1px); }
+    /* AI Chat Styles */
+    .typing-indicator span { display: inline-block; width: 6px; height: 6px; background-color: #aaa; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; margin: 0 1px; }
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    .markdown-body p { margin-bottom: 0.5em; }
+    .markdown-body ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 0.5em; }
+    .markdown-body strong { font-weight: 700; color: #0284c7; }
   </style>
 </head>
 
@@ -597,6 +609,71 @@
     </button>
   </nav>
 
+  <!-- ✨✨✨ AI FEATURES FLOATING BUTTON ✨✨✨ -->
+  <button @click="toggleAiChat" class="fixed bottom-24 left-6 w-12 h-12 bg-gradient-to-br from-ai to-ai-dark text-white rounded-full shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform z-30 group">
+    <i class="fa-solid fa-robot animate-pulse-fast"></i>
+    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+    </span>
+  </button>
+
+  <!-- ✨✨✨ AI CHAT MODAL ✨✨✨ -->
+  <div v-if="showAiChat" class="fixed inset-0 bg-black/30 z-[60] flex items-end sm:items-center justify-center animate-fade-in" @click.self="toggleAiChat">
+    <div class="bg-white w-full max-w-[480px] h-[80vh] sm:h-[600px] sm:rounded-2xl rounded-t-3xl shadow-2xl flex flex-col animate-slide-up overflow-hidden">
+      <!-- Chat Header -->
+      <div class="bg-gradient-to-r from-ai to-ai-dark p-4 flex justify-between items-center text-white shrink-0">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm"><i class="fa-solid fa-robot"></i></div>
+            <div>
+                <h3 class="font-bold text-sm">AI 隨身導遊</h3>
+                <p class="text-[10px] opacity-80">Gemini 2.5 Flash • 知道您的行程</p>
+            </div>
+        </div>
+        <button @click="toggleAiChat" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      
+      <!-- Chat Messages -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50" ref="chatContainerRef">
+         <div v-for="(msg, idx) in aiChatMessages" :key="idx" class="flex items-start gap-2" :class="msg.role === 'user' ? 'flex-row-reverse' : ''">
+             <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs shadow-sm" 
+                  :class="msg.role === 'user' ? 'bg-gray-200 text-gray-600' : 'bg-ai-light text-ai-dark'">
+                  <i :class="msg.role === 'user' ? 'fa-solid fa-user' : 'fa-solid fa-robot'"></i>
+             </div>
+             <div class="max-w-[75%] p-3 rounded-2xl text-sm shadow-sm markdown-body" 
+                  :class="msg.role === 'user' ? 'bg-white text-gray-800 rounded-tr-none' : 'bg-white text-gray-700 rounded-tl-none border border-ai-light'"
+                  v-html="msg.text">
+             </div>
+         </div>
+         <div v-if="aiIsLoading" class="flex items-start gap-2">
+            <div class="w-8 h-8 rounded-full bg-ai-light text-ai-dark flex items-center justify-center shrink-0 text-xs shadow-sm"><i class="fa-solid fa-robot"></i></div>
+            <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-ai-light shadow-sm typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+         </div>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="p-3 bg-white border-t border-gray-100 shrink-0">
+        <form @submit.prevent="sendAiMessage" class="flex gap-2 relative">
+            <input type="text" v-model="aiChatInput" placeholder="問問行程、交通或美食..." 
+                   class="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ai transition-all" 
+                   :disabled="aiIsLoading">
+            <button type="submit" 
+                    class="w-10 h-10 rounded-full bg-ai text-white flex items-center justify-center shadow-md disabled:opacity-50 hover:bg-ai-dark transition-colors"
+                    :disabled="!aiChatInput.trim() || aiIsLoading">
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+            </button>
+        </form>
+        <div class="flex gap-2 mt-2 overflow-x-auto no-scrollbar">
+            <button @click="setAiPrompt('我接下來要去哪？')" class="text-[10px] bg-gray-50 border border-gray-200 px-2 py-1 rounded-full text-gray-500 hover:bg-ai-light hover:text-ai-dark hover:border-ai-light transition-colors whitespace-nowrap">📍 接下來去哪？</button>
+            <button @click="setAiPrompt('這附近有什麼好吃的？')" class="text-[10px] bg-gray-50 border border-gray-200 px-2 py-1 rounded-full text-gray-500 hover:bg-ai-light hover:text-ai-dark hover:border-ai-light transition-colors whitespace-nowrap">🍜 附近美食</button>
+            <button @click="setAiPrompt('現在天氣如何？')" class="text-[10px] bg-gray-50 border border-gray-200 px-2 py-1 rounded-full text-gray-500 hover:bg-ai-light hover:text-ai-dark hover:border-ai-light transition-colors whitespace-nowrap">☁️ 現在天氣</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- modal -->
   <div v-if="modal.show" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center animate-fade-in">
     <div class="bg-white w-full max-w-[480px] rounded-t-[20px] sm:rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
@@ -650,7 +727,17 @@
         <template v-if="modal.type === 'notebook'">
             <div><label class="block text-xs font-bold text-gray-500 mb-1">記錄人</label><select v-model="formData.owner" class="w-full bg-gray-50 rounded-xl p-3"><option v-for="t in travelers" :value="t">{{t}}</option></select></div>
             <div><label class="block text-xs font-bold text-gray-500 mb-1">標題</label><input type="text" v-model="formData.title" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none"></div>
-            <div><label class="block text-xs font-bold text-gray-500 mb-1">內容</label><textarea v-model="formData.content" class="w-full bg-gray-50 rounded-xl p-3 h-32 border focus:border-sakura outline-none"></textarea></div>
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-xs font-bold text-gray-500">內容</label>
+                    <button @click="refineNoteWithAi" type="button" class="text-[10px] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-1 rounded-full flex items-center shadow-md hover:scale-105 transition-transform" :disabled="isAiRefining">
+                        <i v-if="isAiRefining" class="fa-solid fa-spinner fa-spin mr-1"></i>
+                        <i v-else class="fa-solid fa-wand-magic-sparkles mr-1"></i> 
+                        {{ isAiRefining ? '思考中...' : 'AI 潤飾' }}
+                    </button>
+                </div>
+                <textarea v-model="formData.content" placeholder="輸入關鍵字（例如：鹿很多、仙貝被搶、好玩），AI 會幫您寫成日記..." class="w-full bg-gray-50 rounded-xl p-3 h-32 border focus:border-sakura outline-none"></textarea>
+            </div>
         </template>
       </div>
 
@@ -735,7 +822,7 @@ window.__FULL_ITINERARY_DATA__ = [
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
   
   // 移除從 CDN 引入 Vue 的這行，改用全域變數
-  const { createApp, ref, computed, reactive, onMounted, watch } = Vue;
+  const { createApp, ref, computed, reactive, onMounted, watch, nextTick } = Vue;
 
   // Firebase Configuration
   const firebaseConfig = {
@@ -753,6 +840,37 @@ window.__FULL_ITINERARY_DATA__ = [
   const auth = getAuth(app);
   // 保留您的舊資料 ID (v8_final)
   const TRIP_ID = "keihan_2026_0402_v8_final";
+
+  // ✨✨✨ GEMINI API SETUP ✨✨✨
+  const apiKey = ""; // API Key injected at runtime
+  
+  async function callGeminiAPI(userPrompt, systemInstruction) {
+    if (!apiKey) {
+      console.warn("API Key not found");
+      return "目前無法連線到 AI 服務。";
+    }
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    
+    const payload = {
+      contents: [{ parts: [{ text: userPrompt }] }],
+      systemInstruction: { parts: [{ text: systemInstruction }] }
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message);
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "AI 暫時無法回應。";
+    } catch (error) {
+      console.error("Gemini API Error:", error);
+      return "發生錯誤，請稍後再試。";
+    }
+  }
 
   createApp({
     setup() {
@@ -1216,6 +1334,77 @@ window.__FULL_ITINERARY_DATA__ = [
       const getExpenseIcon = (c) => ({food:'fa-solid fa-utensils',transport:'fa-solid fa-train',shopping:'fa-solid fa-bag-shopping',accommodation:'fa-solid fa-bed',ticket:'fa-solid fa-ticket'}[c]||'fa-solid fa-yen-sign');
       const getTransportIcon = (t) => t==='walk'?'fa-solid fa-person-walking':(t==='flight'?'fa-solid fa-plane':'fa-solid fa-train-subway');
 
+      // --- ✨✨✨ AI CHAT LOGIC ---
+      const showAiChat = ref(false);
+      const toggleAiChat = () => showAiChat.value = !showAiChat.value;
+      const aiChatInput = ref('');
+      const aiChatMessages = ref([{role: 'model', text: '你好！我是你的 AI 隨身導遊 ✨ <br>關於今天的行程、交通或美食，有什麼想問的嗎？'}]);
+      const aiIsLoading = ref(false);
+      const chatContainerRef = ref(null);
+
+      const scrollChatToBottom = () => {
+          nextTick(() => {
+              if (chatContainerRef.value) {
+                  chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
+              }
+          });
+      };
+
+      const setAiPrompt = (txt) => {
+          aiChatInput.value = txt;
+          // optional: auto send
+      };
+
+      const sendAiMessage = async () => {
+          if(!aiChatInput.value.trim() || aiIsLoading.value) return;
+
+          const userText = aiChatInput.value.trim();
+          aiChatMessages.value.push({ role: 'user', text: userText });
+          aiChatInput.value = '';
+          aiIsLoading.value = true;
+          scrollChatToBottom();
+
+          // Prepare context
+          const todayItin = filteredItinerary.value.map(i => `${i.time} ${i.name} (${i.description || i.note})`).join('\n');
+          const systemPrompt = `你是一個專業的京阪旅遊導遊。今天的日期是 ${selectedDate.value}。
+          
+          使用者今日的詳細行程如下：
+          ${todayItin}
+
+          請根據上述行程回答使用者的問題。
+          - 保持回答簡短、實用、熱情。
+          - 如果使用者問交通，請參考行程中的交通建議。
+          - 如果使用者問美食，請推薦行程地點附近的真實餐廳。
+          - 請用繁體中文回答。
+          - 可以使用 markdown 格式美化回答 (bold, list)。`;
+
+          const response = await callGeminiAPI(userText, systemPrompt);
+          
+          // Parse markdown to HTML
+          const htmlResponse = marked.parse(response);
+          aiChatMessages.value.push({ role: 'model', text: htmlResponse });
+          
+          aiIsLoading.value = false;
+          scrollChatToBottom();
+      };
+
+      // --- ✨✨✨ NOTEBOOK AI REFINEMENT LOGIC ---
+      const isAiRefining = ref(false);
+      const refineNoteWithAi = async () => {
+          if (!formData.content || isAiRefining.value) return;
+          
+          isAiRefining.value = true;
+          const originalText = formData.content;
+          
+          const systemPrompt = `你是一位文筆優美的旅遊作家。請將使用者提供的簡短旅遊筆記或關鍵字，改寫成一篇溫暖、生動且通順的旅遊日記 (繁體中文)。保留原本的情感，但增加一些細節描寫。長度適中即可。`;
+
+          const refinedText = await callGeminiAPI(originalText, systemPrompt);
+          
+          formData.content = refinedText;
+          isAiRefining.value = false;
+      };
+
+
       // --- AUTH & INIT ---
       onMounted(() => {
         // 設定強制3秒後關閉 Splash，避免卡死
@@ -1269,7 +1458,11 @@ window.__FULL_ITINERARY_DATA__ = [
         exchange, currentRate, calcTwd, calcJpy,
         getCategoryLabel, getCategoryColor, getExpenseIcon, getTransportIcon, handleImageUpload, openMap,
         firebaseStatus, reconnectFirebase, migrationStatus,
-        isTigerairInfoExpanded
+        isTigerairInfoExpanded,
+
+        // AI Features
+        showAiChat, toggleAiChat, aiChatInput, aiChatMessages, sendAiMessage, aiIsLoading, chatContainerRef, setAiPrompt,
+        isAiRefining, refineNoteWithAi
       };
     }
   }).mount('#app');
