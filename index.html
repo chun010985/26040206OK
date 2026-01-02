@@ -494,11 +494,13 @@
 
       <div class="grid grid-cols-2 gap-4 pb-24">
         <div v-for="(item, index) in filteredShoppingList" :key="item.id" class="bg-white rounded-2xl overflow-hidden shadow-card relative group">
-          <div class="h-32 bg-gray-100 relative overflow-hidden" @click="openModal('shopping', item)">
+          <!-- 移除這裡的 @click="openModal..." -->
+          <div class="h-32 bg-gray-100 relative overflow-hidden">
             <img v-if="item.image" :src="item.image" class="w-full h-full object-cover">
             <div v-else class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-image text-3xl"></i></div>
             <div class="absolute top-1 right-1 flex gap-1">
-              <button @click.stop="openModal('shopping', item)" class="bg-white/80 w-6 h-6 rounded-full text-gray-500 text-xs flex items-center justify-center shadow-sm hover:text-sakura-dark"><i class="fa-solid fa-pen"></i></button>
+              <!-- 保留編輯按鈕的功能 -->
+              <button @click="openModal('shopping', item)" class="bg-white/80 w-6 h-6 rounded-full text-gray-500 text-xs flex items-center justify-center shadow-sm hover:text-sakura-dark"><i class="fa-solid fa-pen"></i></button>
             </div>
             <span class="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm">{{ item.owner || '未指定' }}</span>
           </div>
