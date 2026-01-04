@@ -309,7 +309,10 @@
       <div class="bg-white rounded-2xl p-5 shadow-card">
         <h3 class="font-bold text-sakura-text mb-4 border-b pb-2 flex justify-between items-center">
           <span><i class="fa-solid fa-coins mr-2 text-yellow-500"></i>匯率換算</span>
-          <span class="text-[10px] text-gray-400">1 JPY ≈ {{ currentRate }} TWD</span>
+          <div class="text-right">
+            <span class="text-[10px] text-gray-400 block">1 JPY ≈ {{ currentRate }} TWD</span>
+            <span v-if="rateUpdateDate" class="text-[9px] text-gray-300 block">更新: {{ rateUpdateDate }}</span>
+          </div>
         </h3>
         <div class="flex items-center gap-4">
           <div class="flex-1"><label class="text-xs text-gray-500 mb-1 block">日幣 (JPY)</label><input type="number" v-model="exchange.jpy" @input="calcTwd" class="w-full bg-gray-50 rounded-xl p-3 outline-none focus:ring-2 focus:ring-sakura" placeholder="¥"></div>
@@ -1152,15 +1155,26 @@ window.__FULL_ITINERARY_DATA__ = [
 
       const exchange = reactive({ jpy: '', twd: '' });
       const currentRate = ref(0.218);
+      const rateUpdateDate = ref('');
       const fetchExchangeRate = async () => {
          try {
             const res = await fetch('https://api.exchangerate-api.com/v4/latest/JPY');
             const data = await res.json();
             currentRate.value = data.rates.TWD;
+            rateUpdateDate.value = data.date;
          } catch(e) {}
       };
-      const calcTwd = () => exchange.twd = exchange.jpy ? Math.round(exchange.jpy * currentRate.value) : '';
-      const calcJpy = () => exchange.jpy = exchange.twd ? Math.round(exchange.twd / currentRate.value) : '';
+      const calcTwd = () => {
+        if(!exchange.jpy) { exchange.twd = ''; return; }
+        // 保留 2 位小數，避免 Math.round 造成小額換算為 0
+        exchange.twd = parseFloat((exchange.jpy * currentRate.value).toFixed(2));
+      };
+      const calcJpy = () => {
+        if(!exchange.twd) { exchange.jpy = ''; return; }
+        // 日幣通常為整數，但為了精確計算保留小數也無妨，或設為 0 位
+        // 為了回應使用者需求，這裡保留 2 位
+        exchange.jpy = parseFloat((exchange.twd / currentRate.value).toFixed(2));
+      };
 
       const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -1269,7 +1283,7 @@ window.__FULL_ITINERARY_DATA__ = [
 
         // Utils
         weatherData, isWeatherExpanded, toggleWeather, weatherLoading, currentDayCities, changeWeatherCity,
-        exchange, currentRate, calcTwd, calcJpy,
+        exchange, currentRate, calcTwd, calcJpy, rateUpdateDate,
         getCategoryLabel, getCategoryColor, getExpenseIcon, getTransportIcon, handleImageUpload, openMap,
         firebaseStatus, reconnectFirebase, migrationStatus,
         isTigerairInfoExpanded
@@ -1279,3 +1293,5 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
+
+
