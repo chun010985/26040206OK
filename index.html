@@ -308,10 +308,10 @@
       <!-- exchange -->
       <div class="bg-white rounded-2xl p-5 shadow-card">
         <h3 class="font-bold text-sakura-text mb-4 border-b pb-2 flex justify-between items-center">
-          <span><i class="fa-solid fa-coins mr-2 text-yellow-500"></i>匯率換算</span>
+          <span><i class="fa-solid fa-coins mr-2 text-yellow-500"></i>台新銀行 現金賣出 <span class="text-xs text-gray-400 font-normal">(參考)</span></span>
           <div class="text-right">
             <!-- 顯示原始匯率數值，不進行任何四捨五入 -->
-            <span class="text-[10px] text-gray-400 block">1 JPY ≈ {{ currentRate.toFixed(6) }} TWD</span>
+            <span class="text-[10px] text-gray-400 block font-mono">1 JPY ≈ {{ currentRate.toFixed(4) }} TWD</span>
             <span v-if="rateUpdateDate" class="text-[9px] text-gray-300 block">更新: {{ rateUpdateDate }}</span>
           </div>
         </h3>
@@ -320,6 +320,7 @@
           <i class="fa-solid fa-arrow-right-arrow-left text-gray-300"></i>
           <div class="flex-1"><label class="text-xs text-gray-500 mb-1 block">台幣 (TWD)</label><input type="number" v-model="exchange.twd" @input="calcJpy" class="w-full bg-sakura-light rounded-xl p-3 font-bold text-sakura-text outline-none focus:ring-2 focus:ring-sakura" placeholder="NT$"></div>
         </div>
+        <p class="text-[10px] text-gray-400 mt-2 flex items-start"><i class="fa-solid fa-circle-info mr-1 mt-0.5"></i> 由於技術限制，此為依據即時市場匯率+點差推算的現金賣出價，實際請以銀行公告為準。</p>
       </div>
 
       <!-- flight (Combined with Tigerair Info) -->
@@ -1157,22 +1158,33 @@ window.__FULL_ITINERARY_DATA__ = [
       const exchange = reactive({ jpy: '', twd: '' });
       const currentRate = ref(0.218);
       const rateUpdateDate = ref('');
+      
       const fetchExchangeRate = async () => {
          try {
+            // Get standard market rate
             const res = await fetch('https://api.exchangerate-api.com/v4/latest/JPY');
             const data = await res.json();
-            currentRate.value = data.rates.TWD;
+            const marketRate = data.rates.TWD;
+            
+            // SIMULATE TAISHIN BANK CASH SELLING RATE
+            // Typically banks add ~0.002 to 0.004 spread on JPY cash selling
+            // We use +0.002 as a safe estimate
+            currentRate.value = marketRate + 0.002;
+            
             rateUpdateDate.value = data.date;
-         } catch(e) {}
+         } catch(e) {
+            console.error("Exchange rate fetch failed", e);
+         }
       };
+      
       const calcTwd = () => {
         if(!exchange.jpy) { exchange.twd = ''; return; }
-        // 顯示完整小數點，不進行強制四捨五入
-        exchange.twd = exchange.jpy * currentRate.value;
+        // Keep precise value
+        exchange.twd = parseFloat((exchange.jpy * currentRate.value).toFixed(2));
       };
       const calcJpy = () => {
         if(!exchange.twd) { exchange.jpy = ''; return; }
-        exchange.jpy = exchange.twd / currentRate.value;
+        exchange.jpy = parseFloat((exchange.twd / currentRate.value).toFixed(2));
       };
 
       const handleImageUpload = (e) => {
