@@ -310,6 +310,7 @@
         <h3 class="font-bold text-sakura-text mb-4 border-b pb-2 flex justify-between items-center">
           <span><i class="fa-solid fa-coins mr-2 text-yellow-500"></i>匯率換算</span>
           <div class="text-right">
+            <!-- 顯示原始匯率數值，不進行任何四捨五入 -->
             <span class="text-[10px] text-gray-400 block">1 JPY ≈ {{ currentRate }} TWD</span>
             <span v-if="rateUpdateDate" class="text-[9px] text-gray-300 block">更新: {{ rateUpdateDate }}</span>
           </div>
@@ -535,7 +536,7 @@
       <div class="bg-gradient-to-r from-sakura to-sakura-dark rounded-2xl p-6 text-white shadow-soft mb-6 text-center transition-all duration-300">
         <p class="text-sm opacity-90 mb-1 flex items-center justify-center gap-2"><i class="fa-solid fa-user-tag text-xs"></i>{{ currentMemberFilter ? currentMemberFilter + ' 的' : '目前總' }}花費 (JPY)</p>
         <h2 class="text-4xl font-bold font-mono">¥ {{ filteredTotalExpense.toLocaleString() }}</h2>
-        <p class="text-xs opacity-70 mt-2">約 TWD {{ Math.round(filteredTotalExpense * currentRate).toLocaleString() }}</p>
+        <p class="text-xs opacity-70 mt-2">約 TWD {{ (filteredTotalExpense * currentRate).toLocaleString(undefined, {maximumFractionDigits: 2}) }}</p>
       </div>
 
       <div class="bg-white rounded-t-2xl shadow-card min-h-[300px] pb-24">
@@ -1166,14 +1167,12 @@ window.__FULL_ITINERARY_DATA__ = [
       };
       const calcTwd = () => {
         if(!exchange.jpy) { exchange.twd = ''; return; }
-        // 保留 2 位小數，避免 Math.round 造成小額換算為 0
-        exchange.twd = parseFloat((exchange.jpy * currentRate.value).toFixed(2));
+        // 顯示完整小數點，不進行強制四捨五入
+        exchange.twd = exchange.jpy * currentRate.value;
       };
       const calcJpy = () => {
         if(!exchange.twd) { exchange.jpy = ''; return; }
-        // 日幣通常為整數，但為了精確計算保留小數也無妨，或設為 0 位
-        // 為了回應使用者需求，這裡保留 2 位
-        exchange.jpy = parseFloat((exchange.twd / currentRate.value).toFixed(2));
+        exchange.jpy = exchange.twd / currentRate.value;
       };
 
       const handleImageUpload = (e) => {
