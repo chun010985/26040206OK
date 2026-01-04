@@ -311,7 +311,7 @@
           <span><i class="fa-solid fa-coins mr-2 text-yellow-500"></i>匯率換算</span>
           <div class="text-right">
             <!-- 顯示原始匯率數值，不進行任何四捨五入 -->
-            <span class="text-[10px] text-gray-400 block">1 JPY ≈ {{ currentRate }} TWD</span>
+            <span class="text-[10px] text-gray-400 block">1 JPY ≈ {{ currentRate.toFixed(6) }} TWD</span>
             <span v-if="rateUpdateDate" class="text-[9px] text-gray-300 block">更新: {{ rateUpdateDate }}</span>
           </div>
         </h3>
@@ -536,7 +536,7 @@
       <div class="bg-gradient-to-r from-sakura to-sakura-dark rounded-2xl p-6 text-white shadow-soft mb-6 text-center transition-all duration-300">
         <p class="text-sm opacity-90 mb-1 flex items-center justify-center gap-2"><i class="fa-solid fa-user-tag text-xs"></i>{{ currentMemberFilter ? currentMemberFilter + ' 的' : '目前總' }}花費 (JPY)</p>
         <h2 class="text-4xl font-bold font-mono">¥ {{ filteredTotalExpense.toLocaleString() }}</h2>
-        <p class="text-xs opacity-70 mt-2">約 TWD {{ (filteredTotalExpense * currentRate).toLocaleString(undefined, {maximumFractionDigits: 2}) }}</p>
+        <p class="text-xs opacity-70 mt-2">約 TWD {{ (filteredTotalExpense * currentRate).toLocaleString(undefined, {maximumFractionDigits: 20}) }}</p>
       </div>
 
       <div class="bg-white rounded-t-2xl shadow-card min-h-[300px] pb-24">
