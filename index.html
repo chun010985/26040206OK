@@ -902,9 +902,9 @@ window.__FULL_ITINERARY_DATA__ = [
 
       // 修復重複行程功能
       const fixDuplicates = async () => {
-          if(!confirm('這將會掃描並刪除行程表中名稱與日期完全重複的項目，僅保留一筆。確定執行？')) return;
+          if(!confirm('這將會掃描並刪除行程表中名稱與日期完全重複的項目，僅保留一筆。\n\n⚠️ 重要：系統會強制將保留下來的項目內容更新為最新版 (例如 04:30)。')) return;
           
-          migrationStatus.value = "正在掃描重複項目...";
+          migrationStatus.value = "正在智慧修復行程...";
           try {
               const q = collection(db, 'trips', TRIP_ID, 'itinerary');
               const snapshot = await getDocs(q);
@@ -912,6 +912,7 @@ window.__FULL_ITINERARY_DATA__ = [
               snapshot.forEach(doc => items.push({ _docId: doc.id, ...doc.data() }));
 
               let deletedCount = 0;
+              let updatedCount = 0;
               const seedData = window.__FULL_ITINERARY_DATA__ || [];
 
               // 針對每一個種子資料，去檢查 DB 裡是否有重複的
@@ -919,21 +920,30 @@ window.__FULL_ITINERARY_DATA__ = [
                   // 找出 DB 中名稱跟日期一樣的
                   const duplicates = items.filter(i => i.name === seed.name && i.date === seed.date);
                   
-                  if (duplicates.length > 1) {
-                      // 優先保留 ID 吻合的，若無則保留第一筆
+                  if (duplicates.length > 0) {
+                      // 1. 決定要保留哪一個 (優先保留 ID 吻合的，若無則保留第一筆)
                       const exactMatch = duplicates.find(d => String(d._docId) === String(seed.id));
                       const targetToKeep = exactMatch || duplicates[0];
 
-                      for (const dup of duplicates) {
-                          if (dup !== targetToKeep) {
-                              await deleteDoc(doc(db, 'trips', TRIP_ID, 'itinerary', dup._docId));
-                              deletedCount++;
+                      // 2. 關鍵步驟：強制更新保留下來的那一筆，確保內容是最新的 (例如時間 04:30)
+                      // 這樣即使系統保留了舊 ID 的資料，內容也會被修正為新版
+                      const docRef = doc(db, 'trips', TRIP_ID, 'itinerary', targetToKeep._docId);
+                      await setDoc(docRef, seed, { merge: true });
+                      updatedCount++;
+
+                      // 3. 刪除其他的
+                      if (duplicates.length > 1) {
+                          for (const dup of duplicates) {
+                              if (dup !== targetToKeep) {
+                                  await deleteDoc(doc(db, 'trips', TRIP_ID, 'itinerary', dup._docId));
+                                  deletedCount++;
+                              }
                           }
                       }
                   }
               }
               
-              alert(deletedCount > 0 ? `修復完成！共移除了 ${deletedCount} 個重複項目。` : "檢查完畢，沒有發現重複的項目。");
+              alert(`修復完成！\n- 更新了 ${updatedCount} 筆資料為最新內容\n- 移除了 ${deletedCount} 筆重複項目`);
           } catch(e) {
               alert("修復失敗：" + e.message);
           } finally {
@@ -1306,6 +1316,7 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
+
 
 
 
