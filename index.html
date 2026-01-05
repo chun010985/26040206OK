@@ -339,7 +339,6 @@
             <div class="text-right"><div class="text-3xl font-black text-gray-800 leading-none">10:55</div><div class="text-sm font-bold text-gray-600 mt-1">KIX 關西</div><div class="text-[10px] text-gray-400 mt-0.5 bg-white/60 inline-block px-1 rounded">第一航廈</div></div>
           </div>
           <div class="text-center mb-3">
-            <!-- 修改這裡的建議報到時間 -->
             <span class="text-xs font-bold text-blue-600 bg-white border border-blue-200 px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-user-clock mr-1"></i>建議報到：04:30</span>
           </div>
           <div class="flex justify-between items-center text-xs text-gray-500 border-t border-blue-200/50 pt-3 mt-2">
@@ -678,7 +677,6 @@
 <!-- FULL DATA SEEDING -->
 <script>
 window.__FULL_ITINERARY_DATA__ = [
-  // 修改這裡的集合時間
   { id: 0, date: '2026-04-02', category: 'other', name: '高雄小港機場集合', time: '04:30', travelTime: 0, transportType: 'walk', note: '國際航廈出境大廳', description: '準備啟程出發囉！🎉 請務必準時集合，準備辦理登機手續。記得再次檢查護照與必備證件！' },
   { id: 1, date: '2026-04-02', category: 'flight', name: '航班 IT-284 KHH->KIX', time: '07:00', travelTime: 0, transportType: 'flight', note: '起飛 07:00 / 抵達 10:55 (預計出關 11:30)' },
   
@@ -886,10 +884,25 @@ window.__FULL_ITINERARY_DATA__ = [
           const itinToUpload = window.__FULL_ITINERARY_DATA__ || [];
           
           try {
+             // 新邏輯：依據 Name 和 Date 來更新，而不是盲目用 ID
+             const q = collection(db, 'trips', TRIP_ID, 'itinerary');
+             const snapshot = await getDocs(q);
+             const existingItems = [];
+             snapshot.forEach(doc => existingItems.push({ _docId: doc.id, ...doc.data() }));
+
              if (Array.isArray(itinToUpload)) {
                   for (const item of itinToUpload) {
-                      const id = item.id ? String(item.id) : Date.now().toString();
-                      await setDoc(doc(db, 'trips', TRIP_ID, 'itinerary', id), item, { merge: true });
+                      // 尋找是否已有同名同日期的行程
+                      const match = existingItems.find(ex => ex.name === item.name && ex.date === item.date);
+                      
+                      if (match) {
+                          // 如果有，更新該筆資料 (保留原本的 docID)
+                          await setDoc(doc(db, 'trips', TRIP_ID, 'itinerary', match._docId), item, { merge: true });
+                      } else {
+                          // 如果沒有，才新增
+                          const id = item.id ? String(item.id) : Date.now().toString();
+                          await setDoc(doc(db, 'trips', TRIP_ID, 'itinerary', id), item);
+                      }
                   }
               }
               alert("行程資料已更新完畢！若發現重複行程，請使用下方的「修復重複行程」按鈕。");
@@ -900,11 +913,11 @@ window.__FULL_ITINERARY_DATA__ = [
           }
       };
 
-      // 修復重複行程功能
+      // 修復重複行程功能 (超級強力版)
       const fixDuplicates = async () => {
-          if(!confirm('這將會掃描並刪除行程表中名稱與日期完全重複的項目，僅保留一筆。\n\n⚠️ 重要：系統會強制將保留下來的項目內容更新為最新版 (例如 04:30)。')) return;
+          if(!confirm('這將會強制掃描所有「高雄小港機場集合」的項目，並強制將其更新為 04:30，同時刪除多餘的重複項。\n\n確定執行？')) return;
           
-          migrationStatus.value = "正在智慧修復行程...";
+          migrationStatus.value = "正在強制修正...";
           try {
               const q = collection(db, 'trips', TRIP_ID, 'itinerary');
               const snapshot = await getDocs(q);
@@ -915,35 +928,31 @@ window.__FULL_ITINERARY_DATA__ = [
               let updatedCount = 0;
               const seedData = window.__FULL_ITINERARY_DATA__ || [];
 
-              // 針對每一個種子資料，去檢查 DB 裡是否有重複的
+              // 針對每一個種子資料
               for (const seed of seedData) {
-                  // 找出 DB 中名稱跟日期一樣的
+                  // 找出資料庫中所有同名同日期的項目
                   const duplicates = items.filter(i => i.name === seed.name && i.date === seed.date);
                   
                   if (duplicates.length > 0) {
-                      // 1. 決定要保留哪一個 (優先保留 ID 吻合的，若無則保留第一筆)
-                      const exactMatch = duplicates.find(d => String(d._docId) === String(seed.id));
-                      const targetToKeep = exactMatch || duplicates[0];
+                      // 1. 選出要保留的「倖存者」（直接選第一筆找到的，不管它是誰）
+                      const survivor = duplicates[0];
 
-                      // 2. 關鍵步驟：強制更新保留下來的那一筆，確保內容是最新的 (例如時間 04:30)
-                      // 這樣即使系統保留了舊 ID 的資料，內容也會被修正為新版
-                      const docRef = doc(db, 'trips', TRIP_ID, 'itinerary', targetToKeep._docId);
-                      await setDoc(docRef, seed, { merge: true });
+                      // 2. 【關鍵動作】強制把倖存者的內容，覆寫成程式碼裡的最新版 (04:30)
+                      const survivorRef = doc(db, 'trips', TRIP_ID, 'itinerary', survivor._docId);
+                      await setDoc(survivorRef, seed); // 直接覆蓋，不使用 merge，確保完全一致
                       updatedCount++;
 
-                      // 3. 刪除其他的
+                      // 3. 刪除其他的重複項
                       if (duplicates.length > 1) {
-                          for (const dup of duplicates) {
-                              if (dup !== targetToKeep) {
-                                  await deleteDoc(doc(db, 'trips', TRIP_ID, 'itinerary', dup._docId));
-                                  deletedCount++;
-                              }
+                          for (let i = 1; i < duplicates.length; i++) {
+                              await deleteDoc(doc(db, 'trips', TRIP_ID, 'itinerary', duplicates[i]._docId));
+                              deletedCount++;
                           }
                       }
                   }
               }
               
-              alert(`修復完成！\n- 更新了 ${updatedCount} 筆資料為最新內容\n- 移除了 ${deletedCount} 筆重複項目`);
+              alert(`強制修復完成！\n- 已強制更新 ${updatedCount} 筆資料為最新內容 (含 04:30)\n- 已移除 ${deletedCount} 筆重複項目`);
           } catch(e) {
               alert("修復失敗：" + e.message);
           } finally {
@@ -1316,7 +1325,5 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
-
-
 
 
