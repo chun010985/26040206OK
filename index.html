@@ -111,7 +111,7 @@
       <span v-if="daysUntilTrip > 0">距離出發還有 <b>{{ daysUntilTrip }}</b> 天</span>
       <span v-else-if="daysUntilTrip >= -3">旅程第 {{ Math.abs(daysUntilTrip) + 1 }} 天</span>
       <span v-else-if="daysUntilTrip === -4">旅程結束，平安返家 🏠</span>
-      <span v-else>旅程已圓滿結束</span>
+      <span v-else>旅程已圓滿結束，期待下次旅行</span>
     </div>
     <div class="absolute top-6 left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm">
       <h1 class="text-3xl font-bold tracking-widest text-sakura-text">京阪之旅</h1>
@@ -468,7 +468,7 @@
 
       <div class="bg-pink-50 text-pink-700 text-xs px-4 py-2 rounded-xl mb-4 flex items-center border border-pink-100 mx-2 shadow-sm animate-pulse">
         <i class="fa-solid fa-wallet mr-2 text-pink-500"></i>
-        溫馨提醒：日本是免稅不是免費唷~ 請理性購物 (笑)
+        溫馨提醒：日本是免稅不是免費~ 請理性購物
       </div>
 
       <div class="grid grid-cols-2 gap-4 pb-24">
@@ -671,7 +671,7 @@ window.__FULL_ITINERARY_DATA__ = [
   // Day 2 (Kyoto - SWAPPED from Day 3)
   { id: 301, date: '2026-04-03', category: 'transport', name: '飯店 → 京都車站', time: '08:00', travelTime: 50, transportType: 'transit', note: '地鐵轉 JR (經新大阪)', description: '📍 轉乘路徑：\n1. 本町站 (M18) → 新大阪站 (M13) (地鐵御堂筋線)\n2. JR 新大阪站 → JR 京都站 (JR京都線 - 新快速)\n💡 提示：在新大阪轉乘比在梅田簡單，搭乘「新快速」列車約 25 分鐘抵達京都。' },
   { id: 302, date: '2026-04-03', category: 'transport', name: '京都車站 → 清水寺', time: '09:00', travelTime: 30, transportType: 'transit', note: '轉乘京都市巴士', description: '🚉 路線：京都市巴士 (206號 / 100號)\n📍 區間：京都車站前巴士總站 (D1/D2) → 五條坂或清水道\n🚶 步行：下車後步行上坡約 10-15 分鐘抵達仁王門。' },
-  { id: 303, date: '2026-04-03', category: 'attraction', name: '清水寺', time: '09:40', travelTime: 15, transportType: 'walk', note: '清水舞台、音羽瀑布', ticket: '¥400', openHours: '06:00 - 18:00', description: '京都最著名的古老寺院，必看懸空的「清水舞台」。參拜後可去「地主神社」求姻緣 (若整修中則略過)，最後別忘了在「音羽瀑布」排隊喝水祈福（分別代表學業、戀愛、長壽，只能選一道喝喔）。' },
+  { id: 303, date: '2026-04-03', category: 'attraction', name: '清水寺', time: '09:40', travelTime: 15, transportType: 'walk', note: '清水舞台、音羽瀑布', ticket: '¥500', openHours: '06:00 - 18:00', description: '京都最著名的古老寺院，必看懸空的「清水舞台」。參拜後可去「地主神社」求姻緣 (若整修中則略過)，最後別忘了在「音羽瀑布」排隊喝水祈福（分別代表學業、戀愛、長壽，只能選一道喝喔）。' },
   { id: 304, date: '2026-04-03', category: 'attraction', name: '散步：二三年坂 & 寧寧之道', time: '11:30', travelTime: 0, transportType: 'walk', note: '古色古香老街', description: '順著清水寺走下來，會經過三年坂（產寧坂）和二年坂。這裡有非常多日式雜貨與點心店。途中推薦去「星巴克京都二寧坂雅祥茶屋店」拍照，這是全球唯一設在百年町家裡的榻榻米星巴克。接著前往高台寺旁的寧寧之道。' },
   { id: 305, date: '2026-04-03', category: 'attraction', name: '八坂神社、祇園 & 花見小路', time: '13:00', travelTime: 15, transportType: 'walk', note: '藝妓與茶屋文化', description: '沿著寧寧之道走到八坂神社，再前往祇園區域。花見小路兩旁是保存良好的傳統茶屋，運氣好可能會看到藝妓或舞妓經過（請勿觸碰或阻擋拍照）。午餐建議在此區域或河原町解決。' },
   { id: 306, date: '2026-04-03', category: 'attraction', name: '鴨川 & 河原町商店街', time: '15:00', travelTime: 10, transportType: 'walk', note: '河岸散步與逛街', description: '從祇園跨過四條大橋就是鴨川，適合在河堤邊坐著休息吹風，欣賞河景。過橋後即進入河原町商圈，這裡有高島屋、Disney Store、各种藥妝與服飾店，非常好逛。' },
@@ -700,7 +700,7 @@ window.__FULL_ITINERARY_DATA__ = [
   { id: 407, date: '2026-04-05', category: 'transport', name: '動物園 → 阿倍野', time: '15:30', travelTime: 15, transportType: 'walk', note: '穿越天王寺公園', description: '🚉 路線：步行\n📍 區間：天王寺動物園 → 阿倍野 HARUKAS\n🚶 步行：穿越漂亮的「天王寺公園 (Ten-Shiba)」草皮區，前方最高的摩天大樓就是。' },
   { id: 408, date: '2026-04-05', category: 'attraction', name: '阿倍野 HARUKAS 300', time: '16:00', travelTime: 0, transportType: 'walk', note: '絕美日落與夜景', ticket: '¥1,800', openHours: '09:00 - 22:00', description: '提早上展望台佔個好位置！在 60 樓展望台 360 度俯瞰大阪全景。這個時間上去可以悠閒地等待日落，一次欣賞白天、夕陽與百萬夜景的變化。' },
   { id: 409, date: '2026-04-05', category: 'transport', name: '天王寺 → 飯店', time: '18:30', travelTime: 15, transportType: 'transit', note: '御堂筋線直達', description: '🚉 路線：地鐵御堂筋線\n📍 區間：天王寺站 (M23) → 本町站 (M18)\n💡 提示：免轉乘，直達飯店。' },
-  { id: 410, date: '2026-04-05', category: 'other', name: '回飯店休息', time: '19:00', travelTime: 0, transportType: 'walk', note: '整理戰利品', description: '最後一晚了，早點回飯店整理行李，確認伴手禮是否買齊，明天就要回程囉。' },
+  { id: 410, date: '2026-04-05', category: 'other', name: '回飯店休息', time: '19:00', travelTime: 0, transportType: 'walk', note: '整理戰利品', description: '今天是最後一晚，早點回飯店整理行李，確認伴手禮是否買齊，明天就要回程囉。' },
 
   // Day 5 (Return)
   { id: 501, date: '2026-04-06', category: 'transport', name: '飯店 → 關西機場', time: '08:30', travelTime: 60, transportType: 'transit', note: '地鐵轉南海電鐵', description: '📍 轉乘路徑：\n1. 本町站 (M18) → 難波站 (M20) (地鐵御堂筋線)\n2. 南海難波站 → 關西機場站 (南海電鐵 - 空港急行)\n💡 雖然班機是 12:00，但建議 10:00 前抵達機場比較充裕。' },
