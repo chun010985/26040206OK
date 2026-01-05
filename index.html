@@ -786,10 +786,10 @@ window.__FULL_ITINERARY_DATA__ = [
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       });
       
-      const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '媽媽']);
+      const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '媽媽', '爸爸']);
       const shoppingTravelers = computed(() => ['全部', ...travelers.value.filter(t => t !== '公費')]);
       const notebookOwners = computed(() => travelers.value.filter(t => t !== '公費'));
-      const packingPeople = ref(['士翔', '侑君', '士倫', '欣怡', '珮茹', '媽媽']);
+      const packingPeople = ref(['士翔', '侑君', '士倫', '欣怡', '珮茹', '媽媽', '爸爸']);
 
       const days = [
         { dateStr: '2026-04-02', displayDate: '4/2', dayOfWeek: '週四', mainCity: '大阪市', locations: [{name:'大阪市', lat:34.6937, lng:135.5023}] },
@@ -1325,3 +1325,5 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
+
+
