@@ -414,37 +414,6 @@
         </div>
       </div>
 
-      <!-- hotel (Static) -->
-      <div class="bg-white rounded-2xl p-5 shadow-card">
-        <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-bed mr-2 text-purple-400"></i>住宿資訊</h3>
-        <h4 class="font-bold text-lg mb-1">東急 STAY 大阪本町</h4>
-        <div class="flex gap-2 mb-3">
-          <a href="https://www.google.com/maps/search/?api=1&query=東急STAY大阪本町" target="_blank" class="flex-1 bg-sakura text-white py-2 rounded-xl text-center text-sm shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-location-dot mr-1"></i> 導航</a>
-          <a href="tel:+81612345678" class="flex-1 bg-gray-100 text-gray-600 py-2 rounded-xl text-center text-sm active:scale-95 transition-transform"><i class="fa-solid fa-phone mr-1"></i> 電話</a>
-        </div>
-        <p class="text-xs text-gray-400">大阪府大阪市中央區久太郎町 2-4-24</p>
-      </div>
-
-      <!-- tips (Static) -->
-      <div class="bg-white rounded-2xl p-5 shadow-card border-l-4 border-yellow-400">
-        <h3 class="font-bold text-gray-700 mb-3"><i class="fa-solid fa-lightbulb text-yellow-400 mr-2"></i>溫馨提醒</h3>
-        <ul class="text-xs text-gray-600 space-y-3 list-disc pl-4">
-          <li><b>注意事項</b>：
-            <ol class="list-decimal pl-4 mt-1 space-y-1 text-gray-500">
-              <li>行程含吃到飽(請留意公平使用原則)SIM卡，不用再另外購買。</li>
-              <li>飯店因早餐不是自助式且價格昂貴，附近是心齋橋還有LOWSAN跟超市，故這次不含早餐。</li>
-              <li>自由行每日約為20,000步以上，回飯店休息後別忘了讓腳好好休息!!!</li>
-            </ol>
-          </li>
-          <li><b>護照與簽證</b>：請確認護照有效期超過 6 個月，並於出發前填寫 <a href="https://services.digital.go.jp/zh-cmn-hant/visit-japan-web/" target="_blank" class="text-blue-500 underline hover:text-blue-600">Visit Japan Web</a>。</li>
-          <li><b>電壓與插座</b>：日本電壓為 100V，插座為雙孔扁平（與台灣相同），通常不需轉接頭。</li>
-          <li><b>禮儀</b>：電車內請保持安靜，手機調成靜音。走路請靠左側通行（大阪部分手扶梯靠右，依循前人即可）且日本禁止邊走邊吃。</li>
-          <li><b>小費</b>：日本無小費文化，服務費通常已包含在帳單內。</li>
-          <li><b>垃圾</b>：街上垃圾桶很少，請隨身攜帶塑膠袋裝垃圾，回飯店再丟。</li>
-          <li><b>支付方式</b>：現金/信用卡(touch)/Pay pay</li>
-        </ul>
-      </div>
-
       <!-- packing -->
       <div class="bg-white rounded-2xl p-5 shadow-card">
         <h3 class="font-bold text-sakura-text mb-3 border-b pb-2 flex justify-between items-center">
@@ -476,10 +445,15 @@
           </div>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex gap-2 mb-2">
           <input type="text" v-model="newPackingItem" placeholder="新增檢查項目..." class="flex-1 bg-gray-50 rounded-lg px-3 py-2 text-sm outline-none border focus:border-sakura" @keyup.enter="addPackingItem">
           <button @click="addPackingItem" class="bg-sakura text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i></button>
         </div>
+        
+        <!-- 新增的手動補齊按鈕 -->
+        <button v-if="filteredPackingList.length === 0 && currentPackingFilter" @click="checkAndMigrateData(true, currentPackingFilter)" class="w-full py-2 bg-gray-100 text-gray-500 rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors dashed border border-gray-300">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 幫 {{ currentPackingFilter }} 補齊預設項目
+        </button>
       </div>
     </div>
 
@@ -686,7 +660,7 @@ window.__FULL_ITINERARY_DATA__ = [
   { id: 4, date: '2026-04-02', category: 'accommodation', name: '東急 Stay 大阪本町', time: '13:00', travelTime: 0, transportType: 'walk', note: '先寄放行李', description: '先在大廳寄放行李，輕裝出發！' },
   { id: 41, date: '2026-04-02', category: 'transport', name: '本町 → 日本橋 (黑門市場)', time: '13:15', travelTime: 15, transportType: 'transit', note: '地鐵或計程車', description: '🚉 路線：地鐵堺筋線 (Sakaisuji Line)\n📍 區間：堺筋本町站 (K15) → 日本橋站 (K17)\n🚶 步行：10號出口出站，步行即達黑門市場。' },
   { id: 42, date: '2026-04-02', category: 'food', name: '午餐：黑門市場', time: '13:30', travelTime: 0, transportType: 'walk', note: '大阪的廚房', openHours: '09:00 - 18:00', description: '大啖海鮮、和牛、關東煮！推薦嘗試現烤扇貝、鮪魚生魚片、豆漿濃郁的豆乳。請在店家指定的內用區或立食區享用，請勿邊走邊吃。' },
-  { id: 43, date: '2026-04-02', category: 'transport', name: '日本橋 → 大阪城公園 ', time: '15:00', travelTime: 30, transportType: 'transit', note: '堺筋線轉中央線', description: '📍 轉乘路徑：\n1. 日本橋站 (K17) 搭乘 堺筋線 (往北) → 堺筋本町站 (K15)\n2. 轉乘 中央線 (往長田方向) → 森之宮站 (C19)\n3. 3-B出口出站即為大阪城公園入口（噴水池區），可慢慢散步至天守閣。' },
+  { id: 43, date: '2026-04-02', category: 'transport', name: '日本橋 → 大阪城公園 (森之宮)', time: '15:00', travelTime: 30, transportType: 'transit', note: '堺筋線轉中央線', description: '📍 轉乘路徑：\n1. 日本橋站 (K17) 搭乘 堺筋線 (往北) → 堺筋本町站 (K15)\n2. 轉乘 中央線 (往長田方向) → 森之宮站 (C19)\n3. 3-B出口出站即為大阪城公園入口（噴水池區），可慢慢散步至天守閣。' },
   { id: 6, date: '2026-04-02', category: 'attraction', name: '大阪城公園 & 天守閣', time: '15:30', travelTime: 0, transportType: 'walk', note: '🌸 櫻花百選名所', openHours: '09:00 - 17:00 (最後入場 16:30)', ticket: '天守閣 ¥600', description: '大阪的地標，園內種植約3000株櫻花。推薦前往「西之丸庭園」賞櫻，這裡以染井吉野櫻為主，能拍到天守閣與櫻花同框的絕美畫面。天守閣內展示豐臣秀吉的歷史文物，8樓展望台可俯瞰大阪市景。' },
   { id: 7, date: '2026-04-02', category: 'transport', name: '大阪城 → 飯店', time: '17:30', travelTime: 20, transportType: 'transit', note: '回飯店辦理入住', description: '🚉 路線：地鐵中央線\n📍 區間：森之宮站 (C19) / 谷町四丁目 (C18) → 堺筋本町站 (C17)\n🚶 步行：由 11 號出口出站，步行約 1-2 分鐘抵達飯店。' },
   { id: 8, date: '2026-04-02', category: 'accommodation', name: '飯店 Check-in & 休息', time: '18:00', travelTime: 0, transportType: 'walk', note: '稍作整理與休息', description: '辦理入住手續，進房整理一下行李，休息片刻，準備晚上去逛街！' },
@@ -836,44 +810,53 @@ window.__FULL_ITINERARY_DATA__ = [
       };
 
       // --- DATA MIGRATION ---
-      const checkAndMigrateData = async (force = false) => {
-          migrationStatus.value = "檢查雲端資料...";
+      const checkAndMigrateData = async (force = false, specificPerson = null) => {
+          migrationStatus.value = "檢查行李清單...";
 
-          // 1. Itinerary Check
-          const itinRef = collection(db, 'trips', TRIP_ID, 'itinerary');
-          const snapItin = await getDocs(itinRef);
-          
-          if (snapItin.empty || force) {
-              migrationStatus.value = "同步行程資料...";
-              const itinToUpload = window.__FULL_ITINERARY_DATA__ || [];
-              if (Array.isArray(itinToUpload)) {
-                  for (const item of itinToUpload) {
-                      const id = item.id ? String(item.id) : Date.now().toString();
-                      await setDoc(doc(db, 'trips', TRIP_ID, 'itinerary', id), item);
-                  }
-              }
-          }
-
-          // 5. Packing Check
+          // Fetch all current packing items
           const packRef = collection(db, 'trips', TRIP_ID, 'packing');
           const snapPack = await getDocs(packRef);
+          
+          // Map of owner -> count of items
+          const ownerCounts = {};
+          packingPeople.value.forEach(p => ownerCounts[p] = 0);
 
-          if (snapPack.empty || force) {
-             migrationStatus.value = "初始化行李清單...";
-             const defaultItems = [
+          snapPack.forEach(doc => {
+              const data = doc.data();
+              if (data.owner && ownerCounts.hasOwnProperty(data.owner)) {
+                  ownerCounts[data.owner]++;
+              }
+          });
+
+          const defaultItems = [
                '護照 (有效期6個月以上)', 'Visit Japan Web QRcode 截圖', '網卡 / eSIM', '日幣現金 / 信用卡',
                '行動電源 (需隨身攜帶)', '個人常備藥 / 暈機藥', '牙刷牙膏 (日本部分飯店不主動提供)'
-             ];
-             for (const p of packingPeople.value) {
-                for (const txt of defaultItems) {
-                    const safeId = (p + '_' + txt).replace(/[\/\s]/g, '');
-                    await setDoc(doc(db, 'trips', TRIP_ID, 'packing', safeId), { text: txt, owner: p, checked: false });
-                }
-             }
-          }
+          ];
 
+          const targets = specificPerson ? [specificPerson] : packingPeople.value;
+
+          let updateCount = 0;
+
+          for (const p of targets) {
+                // Condition: Force update OR (Auto mode AND person has 0 items)
+                if (force || (ownerCounts[p] === 0)) {
+                    migrationStatus.value = `正在為 ${p} 建立清單...`;
+                    for (const txt of defaultItems) {
+                        const safeId = (p + '_' + txt).replace(/[\/\s]/g, '');
+                        await setDoc(doc(db, 'trips', TRIP_ID, 'packing', safeId), { 
+                            text: txt, 
+                            owner: p, 
+                            checked: false,
+                            createdAt: serverTimestamp() 
+                        }, { merge: true });
+                    }
+                    updateCount++;
+                }
+          }
+          
           migrationStatus.value = "";
-          if(force) alert('已完成重置！');
+          if ((force || specificPerson) && updateCount > 0) alert('已成功補齊預設項目！');
+          else if ((force || specificPerson) && updateCount === 0) alert('清單已存在，無需補齊。');
       };
 
       // 關鍵新增功能：只更新行程內容，不刪除其他資料
@@ -1311,6 +1294,7 @@ window.__FULL_ITINERARY_DATA__ = [
         updateItineraryContentOnly, // 確保回傳更新函數
         fixDuplicates, // 新增修復重複函數
         forceResetData, // 確保回傳重置函數
+        checkAndMigrateData, // 確保回傳手動補齊函數
         TRIP_ID, // Expose for template
 
         // Utils
