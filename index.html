@@ -459,7 +459,7 @@
 
     <!-- TAB 3 shopping -->
     <div v-if="currentTab === 'shopping'">
-      <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1 justify-center">
+      <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
         <button v-for="traveler in shoppingTravelers" :key="traveler" @click="currentShoppingFilter = traveler"
           :class="['px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentShoppingFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
           {{ traveler }}
@@ -500,7 +500,7 @@
 
     <!-- TAB 4 expense -->
     <div v-if="currentTab === 'expense'">
-      <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1 justify-center">
+      <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
         <button @click="currentMemberFilter = null" :class="['px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', !currentMemberFilter ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">全部</button>
         <button v-for="traveler in travelers" :key="traveler" @click="currentMemberFilter = traveler"
           :class="['px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
@@ -536,7 +536,7 @@
 
     <!-- TAB 5 notebook -->
     <div v-if="currentTab === 'notebook'">
-      <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4 px-1 justify-center">
+      <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
         <button v-for="traveler in notebookOwners" :key="traveler" @click="currentNotebookFilter = traveler"
           :class="['px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentNotebookFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
           {{ traveler }}
@@ -874,7 +874,7 @@ window.__FULL_ITINERARY_DATA__ = [
              snapshot.forEach(doc => existingItems.push({ _docId: doc.id, ...doc.data() }));
 
              if (Array.isArray(itinToUpload)) {
-                  for (const item of itinToUpload) {
+                 for (const item of itinToUpload) {
                       // 尋找是否已有同名同日期的行程
                       const match = existingItems.find(ex => ex.name === item.name && ex.date === item.date);
                       
@@ -886,13 +886,13 @@ window.__FULL_ITINERARY_DATA__ = [
                           const id = item.id ? String(item.id) : Date.now().toString();
                           await setDoc(doc(db, 'trips', TRIP_ID, 'itinerary', id), item);
                       }
-                  }
-              }
-              alert("行程資料已更新完畢！若發現重複行程，請使用下方的「修復重複行程」按鈕。");
+                 }
+             }
+             alert("行程資料已更新完畢！若發現重複行程，請使用下方的「修復重複行程」按鈕。");
           } catch(e) {
-              alert("更新失敗：" + e.message);
+             alert("更新失敗：" + e.message);
           } finally {
-              migrationStatus.value = "";
+             migrationStatus.value = "";
           }
       };
 
