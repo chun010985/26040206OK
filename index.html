@@ -113,9 +113,15 @@
       <span v-else-if="daysUntilTrip === -4">旅程結束，平安返家 🏠</span>
       <span v-else>旅程已圓滿結束，期待下次旅行</span>
     </div>
-    <div class="absolute top-6 left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm">
-      <h1 class="text-3xl font-bold tracking-widest text-sakura-text">京阪之旅</h1>
-      <p class="text-sm opacity-90 text-sakura-text/80">2026.04.02 - 04.06</p>
+    <div class="absolute top-6 left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm flex items-center gap-3">
+      <div>
+        <h1 class="text-3xl font-bold tracking-widest text-sakura-text">京阪之旅</h1>
+        <p class="text-sm opacity-90 text-sakura-text/80">2026.04.02 - 04.06</p>
+      </div>
+      <label class="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center cursor-pointer hover:bg-sakura-light hover:border-sakura-light transition-all text-gray-400 hover:text-sakura-dark shadow-sm">
+        <input type="file" class="hidden" accept="image/*" @change="handleBannerUpload">
+        <i class="fa-solid fa-camera text-xs"></i>
+      </label>
     </div>
   </header>
 
@@ -245,7 +251,16 @@
                 <span class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full font-bold"><i class="fa-solid fa-plane-departure mr-1"></i>航班</span>
                 <span class="text-xs text-gray-500 font-bold">{{ item.time }}</span>
               </div>
-              <h3 class="font-bold text-gray-800 text-lg mb-1">{{ item.name }}</h3>
+              <div class="flex items-center mb-1">
+                  <h3 class="font-bold text-gray-800 text-lg">{{ item.name }}</h3>
+                  <label class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center cursor-pointer ml-2 hover:bg-sakura-light transition-colors text-gray-300 hover:text-sakura-dark border border-transparent hover:border-sakura-light">
+                    <input type="file" class="hidden" accept="image/*" @change="(e) => handleItineraryImageUpload(e, item)">
+                    <i class="fa-solid fa-camera text-[10px]"></i>
+                  </label>
+              </div>
+              <div v-if="item.image" class="w-full h-32 rounded-xl overflow-hidden mb-2 border border-gray-100">
+                  <img :src="item.image" class="w-full h-full object-cover">
+              </div>
               <div class="text-sm text-gray-600 space-y-1"><p>{{ item.note }}</p></div>
               <div v-if="item.description" class="text-xs text-gray-400 mt-1">{{ item.description }}</div>
             </div>
@@ -263,9 +278,21 @@
                 </div>
                 <span class="text-sm font-black text-sakura-text bg-sakura-light px-2 py-1 rounded-lg whitespace-nowrap ml-2">{{ item.time }}</span>
               </div>
-              <h3 class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2" @click.stop="openMap(item.name)">
-                {{ item.name }} <i class="fa-solid fa-location-arrow text-xs text-sakura cursor-pointer"></i>
-              </h3>
+              <div class="flex items-center mb-2">
+                  <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2" @click.stop="openMap(item.name)">
+                    {{ item.name }} <i class="fa-solid fa-location-arrow text-xs text-sakura cursor-pointer"></i>
+                  </h3>
+                  <label class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center cursor-pointer ml-2 hover:bg-sakura-light transition-colors text-gray-300 hover:text-sakura-dark border border-transparent hover:border-sakura-light">
+                    <input type="file" class="hidden" accept="image/*" @change="(e) => handleItineraryImageUpload(e, item)">
+                    <i class="fa-solid fa-camera text-[10px]"></i>
+                  </label>
+              </div>
+              <div v-if="item.image" class="w-full h-40 rounded-xl overflow-hidden mb-3 border border-gray-100 relative group/img">
+                  <img :src="item.image" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <span class="text-white text-xs font-bold drop-shadow-md">點擊相機更換</span>
+                  </div>
+              </div>
               <div class="space-y-2 text-sm text-gray-600">
                 <div class="flex flex-wrap gap-3 text-xs">
                   <p v-if="item.category !== 'other' && item.category !== 'accommodation' && item.openHours" class="flex items-center"><i class="fa-regular fa-clock w-4 text-center text-gray-400 mr-1"></i> {{ item.openHours }}</p>
@@ -363,7 +390,7 @@
           </div>
           <div class="flex justify-between items-center text-xs text-gray-500 border-t border-sakura-light pt-3 mt-2">
             <span class="flex items-center"><i class="fa-regular fa-calendar-check mr-1.5 text-sakura"></i>2026/04/06 (週一)</span>
-            <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-sakura"></i>20kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-briefcase mr-1 text-sakura"></i>10kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-utensils mr-1 text-sakura"></i>含餐</span>
+            <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-sakura"></i>25kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-briefcase mr-1 text-sakura"></i>10kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-utensils mr-1 text-sakura"></i>含餐</span>
           </div>
         </div>
 
@@ -1241,6 +1268,60 @@ window.__FULL_ITINERARY_DATA__ = [
         }
       };
       
+      const handleBannerUpload = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            bannerImage.value = evt.target.result;
+            localStorage.setItem('trip_banner_image', evt.target.result);
+        };
+        reader.readAsDataURL(file);
+      };
+
+      const handleItineraryImageUpload = async (e, item) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          
+          isSaving.value = true;
+          
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+              const img = new Image();
+              img.onload = async () => {
+                  const canvas = document.createElement('canvas');
+                  let width = img.width;
+                  let height = img.height;
+                  const maxDim = 1280;
+                  if (width > maxDim || height > maxDim) {
+                      if (width > height) {
+                          height = Math.round((height * maxDim) / width);
+                          width = maxDim;
+                      } else {
+                          width = Math.round((width * maxDim) / height);
+                          height = maxDim;
+                      }
+                  }
+                  canvas.width = width;
+                  canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0, width, height);
+                  const base64Data = canvas.toDataURL('image/jpeg', 0.3);
+                  
+                  try {
+                      await setDoc(doc(db, 'trips', TRIP_ID, 'itinerary', String(item.id)), { image: base64Data }, { merge: true });
+                  } catch(err) {
+                      console.error(err);
+                      alert("上傳失敗");
+                  } finally {
+                      isSaving.value = false;
+                  }
+              };
+              img.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+      };
+      
       const openMap = (name) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`);
 
       const getCategoryLabel = (c) => ({attraction:'景點',food:'美食',shopping:'購物',transport:'交通',flight:'航班',accommodation:'住宿',other:'其他'}[c]||c);
@@ -1252,6 +1333,10 @@ window.__FULL_ITINERARY_DATA__ = [
       onMounted(() => {
         // 設定強制3秒後關閉 Splash，避免卡死
         setTimeout(() => showSplash.value = false, 3000);
+        
+        // Load saved banner
+        const savedBanner = localStorage.getItem('trip_banner_image');
+        if(savedBanner) bannerImage.value = savedBanner;
         
         try {
             signInAnonymously(auth).then(async () => {
@@ -1302,7 +1387,8 @@ window.__FULL_ITINERARY_DATA__ = [
         exchange, currentRate, calcTwd, calcJpy, rateUpdateDate,
         getCategoryLabel, getCategoryColor, getExpenseIcon, getTransportIcon, handleImageUpload, openMap,
         firebaseStatus, reconnectFirebase, migrationStatus,
-        isTigerairInfoExpanded
+        isTigerairInfoExpanded,
+        handleBannerUpload, handleItineraryImageUpload // 新增這兩個函數的回傳
       };
     }
   }).mount('#app');
