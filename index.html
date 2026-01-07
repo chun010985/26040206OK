@@ -228,9 +228,9 @@
       <div class="flex overflow-x-auto no-scrollbar gap-3 mb-4 pb-2 justify-center">
         <button v-for="(day, index) in days" :key="index" @click="selectedDate = day.dateStr"
           :class="['flex-shrink-0 flex flex-col items-center justify-center w-16 h-20 rounded-2xl transition-all duration-300 relative overflow-hidden', selectedDate === day.dateStr ? 'bg-sakura text-white shadow-soft transform scale-105' : 'bg-white text-gray-400 border border-gray-100']">
-          <span class="text-lg font-bold z-10">{{ day.dayOfWeek }}</span>
-          <span class="text-sm z-10">{{ day.displayDate }}</span>
-          <span v-if="selectedDate === day.dateStr" class="absolute bottom-1 text-[10px] opacity-80 z-10">{{ day.mainCity.split('/')[0] }}</span>
+          <span class="text-[10px] font-bold z-10 opacity-90 mb-0.5">Day{{ index + 1 }}</span>
+          <span class="text-lg font-bold z-10 leading-none mb-1">{{ day.dayOfWeek }}</span>
+          <span class="text-xs z-10 font-medium">{{ day.displayDate }}</span>
         </button>
       </div>
 
@@ -263,9 +263,15 @@
                 </div>
                 <span class="text-sm font-black text-sakura-text bg-sakura-light px-2 py-1 rounded-lg whitespace-nowrap ml-2">{{ item.time }}</span>
               </div>
-              <h3 class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2" @click.stop="openMap(item.name)">
-                {{ item.name }} <i class="fa-solid fa-location-arrow text-xs text-sakura cursor-pointer"></i>
+              
+              <!-- 修改: 標題不可點，只有點擊 Icon 才會觸發導航 -->
+              <h3 class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2 select-none">
+                {{ item.name }} 
+                <button @click.stop="openMap(item.name)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-sakura-light/50 active:bg-sakura-light transition-colors -my-1">
+                    <i class="fa-solid fa-location-arrow text-xs text-sakura cursor-pointer"></i>
+                </button>
               </h3>
+
               <div class="space-y-2 text-sm text-gray-600">
                 <div class="flex flex-wrap gap-3 text-xs">
                   <p v-if="item.category !== 'other' && item.category !== 'accommodation' && item.openHours" class="flex items-center"><i class="fa-regular fa-clock w-4 text-center text-gray-400 mr-1"></i> {{ item.openHours }}</p>
