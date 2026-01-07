@@ -103,19 +103,45 @@
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="relative h-[250px] w-full overflow-hidden bg-gray-200 group">
-    <img :src="bannerImage" class="w-full h-full object-cover transition-opacity duration-500" @error="handleImageError">
-    <div class="absolute top-4 right-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full text-sakura-text text-xs border border-white/50 shadow-sm flex items-center gap-2 z-20">
-      <i class="fa-regular fa-clock"></i>
-      <span v-if="daysUntilTrip > 0">距離出發還有 <b>{{ daysUntilTrip }}</b> 天</span>
+  <!-- Header (New Design) -->
+  <header class="relative h-[300px] w-full overflow-hidden bg-gray-900 group">
+    <img :src="bannerImage" class="w-full h-full object-cover transition-transform duration-1000 hover:scale-110 opacity-70" @error="handleImageError">
+    
+    <!-- Dark Gradient Overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 z-0"></div>
+
+    <!-- Countdown Badge -->
+    <div class="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-[10px] border border-white/20 shadow-lg flex items-center gap-2 z-20 font-bold">
+      <i class="fa-regular fa-clock text-sakura"></i>
+      <span v-if="daysUntilTrip > 0">距離出發 <b>{{ daysUntilTrip }}</b> 天</span>
       <span v-else-if="daysUntilTrip >= -3">旅程第 {{ Math.abs(daysUntilTrip) + 1 }} 天</span>
-      <span v-else-if="daysUntilTrip === -4">旅程結束，平安返家 🏠</span>
-      <span v-else>旅程已圓滿結束，期待下次旅行</span>
+      <span v-else-if="daysUntilTrip === -4">旅程結束 🏠</span>
+      <span v-else>旅程已圓滿結束</span>
     </div>
-    <div class="absolute top-6 left-6 z-10 bg-white p-3 rounded-2xl border border-white/40 shadow-sm">
-      <h1 class="text-3xl font-bold tracking-widest text-sakura-text">京阪之旅</h1>
-      <p class="text-sm opacity-90 text-sakura-text/80">2026.04.02 - 04.06</p>
+
+    <!-- Title Section (Centered Modern Style) -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center z-10 text-white animate-slide-up">
+        <!-- Decorative Line -->
+        <div class="w-12 h-1.5 bg-sakura mb-5 rounded-full shadow-[0_0_15px_rgba(255,183,197,0.8)] animate-pulse"></div>
+        
+        <!-- Main Title -->
+        <h1 class="text-6xl font-black tracking-[0.2em] mb-4 text-center drop-shadow-2xl" style="font-family: 'Zen Maru Gothic'; text-shadow: 0 4px 30px rgba(0,0,0,0.6);">
+            京阪之旅
+        </h1>
+        
+        <!-- Subtitle / Cities -->
+        <div class="flex items-center gap-3 text-[10px] font-bold tracking-[0.3em] uppercase bg-white/10 px-6 py-2 rounded-full backdrop-blur-md border border-white/20 shadow-lg mb-2">
+            <span>Osaka</span>
+            <span class="text-sakura text-xs">•</span>
+            <span>Kyoto</span>
+            <span class="text-sakura text-xs">•</span>
+            <span>Nara</span>
+        </div>
+
+        <!-- Date -->
+        <div class="text-xs font-medium opacity-80 tracking-widest mt-1">
+            2026.04.02 - 04.06
+        </div>
     </div>
   </header>
 
@@ -337,8 +363,10 @@
             <div>
                 <h4 class="font-bold text-gray-800 text-sm mb-2">重要公告</h4>
                 <ul class="text-xs text-gray-600 space-y-1.5 list-disc pl-4">
-                    <li>飯店<b>無早餐</b>，因飯店早餐價格較高且並非自助餐故不安排。</li>
+                    <li>飯店住宿<b>無安排早餐</b>，因價格較高且非自助式。</li>
                     <li>行程已包含 <b>吃到飽網卡</b> 不需要另外購買。</li>
+                    <li>行程中若要脫隊或某個景點不想去，請<b>自行回飯店</b>唷。</li>
+                    <li>自由行每日基本上走 <b>20,000 步以上</b>，建議穿著好走的鞋子。</li>
                 </ul>
             </div>
         </div>
@@ -384,7 +412,7 @@
           </div>
           <div class="flex justify-between items-center text-xs text-gray-500 border-t border-sakura-light pt-3 mt-2">
             <span class="flex items-center"><i class="fa-regular fa-calendar-check mr-1.5 text-sakura"></i>2026/04/06 (週一)</span>
-            <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-sakura"></i>25kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-briefcase mr-1 text-sakura"></i>10kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-utensils mr-1 text-sakura"></i>含餐</span>
+            <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-sakura"></i>20kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-briefcase mr-1 text-sakura"></i>10kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-utensils mr-1 text-sakura"></i>含餐</span>
           </div>
         </div>
 
@@ -514,7 +542,7 @@
                         <a href="https://vjw-lp.digital.go.jp/zh-hant/" target="_blank" class="text-blue-500 hover:text-blue-700 underline decoration-blue-300 underline-offset-2">Visit Japan Web</a>
                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1 text-blue-400"></i>
                     </h5>
-                    <p class="text-[10px] text-gray-500">請於出發前填寫入境審查與海關申報，並截圖 QR Code 以加速通關。</p>
+                    <p class="text-[10px] text-gray-500">建議事先填寫入境審查與海關申報，並截圖 QR Code 以加速通關。</p>
                 </div>
              </div>
 
@@ -522,7 +550,17 @@
                 <i class="fa-regular fa-credit-card text-gray-400 mt-1 w-4 text-center"></i>
                 <div>
                     <h5 class="text-xs font-bold text-gray-700">交通卡 (ICOCA)</h5>
-                    <p class="text-[10px] text-gray-500">大阪與京都的 JR、地鐵、私鐵及巴士皆通用（類似悠遊卡）。進出站皆需刷卡，可於車站售票機儲值；手機版可透過線上儲值。</p>
+                    <p class="text-[10px] text-gray-500">大阪與京都的 JR、地鐵、私鐵及巴士皆通用（類似悠遊卡）。進出站皆需刷卡，可於車站售票機或超商儲值。</p>
+                </div>
+             </div>
+
+             <div class="flex gap-3 items-start">
+                <i class="fa-solid fa-temperature-half text-gray-400 mt-1 w-4 text-center"></i>
+                <div>
+                    <h5 class="text-xs font-bold text-gray-700">4月氣候與穿搭</h5>
+                    <p class="text-[10px] text-gray-500">
+                        大阪/京都4月平均氣溫約 <b>10°C~20°C</b>，氣候宜人但早晚溫差大。建議採<b>洋蔥式穿法</b>（薄長袖+薄外套/針織衫/風衣），方便隨氣溫調整。
+                    </p>
                 </div>
              </div>
              
@@ -531,13 +569,16 @@
                 <div class="flex gap-3 items-start">
                     <i class="fa-solid fa-user-check text-gray-400 mt-1 w-4 text-center"></i>
                     <div>
-                        <h5 class="text-xs font-bold text-gray-700">日本旅遊禮儀</h5>
+                        <h5 class="text-xs font-bold text-gray-700">日本旅遊禮儀小提醒</h5>
                         <ul class="text-[10px] text-gray-500 list-disc pl-3 mt-1 space-y-1">
+                            <li><b>結帳禮儀：</b> 付款時請將現金或信用卡放在櫃台的「錢盤（Cash Tray）」上，勿直接手遞給店員。</li>
+                            <li><b>車廂寧靜：</b> 電車內請將手機設為靜音，與同伴交談請輕聲細語，避免干擾其他乘客。</li>
                             <li><b>手扶梯習慣：</b> 大阪地區習慣「靠右站立」（與台灣相同），但京都多為靠左；建議觀察前方人流。</li>
                             <li><b>請勿邊走邊吃：</b> 日本視邊走邊吃為不禮貌行為，購買小吃請在店門口或指定區域定點吃完。</li>
-                            <li><b>電車禮儀：</b> 車廂內請將手機設為靜音，避免通話；後背包建議改為前背，以免撞到他人。</li>
+                            <li><b>後背包禮儀：</b> 搭乘電車人多時，建議將後背包改為前背，以免撞到他人。</li>
                             <li><b>垃圾不落地：</b> 日本街頭垃圾桶很少，請隨身攜帶小塑膠袋，將垃圾帶回飯店或車站丟棄。</li>
                             <li><b>拍照注意：</b> 未經允許請勿直接對著路人、警察或店員近距離拍攝；部分店家禁止攝影。</li>
+                            <li><b>室內脫鞋：</b> 進入玄關若有高低差（踏込），通常代表需脫鞋；鞋尖請朝外擺放整齊。</li>
                         </ul>
                     </div>
                 </div>
@@ -1500,3 +1541,6 @@ window.__FULL_ITINERARY_DATA__ = [
 </script>
 </body>
 </html>
+
+
+
