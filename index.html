@@ -134,7 +134,7 @@
   <!-- 2. Header Banner (Restored Height to 240px) -->
   <header class="relative h-[240px] w-full overflow-hidden bg-gray-100 group">
     <!-- 橫幅圖片 -->
-    <img :src="bannerImage" class="w-full h-full object-cover object-bottom origin-bottom opacity-100" @error="handleImageError">
+    <img :src="bannerImage" class="w-full h-full object-cover object-center origin-center opacity-100" @error="handleImageError">
     
     <!-- Countdown Badge -->
     <div class="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-[10px] border border-white/20 shadow-lg flex items-center gap-2 z-20 font-bold">
@@ -400,10 +400,27 @@
             <span v-if="rateUpdateDate" class="text-[9px] text-gray-300 block">更新: {{ rateUpdateDate }}</span>
           </div>
         </h3>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 mb-3">
           <div class="flex-1"><label class="text-xs text-gray-500 mb-1 block font-medium">日幣 (JPY)</label><input type="number" v-model="exchange.jpy" @input="calcTwd" class="w-full bg-gray-50 rounded-xl p-3 outline-none focus:ring-2 focus:ring-sakura" placeholder="¥"></div>
           <i class="fa-solid fa-arrow-right-arrow-left text-gray-300"></i>
           <div class="flex-1"><label class="text-xs text-gray-500 mb-1 block font-medium">台幣 (TWD)</label><input type="number" v-model="exchange.twd" @input="calcJpy" class="w-full bg-sakura-light rounded-xl p-3 font-bold text-sakura-text outline-none focus:ring-2 focus:ring-sakura" placeholder="NT$"></div>
+        </div>
+
+        <!-- Explanation and Warning (Collapsible) -->
+        <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+            <button @click="isExchangeWarningExpanded = !isExchangeWarningExpanded" class="w-full p-3 flex justify-between items-center text-left hover:bg-gray-100 transition-colors focus:outline-none">
+                <h5 class="text-[10px] font-bold text-gray-600 flex items-center m-0">
+                    <i class="fa-solid fa-circle-exclamation mr-1.5 text-gray-400"></i>說明與警語
+                </h5>
+                <i class="fa-solid fa-chevron-down text-gray-400 text-[10px] transition-transform duration-300" :class="{'rotate-180': isExchangeWarningExpanded}"></i>
+            </button>
+            <div v-show="isExchangeWarningExpanded" class="px-3 pb-3 pt-0 animate-fade-in">
+                <ul class="text-[10px] text-gray-500 list-disc pl-3 space-y-1 border-t border-gray-200 pt-2">
+                    <li>此為<b>國際市場匯率 + 0.002 (預估點差)</b> 之模擬現金賣出價，非銀行官方即時報價。</li>
+                    <li>實際換匯或刷卡金額，請依<b>交易當下銀行公告</b>為準。</li>
+                    <li>本功能僅供旅行預算概估參考。</li>
+                </ul>
+            </div>
         </div>
       </div>
 
@@ -445,6 +462,11 @@
           <div class="text-center mb-3">
             <span class="text-xs font-bold text-blue-600 bg-white border border-blue-200 px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-user-clock mr-1"></i>建議報到：04:30</span>
           </div>
+          <!-- Restored Baggage & Meal Info (Outbound) -->
+          <div class="flex justify-between items-center text-xs text-gray-500 border-t border-blue-200/50 pt-3 mt-2">
+            <span class="flex items-center"><i class="fa-regular fa-calendar-check mr-1.5 text-blue-400"></i>2026/04/02 (週四)</span>
+            <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-blue-400"></i>20kg<span class="mx-1 text-blue-200">|</span><i class="fa-solid fa-briefcase mr-1 text-blue-400"></i>10kg<span class="mx-1 text-blue-200">|</span><i class="fa-solid fa-utensils mr-1 text-blue-400"></i>含餐</span>
+          </div>
         </div>
         <!-- Inbound -->
         <div class="bg-sakura-light/40 rounded-xl p-4 border border-sakura-light relative overflow-hidden mb-4">
@@ -457,6 +479,14 @@
             <div class="text-left"><div class="text-3xl font-bold text-gray-800">12:00</div><div class="text-sm font-bold text-gray-600 mt-1">KIX 關西</div></div>
             <div class="flex flex-col items-center w-1/3 px-2"><span class="text-[10px] text-gray-400 mb-2 font-bold">3h 0m</span><div class="w-full h-0.5 bg-gray-300 relative flex items-center justify-center"><i class="fa-solid fa-plane-departure text-sakura text-sm absolute bg-sakura-light/40 px-1"></i></div><span class="text-[10px] text-sakura mt-1">直飛</span></div>
             <div class="text-right"><div class="text-3xl font-bold text-gray-800 leading-none">14:00</div><div class="text-sm font-bold text-gray-600 mt-1">KHH 高雄</div></div>
+          </div>
+          <div class="text-center mb-3">
+            <span class="text-xs font-bold text-sakura-text bg-white border border-sakura-light px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-user-clock mr-1 text-sakura"></i>建議報到：10:00</span>
+          </div>
+          <!-- Restored Baggage & Meal Info (Inbound) -->
+          <div class="flex justify-between items-center text-xs text-gray-500 border-t border-sakura-light pt-3 mt-2">
+            <span class="flex items-center"><i class="fa-regular fa-calendar-check mr-1.5 text-sakura"></i>2026/04/06 (週一)</span>
+            <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-sakura"></i>20kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-briefcase mr-1 text-sakura"></i>10kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-utensils mr-1 text-sakura"></i>含餐</span>
           </div>
         </div>
       </div>
@@ -670,6 +700,7 @@
     <!-- TAB 3: Shopping -->
     <div v-if="currentTab === 'shopping'">
       <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
+        <!-- 點擊按鈕時設定 filter，這會解除隱私遮罩 -->
         <button v-for="traveler in shoppingTravelers" :key="traveler" @click="currentShoppingFilter = traveler"
           :class="['px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border', (currentShoppingFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
           {{ traveler }}
@@ -681,7 +712,17 @@
         溫馨提醒：日本是免稅不是免費~ 請理性購物😆
       </div>
 
-      <div class="grid grid-cols-2 gap-4 pb-24">
+      <!-- 隱私遮罩 (當沒有選擇成員時顯示) -->
+      <div v-if="!currentShoppingFilter" class="flex flex-col items-center justify-center py-20 text-gray-300 animate-fade-in">
+          <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <i class="fa-solid fa-bag-shopping text-3xl text-gray-300"></i>
+          </div>
+          <p class="text-sm font-bold text-gray-400">購物清單已隱藏</p>
+          <p class="text-xs mt-1">👆 請點擊上方成員名字以查看內容</p>
+      </div>
+
+      <!-- 列表內容 (只有當有選擇成員時才顯示) -->
+      <div v-else class="grid grid-cols-2 gap-4 pb-24 animate-slide-up">
         <div v-for="(item, index) in filteredShoppingList" :key="item.id" class="bg-white rounded-2xl overflow-hidden shadow-card relative group">
           <div class="h-32 bg-gray-100 relative overflow-hidden">
             <img v-if="item.image" :src="item.image" class="w-full h-full object-cover">
@@ -702,43 +743,67 @@
             </div>
           </div>
         </div>
+        <!-- 即使選了人但清單是空的 -->
+        <div v-if="filteredShoppingList.length === 0" class="col-span-2 text-center py-10 text-gray-400">
+            <i class="fa-regular fa-folder-open text-2xl mb-2"></i>
+            <p class="text-xs">尚無購物項目</p>
+        </div>
       </div>
+      
+      <!-- 新增按鈕改為打開 Modal 時預設為當前選擇的人 (如果已選) -->
       <button @click="openModal('shopping')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
     </div>
 
     <!-- TAB 4: Expense -->
     <div v-if="currentTab === 'expense'">
       <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
-        <button @click="currentMemberFilter = null" :class="['px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border', !currentMemberFilter ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">全部</button>
+        <!-- 修改 "全部" 按鈕的邏輯，賦予特殊值 'ALL' -->
+        <button @click="currentMemberFilter = 'ALL'" :class="['px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === 'ALL') ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">全部</button>
         <button v-for="traveler in travelers" :key="traveler" @click="currentMemberFilter = traveler"
           :class="['px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
           {{ traveler }}
         </button>
       </div>
 
-      <div class="bg-gradient-to-r from-sakura to-sakura-dark rounded-2xl p-6 text-white shadow-soft mb-6 text-center transition-all duration-300">
-        <p class="text-sm opacity-90 mb-1 flex items-center justify-center gap-2"><i class="fa-solid fa-user-tag text-xs"></i>{{ currentMemberFilter ? currentMemberFilter + ' 的' : '目前總' }}花費 (JPY)</p>
-        <h2 class="text-4xl font-bold font-mono">¥ {{ filteredTotalExpense.toLocaleString() }}</h2>
-        <p class="text-xs opacity-70 mt-2">約 TWD {{ (filteredTotalExpense * currentRate).toLocaleString(undefined, {maximumFractionDigits: 0}) }}</p>
+      <!-- 隱私遮罩 (當沒有選擇成員時顯示) -->
+      <div v-if="!currentMemberFilter" class="flex flex-col items-center justify-center py-20 text-gray-300 animate-fade-in">
+          <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <i class="fa-solid fa-user-shield text-3xl text-gray-300"></i>
+          </div>
+          <p class="text-sm font-bold text-gray-400">花費紀錄保護中</p>
+          <p class="text-xs mt-1">👆 請點擊上方成員名字以查看詳情</p>
       </div>
 
-      <div class="bg-white rounded-t-2xl shadow-card min-h-[300px] pb-24">
-        <div v-for="(item, index) in filteredExpenses" :key="item.id" class="p-4 border-b border-gray-50 flex justify-between items-center" @click="openModal('expense', item)">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg shadow-sm">
-              <i :class="getExpenseIcon(item.category)" class="text-sakura-dark"></i>
-            </div>
-            <div>
-              <h4 class="font-bold text-gray-800">{{ item.name }}</h4>
-              <p class="text-xs text-gray-400">{{ item.date }} · {{ item.owner || '未指定' }}</p>
-            </div>
+      <!-- 內容區塊 (只有當有選擇成員時才顯示) -->
+      <div v-else class="animate-slide-up">
+          <div class="bg-gradient-to-r from-sakura to-sakura-dark rounded-2xl p-6 text-white shadow-soft mb-6 text-center transition-all duration-300">
+            <p class="text-sm opacity-90 mb-1 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-user-tag text-xs"></i>
+                {{ currentMemberFilter === 'ALL' ? '目前總' : currentMemberFilter + ' 的' }}花費 (JPY)
+            </p>
+            <h2 class="text-4xl font-bold font-mono">¥ {{ filteredTotalExpense.toLocaleString() }}</h2>
+            <p class="text-xs opacity-70 mt-2">約 TWD {{ (filteredTotalExpense * currentRate).toLocaleString(undefined, {maximumFractionDigits: 0}) }}</p>
           </div>
-          <div class="text-right">
-            <p class="font-bold text-gray-800 font-mono">¥{{ Number(item.amount).toLocaleString() }}</p>
+
+          <div class="bg-white rounded-t-2xl shadow-card min-h-[300px] pb-24">
+            <div v-for="(item, index) in filteredExpenses" :key="item.id" class="p-4 border-b border-gray-50 flex justify-between items-center" @click="openModal('expense', item)">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg shadow-sm">
+                  <i :class="getExpenseIcon(item.category)" class="text-sakura-dark"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-800">{{ item.name }}</h4>
+                  <p class="text-xs text-gray-400">{{ item.date }} · {{ item.owner || '未指定' }}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-gray-800 font-mono">¥{{ Number(item.amount).toLocaleString() }}</p>
+              </div>
+            </div>
+            <div v-if="filteredExpenses.length === 0" class="text-center py-8 text-gray-400 text-sm">此分類下無紀錄</div>
           </div>
-        </div>
-        <div v-if="expenses.length === 0" class="text-center py-8 text-gray-400 text-sm">此分類下無紀錄</div>
       </div>
+      
       <button @click="openModal('expense')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
     </div>
 
@@ -751,7 +816,17 @@
         </button>
       </div>
 
-      <div class="grid gap-3 pb-24">
+      <!-- 隱私遮罩 (當沒有選擇成員時顯示) -->
+      <div v-if="!currentNotebookFilter" class="flex flex-col items-center justify-center py-20 text-gray-300 animate-fade-in">
+          <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <i class="fa-solid fa-book-open text-3xl text-gray-300"></i>
+          </div>
+          <p class="text-sm font-bold text-gray-400">筆記本內容已隱藏</p>
+          <p class="text-xs mt-1">👆 請點擊上方成員名字以查看內容</p>
+      </div>
+
+      <!-- 筆記列表 (只有當有選擇成員時才顯示) -->
+      <div v-else class="grid gap-3 pb-24 animate-slide-up">
         <div v-if="filteredNotebookList.length === 0" class="text-center py-10 text-gray-400">
           <i class="fa-solid fa-book-open text-4xl mb-3 opacity-50"></i><p>這裡空空的，記點什麼吧！</p>
         </div>
@@ -767,6 +842,7 @@
           </div>
         </div>
       </div>
+      
       <button @click="openModal('notebook')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
     </div>
 
@@ -984,7 +1060,8 @@ window.__FULL_ITINERARY_DATA__ = [
       });
       
       const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '媽媽', '爸爸']);
-      const shoppingTravelers = computed(() => ['全部', ...travelers.value.filter(t => t !== '公費')]);
+      // 修改：移除 '全部' 選項，只保留個別成員
+      const shoppingTravelers = computed(() => travelers.value.filter(t => t !== '公費'));
       const notebookOwners = computed(() => travelers.value.filter(t => t !== '公費'));
       const packingPeople = ref(['士翔', '侑君', '士倫', '欣怡', '珮茹', '媽媽', '爸爸']);
 
@@ -999,6 +1076,7 @@ window.__FULL_ITINERARY_DATA__ = [
 
       const isTigerairInfoExpanded = ref(false);
       // const isTravelTipsExpanded = ref(false); // Removed
+      const isExchangeWarningExpanded = ref(false); // New state for Exchange Warning
 
       // --- FIREBASE SYNC COLLECTIONS ---
       const itineraryList = ref([]);
@@ -1010,13 +1088,21 @@ window.__FULL_ITINERARY_DATA__ = [
       const isSaving = ref(false);
       const migrationStatus = ref('');
 
-      const currentMemberFilter = ref(null);
-      const currentNotebookFilter = ref('翔/君');
-      const currentShoppingFilter = ref('全部');
+      const currentMemberFilter = ref(null); // Default null for privacy
+      const currentNotebookFilter = ref(null); // Default null for privacy (Modified)
+      const currentShoppingFilter = ref(null); // Default null for privacy
       const currentPackingFilter = ref('士翔');
       const newPackingItem = ref('');
 
       // Metro Map Zoom Logic (Removed)
+
+      // Watch Tab Change to Reset Privacy Filters
+      watch(currentTab, (newVal) => {
+          // 當切換分頁時，重置敏感資訊的篩選器為 null (隱藏狀態)
+          if (newVal !== 'shopping') currentShoppingFilter.value = null;
+          if (newVal !== 'expense') currentMemberFilter.value = null;
+          if (newVal !== 'notebook') currentNotebookFilter.value = null; // Add notebook reset
+      });
 
       // Custom Alert & Confirm Implementation
       const confirmState = reactive({ show: false, message: '', resolve: null });
@@ -1188,12 +1274,16 @@ window.__FULL_ITINERARY_DATA__ = [
       );
 
       const filteredShoppingList = computed(() => {
-        if (currentShoppingFilter.value === '全部') return shoppingList.value;
+        // 如果沒有選擇過濾器 (null)，回傳空陣列 (配合 v-if 控制顯示)
+        if (!currentShoppingFilter.value) return [];
+        // 移除 '全部' 的邏輯
         return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
       });
 
       const filteredExpenses = computed(() => {
-        if (!currentMemberFilter.value) return expenses.value;
+        // 如果沒有選擇過濾器 (null)，回傳空陣列
+        if (!currentMemberFilter.value) return [];
+        if (currentMemberFilter.value === 'ALL') return expenses.value; // Special flag for ALL
         return expenses.value.filter(item => item.owner === currentMemberFilter.value);
       });
 
@@ -1213,7 +1303,11 @@ window.__FULL_ITINERARY_DATA__ = [
           });
       });
 
-      const filteredNotebookList = computed(() => notebookList.value.filter(n => n.owner === currentNotebookFilter.value));
+      const filteredNotebookList = computed(() => {
+          // Add privacy check
+          if (!currentNotebookFilter.value) return [];
+          return notebookList.value.filter(n => n.owner === currentNotebookFilter.value);
+      });
 
       // --- MODAL & FORM ---
       const modal = reactive({ show: false, type: '', title: '', isEdit: false });
@@ -1234,9 +1328,22 @@ window.__FULL_ITINERARY_DATA__ = [
             Object.assign(formData, JSON.parse(JSON.stringify(item))); 
         } else {
             modal.title = '新增';
-            if (type === 'shopping') Object.assign(formData, { owner: currentShoppingFilter.value==='全部'?'翔/君':currentShoppingFilter.value, bought: false });
-            if (type === 'expense') Object.assign(formData, { date: selectedDate.value, category: 'food', owner: '公費', method: '現金' });
-            if (type === 'notebook') Object.assign(formData, { owner: currentNotebookFilter.value || '翔/君' });
+            // Shopping: use current filter if set, otherwise default
+            if (type === 'shopping') {
+                // 修改預設邏輯：如果有選人就用那個人，沒選人預設為 '翔/君'
+                const defaultOwner = currentShoppingFilter.value ? currentShoppingFilter.value : '翔/君';
+                Object.assign(formData, { owner: defaultOwner, bought: false });
+            }
+            // Expense: use current filter if set, otherwise default
+            if (type === 'expense') {
+                const defaultOwner = (currentMemberFilter.value && currentMemberFilter.value !== 'ALL') ? currentMemberFilter.value : '公費';
+                Object.assign(formData, { date: selectedDate.value, category: 'food', owner: defaultOwner, method: '現金' });
+            }
+            // Notebook: use current filter if set, otherwise default
+            if (type === 'notebook') {
+                const defaultOwner = currentNotebookFilter.value ? currentNotebookFilter.value : '翔/君';
+                Object.assign(formData, { owner: defaultOwner });
+            }
         }
       };
       
@@ -1574,7 +1681,7 @@ window.__FULL_ITINERARY_DATA__ = [
         exchange, currentRate, calcTwd, calcJpy, rateUpdateDate,
         getCategoryLabel, getCategoryColor, getExpenseIcon, getTransportIcon, handleImageUpload, openMap,
         firebaseStatus, reconnectFirebase, migrationStatus,
-        isTigerairInfoExpanded, // isTravelTipsExpanded removed
+        isTigerairInfoExpanded, isExchangeWarningExpanded, // Export new state
         handleBannerUpload,
         
         // Modal & Toast
