@@ -53,6 +53,7 @@
             'slide-up': 'slideUp 0.3s ease-out forwards',
             'fall-1': 'fall-sway-1 6s linear infinite',
             'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'marquee': 'marquee 15s linear infinite',
           },
           keyframes: {
             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
@@ -63,6 +64,10 @@
               '10%': { opacity: '0.8' },
               '50%': { transform: 'rotate(180deg) translateX(20px)' },
               '100%': { top: '110%', left: 'calc(var(--start-left) + 10%)', transform: 'rotate(360deg) translateX(-20px)', opacity: '0' }
+            },
+            marquee: {
+              '0%': { transform: 'translateX(100%)' },
+              '100%': { transform: 'translateX(-100%)' }
             }
           }
         }
@@ -109,9 +114,12 @@
 
   <!-- Header -->
   <header class="relative h-[300px] w-full overflow-hidden bg-gray-900 group">
-    <!-- 加入 origin-bottom 確保放大時也以底部為基準 -->
-    <img :src="bannerImage" class="w-full h-full object-cover object-bottom origin-bottom transition-transform duration-1000 hover:scale-110 opacity-90" @error="handleImageError">
+    <!-- 改為 object-center 與 origin-center -->
+    <img :src="bannerImage" class="w-full h-full object-cover object-center origin-center transition-transform duration-1000 hover:scale-110 opacity-90" @error="handleImageError">
     
+    <!-- Dark Gradient Overlay (已移除) -->
+    <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 z-0"></div> -->
+
     <!-- Countdown Badge -->
     <div class="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-[10px] border border-white/20 shadow-lg flex items-center gap-2 z-20 font-bold">
       <i class="fa-regular fa-clock text-sakura"></i>
@@ -162,6 +170,7 @@
 
     <!-- TAB 1: Itinerary -->
     <div v-if="currentTab === 'itinerary'">
+      
       <!-- Weather Card -->
       <div class="relative bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] mb-5 border border-gray-50 overflow-hidden group transition-all duration-300">
         <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-sakura-light to-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
@@ -209,21 +218,88 @@
         </div>
 
         <div v-if="isWeatherExpanded" class="mt-2 pt-2 border-t border-gray-100 animate-fade-in relative z-10">
-          <div class="mb-2 bg-gradient-to-r from-sakura-light/30 to-white border border-sakura-light/40 rounded-xl p-2.5 shadow-sm flex gap-2.5 items-start">
+          
+          <!-- 1. Outfit Advice -->
+          <div class="mb-3 bg-gradient-to-r from-sakura-light/30 to-white border border-sakura-light/40 rounded-xl p-2.5 shadow-sm flex gap-2.5 items-start">
             <div class="w-6 h-6 rounded-full bg-white text-sakura-dark flex items-center justify-center shrink-0 shadow-sm text-xs mt-0.5"><i class="fa-solid fa-shirt"></i></div>
             <div>
               <h5 class="text-[10px] font-bold text-sakura-dark mb-0.5 tracking-wider uppercase">Outfit Advice</h5>
               <p class="text-xs text-gray-600 font-medium leading-relaxed">{{ weatherData.clothing }}</p>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-2 mb-2">
-            <div class="bg-gray-50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
-              <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center text-xs"><i class="fa-solid fa-droplet"></i></div>
-              <div><div class="text-[10px] text-gray-400 font-bold uppercase leading-none mb-0.5">濕度</div><div class="text-sm font-bold text-gray-700 leading-none">{{ weatherData.humidity }}%</div></div>
+
+          <!-- 2. Hourly Forecast (New) -->
+          <div class="mb-3">
+            <h5 class="text-[10px] text-gray-400 font-bold mb-2 ml-1">未來 24 小時</h5>
+            <div class="flex overflow-x-auto no-scrollbar gap-2 pb-2">
+                <div v-for="(hour, hIdx) in weatherData.hourly" :key="hIdx" class="flex-shrink-0 flex flex-col items-center bg-gray-50 rounded-xl p-2 w-14 border border-gray-100">
+                    <span class="text-[10px] text-gray-500 font-bold mb-1">{{ hour.time }}</span>
+                    <i :class="hour.icon" class="text-lg mb-1" :style="{color: hour.color}"></i>
+                    <span class="text-xs font-bold text-gray-700">{{ hour.temp }}°</span>
+                    <span v-if="hour.pop > 0" class="text-[9px] text-blue-400 font-bold mt-0.5">{{ hour.pop }}%</span>
+                </div>
             </div>
-            <div class="bg-gray-50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
-              <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center text-xs"><i class="fa-solid fa-wind"></i></div>
-              <div><div class="text-[10px] text-gray-400 font-bold uppercase leading-none mb-0.5">風速</div><div class="text-sm font-bold text-gray-700 leading-none">{{ weatherData.windSpeed }} <span class="text-[10px] font-normal">m/s</span></div></div>
+          </div>
+
+          <!-- 3. Detailed Metrics Grid (Expanded) -->
+          <div class="grid grid-cols-3 gap-2 mb-3">
+            <!-- Humidity -->
+            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
+              <i class="fa-solid fa-droplet text-blue-400 text-lg mb-1"></i>
+              <div class="text-[10px] text-gray-400 font-bold uppercase">濕度</div>
+              <div class="text-xs font-bold text-gray-700">{{ weatherData.humidity }}%</div>
+            </div>
+            <!-- Rain -->
+            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
+              <i class="fa-solid fa-umbrella text-cyan-400 text-lg mb-1"></i>
+              <div class="text-[10px] text-gray-400 font-bold uppercase">降雨量</div>
+              <div class="text-xs font-bold text-gray-700">{{ weatherData.rain }}<span class="text-[9px] font-normal scale-75">mm</span></div>
+            </div>
+            <!-- Wind -->
+            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
+              <i class="fa-solid fa-wind text-indigo-400 text-lg mb-1"></i>
+              <div class="text-[10px] text-gray-400 font-bold uppercase">風速</div>
+              <div class="text-xs font-bold text-gray-700">{{ weatherData.windSpeed }}<span class="text-[9px] font-normal scale-75">m/s</span></div>
+            </div>
+            <!-- UV -->
+            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
+              <i class="fa-solid fa-sun text-orange-400 text-lg mb-1"></i>
+              <div class="text-[10px] text-gray-400 font-bold uppercase">紫外線</div>
+              <div class="text-xs font-bold text-gray-700">{{ weatherData.uvIndex }}</div>
+            </div>
+            <!-- Pressure (New) -->
+            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
+              <i class="fa-solid fa-gauge-high text-emerald-400 text-lg mb-1"></i>
+              <div class="text-[10px] text-gray-400 font-bold uppercase">氣壓</div>
+              <div class="text-xs font-bold text-gray-700">{{ weatherData.pressure }}<span class="text-[9px] font-normal scale-75">hPa</span></div>
+            </div>
+            <!-- Visibility (New) -->
+            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
+              <i class="fa-solid fa-eye text-purple-400 text-lg mb-1"></i>
+              <div class="text-[10px] text-gray-400 font-bold uppercase">能見度</div>
+              <div class="text-xs font-bold text-gray-700">{{ weatherData.visibility }}<span class="text-[9px] font-normal scale-75">km</span></div>
+            </div>
+          </div>
+
+          <!-- 4. Sun Times -->
+          <div class="flex justify-between items-center bg-gray-50 rounded-full px-4 py-2 border border-gray-100 mb-3">
+            <div class="flex items-center gap-2"><i class="fa-regular fa-sun text-orange-400 text-sm"></i><div class="flex flex-col"><span class="text-[9px] text-gray-400 leading-none">日出</span><span class="text-xs font-bold text-gray-600 leading-none">{{ weatherData.sunrise }}</span></div></div>
+            <div class="h-8 w-px bg-gray-200 mx-2"></div>
+            <div class="flex items-center gap-2"><div class="flex flex-col items-end"><span class="text-[9px] text-gray-400 leading-none">日落</span><span class="text-xs font-bold text-gray-600 leading-none">{{ weatherData.sunset }}</span></div><i class="fa-regular fa-moon text-indigo-400 text-sm"></i></div>
+          </div>
+
+          <!-- 5. Daily Forecast -->
+          <div v-if="weatherData.forecast && weatherData.forecast.length > 0" class="border-t border-gray-100 pt-3">
+            <h5 class="text-[10px] text-gray-400 font-bold mb-2 ml-1">未來預報</h5>
+            <div class="flex flex-col gap-2">
+              <div v-for="day in weatherData.forecast" :key="day.dayName" class="flex justify-between items-center bg-gray-50 rounded-xl p-2 px-3 border border-transparent hover:border-sakura-light transition-colors">
+                <span class="text-xs font-bold text-gray-600 w-12">{{ day.dayName }}</span>
+                <div class="flex items-center gap-2 flex-1 justify-center">
+                    <i :class="day.icon" class="text-lg" :style="{color: day.color}"></i>
+                    <span v-if="day.pop > 0" class="text-[9px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-bold flex items-center"><i class="fa-solid fa-umbrella text-[8px] mr-1"></i>{{ day.pop }}%</span>
+                </div>
+                <div class="flex items-center text-xs font-bold text-gray-700 w-16 justify-end">{{ day.max }}° <span class="text-[10px] text-gray-400 font-normal ml-1">{{ day.min }}°</span></div>
+              </div>
             </div>
           </div>
         </div>
@@ -236,6 +312,16 @@
           <span class="text-xs font-bold z-10 opacity-60 mb-1">Day{{ index + 1 }}</span>
           <span class="text-xl font-bold z-10 leading-none">{{ day.displayDate }}</span>
         </button>
+      </div>
+
+      <!-- Marquee Notice (Moved Here) -->
+      <div class="bg-yellow-50 border border-yellow-200/60 text-yellow-800 px-3 py-2 rounded-xl mb-4 overflow-hidden relative shadow-sm mx-1">
+        <div class="whitespace-nowrap animate-marquee text-xs font-bold flex items-center">
+           <i class="fa-solid fa-clock mr-2 text-yellow-600"></i>時間皆為預估，僅供參考，依現場狀況為準
+        </div>
+        <!-- Gradient masks for fade effect -->
+        <div class="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-yellow-50 to-transparent z-10"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-yellow-50 to-transparent z-10"></div>
       </div>
 
       <!-- Itinerary List -->
@@ -337,12 +423,12 @@
                 <i class="fa-solid fa-bullhorn text-lg"></i>
             </div>
             <div>
-                <h4 class="font-bold text-gray-800 text-sm mb-2">公告</h4>
+                <h4 class="font-bold text-gray-800 text-sm mb-2">重要公告</h4>
                 <ul class="text-xs text-gray-600 space-y-1.5 list-disc pl-4 font-medium">
                     <li>飯店<b>無安排早餐</b>，因價格較高且非自助式。</li>
                     <li>已包含 <b>吃到飽網卡</b> 不需要另外購買。</li>
                     <li>行程中若要脫隊或某個景點不想去，請<b>自行回飯店</b>。</li>
-                    <li>自由行每日基本上走 <b>約20,000 步以上</b>，建議穿著好走的鞋。</li>
+                    <li>自由行每日基本上走 <b>約20,000 步以上</b>，建議穿著好走的鞋。😄</li>
                 </ul>
             </div>
         </div>
@@ -632,7 +718,7 @@
 <!-- FULL DATA SEEDING -->
 <script>
 window.__FULL_ITINERARY_DATA__ = [
-  { id: 0, date: '2026-04-02', category: 'other', name: '高雄小港機場集合', time: '04:30', travelTime: 0, transportType: 'walk', note: '國際航廈出境大廳', description: '準備啟程出發囉！🎉 請務必準時集合，辦理登機手續。記得再次檢查護照與必備證件！' },
+  { id: 0, date: '2026-04-02', category: 'other', name: '高雄小港機場集合', time: '04:30', travelTime: 0, transportType: 'walk', note: '國際航廈出境大廳', description: '準備啟程出發囉！🎉 請務必準時集合，準備辦理登機手續。記得再次檢查護照與必備證件！' },
   { id: 1, date: '2026-04-02', category: 'flight', name: '航班 IT-284 KHH->KIX', time: '07:00', travelTime: 0, transportType: 'flight', note: '起飛 07:00 / 抵達 10:55 (預計出關 11:30)' },
   
   // Day 1
@@ -1060,7 +1146,13 @@ window.__FULL_ITINERARY_DATA__ = [
       };
 
       // --- UTILS ---
-      const weatherData = reactive({ city: '大阪市', temp: '--', maxTemp: '--', minTemp: '--', humidity: '--', windSpeed: '--', icon: 'fa-solid fa-spinner', description: '載入中...', clothing: '...', iconColor: '#ccc', forecast: [], apparentTemp: '--', rain: '--', uvIndex: '--', sunrise: '--', sunset: '--' });
+      const weatherData = reactive({ 
+          city: '大阪市', temp: '--', maxTemp: '--', minTemp: '--', 
+          humidity: '--', windSpeed: '--', rain: '--', pressure: '--', visibility: '--', uvIndex: '--', 
+          sunrise: '--', sunset: '--', 
+          icon: 'fa-solid fa-spinner', description: '載入中...', clothing: '...', iconColor: '#ccc', 
+          apparentTemp: '--', forecast: [], hourly: [] 
+      });
       const weatherLoading = ref(false);
       const isWeatherExpanded = ref(false);
       const toggleWeather = () => isWeatherExpanded.value = !isWeatherExpanded.value;
@@ -1094,18 +1186,30 @@ window.__FULL_ITINERARY_DATA__ = [
          weatherLoading.value = true;
          weatherData.city = city.name;
          try {
-             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&daily=weather_code,sunrise,sunset,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo`);
+             // Updated API URL for detailed metrics + hourly forecast
+             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,surface_pressure,visibility,cloud_cover&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=weather_code,sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo`);
              const data = await res.json();
              
              const current = data.current;
              const daily = data.daily;
+             const hourly = data.hourly;
 
+             // Current Conditions
              weatherData.temp = Math.round(current.temperature_2m);
              weatherData.apparentTemp = Math.round(current.apparent_temperature);
              weatherData.humidity = current.relative_humidity_2m;
              weatherData.windSpeed = current.wind_speed_10m;
              weatherData.rain = current.precipitation;
-             weatherData.uvIndex = (current.is_day===1 && current.weather_code <= 2) ? '高' : '低';
+             weatherData.pressure = Math.round(current.surface_pressure);
+             weatherData.visibility = (current.visibility / 1000).toFixed(1); // Convert m to km
+             
+             // UV Index logic (Simulated based on cloud/time as API doesn't provide real-time UV freely easily mixed)
+             const cloudCover = current.cloud_cover;
+             let uvText = '低';
+             if (current.is_day && cloudCover < 30) uvText = '高';
+             else if (current.is_day && cloudCover < 70) uvText = '中';
+             weatherData.uvIndex = uvText;
+
              if(daily.sunrise.length > 0) {
                  weatherData.sunrise = daily.sunrise[0].split('T')[1];
                  weatherData.sunset = daily.sunset[0].split('T')[1];
@@ -1120,6 +1224,7 @@ window.__FULL_ITINERARY_DATA__ = [
              weatherData.iconColor = info.color;
              weatherData.clothing = getClothingAdvice(weatherData.temp, weatherData.maxTemp, weatherData.minTemp);
 
+             // Process Daily Forecast
              const forecastList = [];
              const weekDays = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
              for (let i = 1; i <= 3; i++) {
@@ -1131,12 +1236,37 @@ window.__FULL_ITINERARY_DATA__ = [
                         dayName: weekDays[d.getDay()],
                         max: Math.round(daily.temperature_2m_max[i]),
                         min: Math.round(daily.temperature_2m_min[i]),
+                        pop: daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : 0,
                         icon: fInfo.icon,
                         color: fInfo.color
                     });
                 }
              }
              weatherData.forecast = forecastList;
+
+             // Process Hourly Forecast (Next 24 Hours)
+             const hourlyList = [];
+             const now = new Date();
+             const currentHourIndex = hourly.time.findIndex(t => new Date(t) > now); // Find next hour
+             
+             if (currentHourIndex !== -1) {
+                 for (let i = currentHourIndex; i < currentHourIndex + 24; i++) {
+                     if (!hourly.time[i]) break;
+                     const t = new Date(hourly.time[i]);
+                     const code = hourly.weather_code[i];
+                     const isDay = hourly.is_day[i] === 1;
+                     const hInfo = getWeatherInfo(code, isDay);
+                     
+                     hourlyList.push({
+                         time: t.getHours().toString().padStart(2, '0') + ':00',
+                         temp: Math.round(hourly.temperature_2m[i]),
+                         icon: hInfo.icon,
+                         color: hInfo.color,
+                         pop: hourly.precipitation_probability[i]
+                     });
+                 }
+             }
+             weatherData.hourly = hourlyList;
 
          } catch(e) { console.error(e); }
          finally { setTimeout(() => weatherLoading.value=false, 500); }
