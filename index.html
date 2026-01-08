@@ -509,6 +509,7 @@
                <!-- 新增的便利商店標籤 -->
                <span class="text-[10px] bg-sky-50 text-sky-600 px-2 py-0.5 rounded border border-sky-100">距離Lowson便利商店步行約4分鐘</span>
                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100">距離LIFE Sakaisuji超市步行約5分鐘</span>
+               <!-- 修改這裡 -->
                <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-100">房內有洗衣機</span>
              </div>
            </div>
@@ -1062,10 +1063,11 @@ window.__FULL_ITINERARY_DATA__ = [
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       });
       
-      const travelers = ref(['公費', '翔/君', '倫/怡', '茹', '媽媽', '爸爸']);
-      // 修改：移除 '全部' 選項，只保留個別成員
-      const shoppingTravelers = computed(() => travelers.value.filter(t => t !== '公費'));
-      const notebookOwners = computed(() => travelers.value.filter(t => t !== '公費'));
+      // 修改：移除 '公費'
+      const travelers = ref(['翔/君', '倫/怡', '茹', '媽媽', '爸爸']);
+      // 修改：移除 '全部' 選項，只保留個別成員 (原本過濾公費的邏輯保留也沒關係，因為已經從源頭拿掉了)
+      const shoppingTravelers = computed(() => travelers.value); 
+      const notebookOwners = computed(() => travelers.value);
       const packingPeople = ref(['士翔', '侑君', '士倫', '欣怡', '珮茹', '媽媽', '爸爸']);
 
       const days = [
@@ -1339,7 +1341,8 @@ window.__FULL_ITINERARY_DATA__ = [
             }
             // Expense: use current filter if set, otherwise default
             if (type === 'expense') {
-                const defaultOwner = (currentMemberFilter.value && currentMemberFilter.value !== 'ALL') ? currentMemberFilter.value : '公費';
+                // 修改預設邏輯：因為移除了 '公費'，預設改為第一位成員 '翔/君'
+                const defaultOwner = (currentMemberFilter.value && currentMemberFilter.value !== 'ALL') ? currentMemberFilter.value : '翔/君';
                 Object.assign(formData, { date: selectedDate.value, category: 'food', owner: defaultOwner, method: '現金' });
             }
             // Notebook: use current filter if set, otherwise default
