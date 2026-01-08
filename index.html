@@ -112,14 +112,30 @@
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="relative h-[300px] w-full overflow-hidden bg-gray-900 group">
-    <!-- 改為 object-center 與 origin-center -->
-    <img :src="bannerImage" class="w-full h-full object-cover object-center origin-center transition-transform duration-1000 hover:scale-110 opacity-90" @error="handleImageError">
-    
-    <!-- Dark Gradient Overlay (已移除) -->
-    <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 z-0"></div> -->
+  <!-- 1. Top Bar (With Titles) -->
+  <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm py-3 px-4 flex flex-col justify-center items-center border-b border-gray-100">
+      <h1 class="text-2xl font-bold tracking-[0.2em] text-sakura-text flex items-center gap-2 mb-1" style="font-family: 'Zen Maru Gothic';">
+          <i class="fa-solid fa-plane text-sakura text-xl"></i>
+          京阪之旅
+          <span class="text-xl">🌸</span>
+      </h1>
+      <div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-gray-500 uppercase">
+          <span>Osaka</span>
+          <span class="text-sakura">•</span>
+          <span>Kyoto</span>
+          <span class="text-sakura">•</span>
+          <span>Nara</span>
+      </div>
+      <div class="text-[10px] font-medium text-gray-400 tracking-widest mt-0.5">
+          2026.04.02 - 04.06
+      </div>
+  </div>
 
+  <!-- 2. Header Banner (Restored Height to 240px) -->
+  <header class="relative h-[240px] w-full overflow-hidden bg-gray-100 group">
+    <!-- 橫幅圖片 -->
+    <img :src="bannerImage" class="w-full h-full object-cover object-bottom origin-bottom opacity-100" @error="handleImageError">
+    
     <!-- Countdown Badge -->
     <div class="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-[10px] border border-white/20 shadow-lg flex items-center gap-2 z-20 font-bold">
       <i class="fa-regular fa-clock text-sakura"></i>
@@ -128,38 +144,13 @@
       <span v-else-if="daysUntilTrip === -4">旅程結束 🏠</span>
       <span v-else>旅程已圓滿結束</span>
     </div>
-
-    <!-- Title Section -->
-    <div class="absolute inset-0 flex flex-col items-center justify-center z-10 text-white animate-slide-up">
-        <div class="w-12 h-1.5 bg-sakura mb-5 rounded-full shadow-[0_0_15px_rgba(255,183,197,0.8)] animate-pulse"></div>
-        
-        <!-- Modified Title with Pink Border & Drop Shadow -->
-        <h1 class="text-6xl font-bold tracking-[0.2em] mb-4 text-center" 
-            style="font-family: 'Zen Maru Gothic'; 
-                   -webkit-text-stroke: 8px #ffb7c5; 
-                   color: white; 
-                   paint-order: stroke fill;
-                   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));">
-            京阪之旅
-        </h1>
-        
-        <div class="flex items-center gap-3 text-[10px] font-bold tracking-[0.3em] uppercase bg-black/20 px-6 py-2 rounded-full backdrop-blur-md border border-white/20 shadow-lg mb-2">
-            <span>Osaka</span>
-            <span class="text-sakura text-xs">•</span>
-            <span>Kyoto</span>
-            <span class="text-sakura text-xs">•</span>
-            <span>Nara</span>
-        </div>
-        <div class="text-xs font-medium opacity-100 tracking-widest mt-1 drop-shadow-md">
-            2026.04.02 - 04.06
-        </div>
-    </div>
   </header>
 
-  <main class="relative -mt-10 bg-[#fafafa] rounded-t-[40px] px-4 pt-4 min-h-[500px] z-10">
+  <!-- Main Content Area -->
+  <main class="relative -mt-6 bg-[#fafafa] rounded-t-[30px] px-4 pt-6 min-h-[500px] z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
 
     <!-- Cloud Status -->
-    <div class="fixed top-4 left-4 z-50 flex items-center gap-2 cursor-pointer" @click="reconnectFirebase">
+    <div class="fixed top-[90px] left-4 z-50 flex items-center gap-2 cursor-pointer" @click="reconnectFirebase">
       <div class="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.2)] border border-white transition-all duration-500"
            :class="isSaving ? 'bg-yellow-400 animate-pulse' : (firebaseStatus === 'error' ? 'bg-red-500' : (firebaseStatus === 'connected' ? 'bg-green-400' : 'bg-yellow-400'))">
       </div>
@@ -171,8 +162,8 @@
     <!-- TAB 1: Itinerary -->
     <div v-if="currentTab === 'itinerary'">
       
-      <!-- Weather Card -->
-      <div class="relative bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] mb-5 border border-gray-50 overflow-hidden group transition-all duration-300">
+      <!-- Weather Card (Compacted) -->
+      <div class="relative bg-white rounded-3xl p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] mb-4 border border-gray-50 overflow-hidden group transition-all duration-300">
         <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-sakura-light to-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         
         <div v-if="weatherLoading" class="absolute inset-0 bg-white/80 backdrop-blur-md z-30 flex items-center justify-center rounded-3xl">
@@ -189,42 +180,42 @@
           </button>
         </div>
 
-        <div @click="toggleWeather" class="relative z-10 cursor-pointer pt-1">
+        <div @click="toggleWeather" class="relative z-10 cursor-pointer pt-0">
           <div class="flex justify-between items-center">
-            <div class="pl-2">
+            <div class="pl-1">
               <div class="flex items-center gap-2 mb-0.5">
-                <h2 class="text-xl font-bold text-gray-800 tracking-tight">{{ weatherData.city }}</h2>
-                <span class="px-2 py-0.5 bg-gray-100 rounded-md text-xs font-bold text-gray-500 flex items-center gap-1">
-                  <i class="fa-solid fa-circle text-[6px]" :style="{color: weatherData.iconColor}"></i>
+                <h2 class="text-lg font-bold text-gray-800 tracking-tight">{{ weatherData.city }}</h2>
+                <span class="px-2 py-0.5 bg-gray-100 rounded-md text-[10px] font-bold text-gray-500 flex items-center gap-1">
+                  <i class="fa-solid fa-circle text-[5px]" :style="{color: weatherData.iconColor}"></i>
                   {{ weatherData.description }}
                 </span>
               </div>
-              <div class="flex items-end h-12">
-                <span class="text-5xl font-bold text-gray-800 tracking-tighter leading-none -ml-0.5">{{ weatherData.temp }}°</span>
-                <div class="ml-3 flex flex-col justify-center text-xs font-bold text-gray-400 leading-tight border-l border-gray-200 pl-2 h-8">
+              <div class="flex items-end h-10">
+                <span class="text-4xl font-bold text-gray-800 tracking-tighter leading-none -ml-0.5">{{ weatherData.temp }}°</span>
+                <div class="ml-3 flex flex-col justify-center text-[10px] font-bold text-gray-400 leading-tight border-l border-gray-200 pl-2 h-7">
                   <span class="flex items-center gap-1 mb-0.5"><i class="fa-solid fa-arrow-up text-red-300"></i>{{ weatherData.maxTemp }}°</span>
                   <span class="flex items-center gap-1"><i class="fa-solid fa-arrow-down text-blue-300"></i>{{ weatherData.minTemp }}°</span>
                 </div>
               </div>
-              <p class="text-xs text-gray-400 mt-1 font-medium pl-0.5">體感 {{ weatherData.apparentTemp }}°C</p>
+              <p class="text-[10px] text-gray-400 mt-1 font-medium pl-0.5">體感 {{ weatherData.apparentTemp }}°C</p>
             </div>
-            <div class="w-14 h-14 flex items-center justify-center animate-float mr-1">
-              <i :class="weatherData.icon" class="text-5xl drop-shadow-md transition-all duration-500" :style="{color: weatherData.iconColor}"></i>
+            <div class="w-12 h-12 flex items-center justify-center animate-float mr-1">
+              <i :class="weatherData.icon" class="text-4xl drop-shadow-md transition-all duration-500" :style="{color: weatherData.iconColor}"></i>
             </div>
           </div>
           <div class="flex justify-center -mt-1 opacity-30 group-hover:opacity-100 transition-opacity">
-            <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300 text-xs" :class="{'rotate-180': isWeatherExpanded}"></i>
+            <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300 text-[10px]" :class="{'rotate-180': isWeatherExpanded}"></i>
           </div>
         </div>
 
         <div v-if="isWeatherExpanded" class="mt-2 pt-2 border-t border-gray-100 animate-fade-in relative z-10">
           
           <!-- 1. Outfit Advice -->
-          <div class="mb-3 bg-gradient-to-r from-sakura-light/30 to-white border border-sakura-light/40 rounded-xl p-2.5 shadow-sm flex gap-2.5 items-start">
-            <div class="w-6 h-6 rounded-full bg-white text-sakura-dark flex items-center justify-center shrink-0 shadow-sm text-xs mt-0.5"><i class="fa-solid fa-shirt"></i></div>
+          <div class="mb-3 bg-gradient-to-r from-sakura-light/30 to-white border border-sakura-light/40 rounded-xl p-2 shadow-sm flex gap-2 items-start">
+            <div class="w-5 h-5 rounded-full bg-white text-sakura-dark flex items-center justify-center shrink-0 shadow-sm text-[10px] mt-0.5"><i class="fa-solid fa-shirt"></i></div>
             <div>
-              <h5 class="text-[10px] font-bold text-sakura-dark mb-0.5 tracking-wider uppercase">Outfit Advice</h5>
-              <p class="text-xs text-gray-600 font-medium leading-relaxed">{{ weatherData.clothing }}</p>
+              <h5 class="text-[9px] font-bold text-sakura-dark mb-0.5 tracking-wider uppercase">Outfit Advice</h5>
+              <p class="text-[10px] text-gray-600 font-medium leading-relaxed">{{ weatherData.clothing }}</p>
             </div>
           </div>
 
@@ -232,11 +223,11 @@
           <div class="mb-3">
             <h5 class="text-[10px] text-gray-400 font-bold mb-2 ml-1">未來 24 小時</h5>
             <div class="flex overflow-x-auto no-scrollbar gap-2 pb-2">
-                <div v-for="(hour, hIdx) in weatherData.hourly" :key="hIdx" class="flex-shrink-0 flex flex-col items-center bg-gray-50 rounded-xl p-2 w-14 border border-gray-100">
-                    <span class="text-[10px] text-gray-500 font-bold mb-1">{{ hour.time }}</span>
-                    <i :class="hour.icon" class="text-lg mb-1" :style="{color: hour.color}"></i>
-                    <span class="text-xs font-bold text-gray-700">{{ hour.temp }}°</span>
-                    <span v-if="hour.pop > 0" class="text-[9px] text-blue-400 font-bold mt-0.5">{{ hour.pop }}%</span>
+                <div v-for="(hour, hIdx) in weatherData.hourly" :key="hIdx" class="flex-shrink-0 flex flex-col items-center bg-gray-50 rounded-xl p-1.5 w-12 border border-gray-100">
+                    <span class="text-[9px] text-gray-500 font-bold mb-1">{{ hour.time }}</span>
+                    <i :class="hour.icon" class="text-sm mb-1" :style="{color: hour.color}"></i>
+                    <span class="text-[10px] font-bold text-gray-700">{{ hour.temp }}°</span>
+                    <span v-if="hour.pop > 0" class="text-[8px] text-blue-400 font-bold mt-0.5">{{ hour.pop }}%</span>
                 </div>
             </div>
           </div>
@@ -244,61 +235,61 @@
           <!-- 3. Detailed Metrics Grid (Expanded) -->
           <div class="grid grid-cols-3 gap-2 mb-3">
             <!-- Humidity -->
-            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
-              <i class="fa-solid fa-droplet text-blue-400 text-lg mb-1"></i>
-              <div class="text-[10px] text-gray-400 font-bold uppercase">濕度</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.humidity }}%</div>
+            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
+              <i class="fa-solid fa-droplet text-blue-400 text-sm mb-0.5"></i>
+              <div class="text-[9px] text-gray-400 font-bold uppercase">濕度</div>
+              <div class="text-[10px] font-bold text-gray-700">{{ weatherData.humidity }}%</div>
             </div>
             <!-- Rain -->
-            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
-              <i class="fa-solid fa-umbrella text-cyan-400 text-lg mb-1"></i>
-              <div class="text-[10px] text-gray-400 font-bold uppercase">降雨量</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.rain }}<span class="text-[9px] font-normal scale-75">mm</span></div>
+            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
+              <i class="fa-solid fa-umbrella text-cyan-400 text-sm mb-0.5"></i>
+              <div class="text-[9px] text-gray-400 font-bold uppercase">降雨量</div>
+              <div class="text-[10px] font-bold text-gray-700">{{ weatherData.rain }}<span class="text-[8px] font-normal scale-75">mm</span></div>
             </div>
             <!-- Wind -->
-            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
-              <i class="fa-solid fa-wind text-indigo-400 text-lg mb-1"></i>
-              <div class="text-[10px] text-gray-400 font-bold uppercase">風速</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.windSpeed }}<span class="text-[9px] font-normal scale-75">m/s</span></div>
+            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
+              <i class="fa-solid fa-wind text-indigo-400 text-sm mb-0.5"></i>
+              <div class="text-[9px] text-gray-400 font-bold uppercase">風速</div>
+              <div class="text-[10px] font-bold text-gray-700">{{ weatherData.windSpeed }}<span class="text-[8px] font-normal scale-75">m/s</span></div>
             </div>
             <!-- UV -->
-            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
-              <i class="fa-solid fa-sun text-orange-400 text-lg mb-1"></i>
-              <div class="text-[10px] text-gray-400 font-bold uppercase">紫外線</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.uvIndex }}</div>
+            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
+              <i class="fa-solid fa-sun text-orange-400 text-sm mb-0.5"></i>
+              <div class="text-[9px] text-gray-400 font-bold uppercase">紫外線</div>
+              <div class="text-[10px] font-bold text-gray-700">{{ weatherData.uvIndex }}</div>
             </div>
             <!-- Pressure (New) -->
-            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
-              <i class="fa-solid fa-gauge-high text-emerald-400 text-lg mb-1"></i>
-              <div class="text-[10px] text-gray-400 font-bold uppercase">氣壓</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.pressure }}<span class="text-[9px] font-normal scale-75">hPa</span></div>
+            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
+              <i class="fa-solid fa-gauge-high text-emerald-400 text-sm mb-0.5"></i>
+              <div class="text-[9px] text-gray-400 font-bold uppercase">氣壓</div>
+              <div class="text-[10px] font-bold text-gray-700">{{ weatherData.pressure }}<span class="text-[8px] font-normal scale-75">hPa</span></div>
             </div>
             <!-- Visibility (New) -->
-            <div class="bg-gray-50 rounded-xl p-2 flex flex-col items-center justify-center border border-gray-100 h-20">
-              <i class="fa-solid fa-eye text-purple-400 text-lg mb-1"></i>
-              <div class="text-[10px] text-gray-400 font-bold uppercase">能見度</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.visibility }}<span class="text-[9px] font-normal scale-75">km</span></div>
+            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
+              <i class="fa-solid fa-eye text-purple-400 text-sm mb-0.5"></i>
+              <div class="text-[9px] text-gray-400 font-bold uppercase">能見度</div>
+              <div class="text-[10px] font-bold text-gray-700">{{ weatherData.visibility }}<span class="text-[8px] font-normal scale-75">km</span></div>
             </div>
           </div>
 
           <!-- 4. Sun Times -->
-          <div class="flex justify-between items-center bg-gray-50 rounded-full px-4 py-2 border border-gray-100 mb-3">
-            <div class="flex items-center gap-2"><i class="fa-regular fa-sun text-orange-400 text-sm"></i><div class="flex flex-col"><span class="text-[9px] text-gray-400 leading-none">日出</span><span class="text-xs font-bold text-gray-600 leading-none">{{ weatherData.sunrise }}</span></div></div>
-            <div class="h-8 w-px bg-gray-200 mx-2"></div>
-            <div class="flex items-center gap-2"><div class="flex flex-col items-end"><span class="text-[9px] text-gray-400 leading-none">日落</span><span class="text-xs font-bold text-gray-600 leading-none">{{ weatherData.sunset }}</span></div><i class="fa-regular fa-moon text-indigo-400 text-sm"></i></div>
+          <div class="flex justify-between items-center bg-gray-50 rounded-full px-4 py-1.5 border border-gray-100 mb-3">
+            <div class="flex items-center gap-2"><i class="fa-regular fa-sun text-orange-400 text-xs"></i><div class="flex flex-col"><span class="text-[8px] text-gray-400 leading-none">日出</span><span class="text-[10px] font-bold text-gray-600 leading-none">{{ weatherData.sunrise }}</span></div></div>
+            <div class="h-6 w-px bg-gray-200 mx-2"></div>
+            <div class="flex items-center gap-2"><div class="flex flex-col items-end"><span class="text-[8px] text-gray-400 leading-none">日落</span><span class="text-[10px] font-bold text-gray-600 leading-none">{{ weatherData.sunset }}</span></div><i class="fa-regular fa-moon text-indigo-400 text-xs"></i></div>
           </div>
 
           <!-- 5. Daily Forecast -->
           <div v-if="weatherData.forecast && weatherData.forecast.length > 0" class="border-t border-gray-100 pt-3">
             <h5 class="text-[10px] text-gray-400 font-bold mb-2 ml-1">未來預報</h5>
             <div class="flex flex-col gap-2">
-              <div v-for="day in weatherData.forecast" :key="day.dayName" class="flex justify-between items-center bg-gray-50 rounded-xl p-2 px-3 border border-transparent hover:border-sakura-light transition-colors">
-                <span class="text-xs font-bold text-gray-600 w-12">{{ day.dayName }}</span>
+              <div v-for="day in weatherData.forecast" :key="day.dayName" class="flex justify-between items-center bg-gray-50 rounded-xl p-1.5 px-3 border border-transparent hover:border-sakura-light transition-colors">
+                <span class="text-[10px] font-bold text-gray-600 w-12">{{ day.dayName }}</span>
                 <div class="flex items-center gap-2 flex-1 justify-center">
-                    <i :class="day.icon" class="text-lg" :style="{color: day.color}"></i>
-                    <span v-if="day.pop > 0" class="text-[9px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-bold flex items-center"><i class="fa-solid fa-umbrella text-[8px] mr-1"></i>{{ day.pop }}%</span>
+                    <i :class="day.icon" class="text-sm" :style="{color: day.color}"></i>
+                    <span v-if="day.pop > 0" class="text-[8px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-bold flex items-center"><i class="fa-solid fa-umbrella text-[8px] mr-1"></i>{{ day.pop }}%</span>
                 </div>
-                <div class="flex items-center text-xs font-bold text-gray-700 w-16 justify-end">{{ day.max }}° <span class="text-[10px] text-gray-400 font-normal ml-1">{{ day.min }}°</span></div>
+                <div class="flex items-center text-[10px] font-bold text-gray-700 w-16 justify-end">{{ day.max }}° <span class="text-[9px] text-gray-400 font-normal ml-1">{{ day.min }}°</span></div>
               </div>
             </div>
           </div>
@@ -317,7 +308,7 @@
       <!-- Marquee Notice (Moved Here) -->
       <div class="bg-yellow-50 border border-yellow-200/60 text-yellow-800 px-3 py-2 rounded-xl mb-4 overflow-hidden relative shadow-sm mx-1">
         <div class="whitespace-nowrap animate-marquee text-xs font-bold flex items-center">
-           <i class="fa-solid fa-clock mr-2 text-yellow-600"></i>交通時間與景點停留時間皆為預估，僅供參考，依現場狀況為準
+           <i class="fa-solid fa-clock mr-2 text-yellow-600"></i>時間皆為預估，僅供參考，依現場狀況為準
         </div>
         <!-- Gradient masks for fade effect -->
         <div class="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-yellow-50 to-transparent z-10"></div>
@@ -423,13 +414,86 @@
                 <i class="fa-solid fa-bullhorn text-lg"></i>
             </div>
             <div>
-                <h4 class="font-bold text-gray-800 text-sm mb-2">公告</h4>
+                <h4 class="font-bold text-gray-800 text-sm mb-2">重要公告</h4>
                 <ul class="text-xs text-gray-600 space-y-1.5 list-disc pl-4 font-medium">
                     <li>飯店<b>無安排早餐</b>，因價格較高且非自助式。</li>
                     <li>已包含 <b>吃到飽網卡</b> 不需要另外購買。</li>
-                    <li>行程中若要脫隊或某個景點不想去，後續請<b>自行回飯店</b>唷。</li>
-                    <li>自由行每日基本上走 <b>約20,000 步以上</b>，建議穿著好走的鞋。</li>
+                    <li>行程中若要脫隊或某個景點不想去，請<b>自行回飯店</b>。</li>
+                    <li>自由行每日基本上走 <b>約20,000 步以上</b>，建議穿著好走的鞋。😄</li>
                 </ul>
+            </div>
+        </div>
+      </div>
+
+      <!-- Flight Info -->
+      <div class="bg-white rounded-2xl p-5 shadow-card">
+        <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-plane mr-2 text-blue-400"></i>航班資訊</h3>
+        <!-- Outbound -->
+        <div class="mb-4 bg-blue-50 rounded-xl p-4 border border-blue-100 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-blue-500 text-white text-xs px-3 py-1 rounded-bl-xl font-bold tracking-wider">去程</div>
+          <div class="flex items-center gap-2 mb-4">
+            <span class="font-bold text-xl text-gray-800 tracking-wide">IT-284</span>
+            <span class="text-[10px] text-blue-600 bg-white px-2 py-0.5 rounded-full border border-blue-100 font-bold">台灣虎航</span>
+          </div>
+          <div class="flex justify-between items-center text-center mb-4 relative z-10">
+            <div class="text-left"><div class="text-3xl font-bold text-gray-800 leading-none">07:00</div><div class="text-sm font-bold text-gray-600 mt-1">KHH 高雄</div></div>
+            <div class="flex flex-col items-center w-1/3 px-2"><span class="text-[10px] text-gray-400 mb-2 font-bold">2h 55m</span><div class="w-full h-0.5 bg-gray-300 relative flex items-center justify-center"><i class="fa-solid fa-plane-departure text-blue-400 text-sm absolute bg-blue-50 px-1"></i></div><span class="text-[10px] text-blue-400 mt-1">直飛</span></div>
+            <div class="text-right"><div class="text-3xl font-bold text-gray-800 leading-none">10:55</div><div class="text-sm font-bold text-gray-600 mt-1">KIX 關西</div></div>
+          </div>
+          <div class="text-center mb-3">
+            <span class="text-xs font-bold text-blue-600 bg-white border border-blue-200 px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-user-clock mr-1"></i>建議報到：04:30</span>
+          </div>
+        </div>
+        <!-- Inbound -->
+        <div class="bg-sakura-light/40 rounded-xl p-4 border border-sakura-light relative overflow-hidden mb-4">
+          <div class="absolute top-0 right-0 bg-sakura text-white text-xs px-3 py-1 rounded-bl-xl font-bold tracking-wider">回程</div>
+          <div class="flex items-center gap-2 mb-4">
+            <span class="font-bold text-xl text-gray-800 tracking-wide">IT-285</span>
+            <span class="text-[10px] text-sakura-dark bg-white px-2 py-0.5 rounded-full border border-sakura-light font-bold">台灣虎航</span>
+          </div>
+          <div class="flex justify-between items-center text-center mb-4 relative z-10">
+            <div class="text-left"><div class="text-3xl font-bold text-gray-800">12:00</div><div class="text-sm font-bold text-gray-600 mt-1">KIX 關西</div></div>
+            <div class="flex flex-col items-center w-1/3 px-2"><span class="text-[10px] text-gray-400 mb-2 font-bold">3h 0m</span><div class="w-full h-0.5 bg-gray-300 relative flex items-center justify-center"><i class="fa-solid fa-plane-departure text-sakura text-sm absolute bg-sakura-light/40 px-1"></i></div><span class="text-[10px] text-sakura mt-1">直飛</span></div>
+            <div class="text-right"><div class="text-3xl font-bold text-gray-800 leading-none">14:00</div><div class="text-sm font-bold text-gray-600 mt-1">KHH 高雄</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hotel Info (Restored) -->
+      <div class="bg-white rounded-2xl p-5 shadow-card">
+        <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-hotel mr-2 text-purple-400"></i>住宿資訊</h3>
+        <div class="flex gap-4 mb-4">
+           <div class="w-20 h-20 bg-purple-50 rounded-xl overflow-hidden shrink-0 shadow-sm border border-purple-100 flex items-center justify-center text-purple-300">
+                <i class="fa-solid fa-bed text-3xl"></i>
+           </div>
+           <div class="flex-1 min-w-0 py-0.5">
+             <h4 class="font-bold text-gray-800 text-lg truncate">東急 Stay 大阪本町</h4>
+             <p class="text-xs text-gray-400 mb-2 truncate">Tokyu Stay Osaka Hommachi</p>
+             <div class="flex gap-1 flex-wrap">
+               <span class="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded border border-purple-100">本町站 11號出口</span>
+               <!-- 新增的便利商店標籤 -->
+               <span class="text-[10px] bg-sky-50 text-sky-600 px-2 py-0.5 rounded border border-sky-100">距離Lowson便利商店步行約4分鐘</span>
+               <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100">距離LIFE Sakaisuji超市步行約5分鐘</span>
+               <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-100">房內洗脫烘</span>
+             </div>
+           </div>
+        </div>
+        
+        <div class="space-y-2">
+            <div class="flex items-start gap-3 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                <i class="fa-solid fa-location-dot text-red-400 mt-0.5 ml-1"></i>
+                <div class="flex-1">
+                    <p class="font-bold text-gray-700">大阪府大阪市中央區久太郎町 2-4-24</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5">離心齋橋商店街步行約 10 分鐘</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button @click="openMap('東急 Stay 大阪本町')" class="flex-1 bg-purple-400 text-white py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-purple-500 transition-colors">
+                    <i class="fa-solid fa-map-location-dot mr-1"></i>Google 導航
+                </button>
+                 <a href="tel:+81662620109" class="flex-1 bg-white text-gray-600 border border-gray-200 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-phone mr-1"></i>撥打電話
+                </a>
             </div>
         </div>
       </div>
@@ -790,7 +854,7 @@
 <!-- FULL DATA SEEDING -->
 <script>
 window.__FULL_ITINERARY_DATA__ = [
-  { id: 0, date: '2026-04-02', category: 'other', name: '高雄小港機場集合', time: '04:30', travelTime: 0, transportType: 'walk', note: '國際航廈出境大廳', description: '準備啟程出發囉！🎉 請務必準時集合，辦理登機手續。記得再次檢查護照與必備證件！' },
+  { id: 0, date: '2026-04-02', category: 'other', name: '高雄小港機場集合', time: '04:30', travelTime: 0, transportType: 'walk', note: '國際航廈出境大廳', description: '準備啟程出發囉！🎉 請務必準時集合，準備辦理登機手續。記得再次檢查護照與必備證件！' },
   { id: 1, date: '2026-04-02', category: 'flight', name: '航班 IT-284 KHH->KIX', time: '07:00', travelTime: 0, transportType: 'flight', note: '起飛 07:00 / 抵達 10:55 (預計出關 11:30)' },
   
   // Day 1
@@ -886,7 +950,7 @@ window.__FULL_ITINERARY_DATA__ = [
         { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' },
       ];
       // Changed default image back to previous version
-      const bannerImage = ref('https://i.ibb.co/r2r9z1vm/Gemini-Generated-Image-71bg6f71bg6f71bg.png');
+      const bannerImage = ref('https://i.ibb.co/YBR5dpk4/22223.png');
       const handleImageError = () => { bannerImage.value = 'https://via.placeholder.com/480x250?text=Trip'; };
       
       const tripStartDate = new Date('2026-04-02T00:00:00');
