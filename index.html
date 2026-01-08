@@ -427,7 +427,7 @@
                 <ul class="text-xs text-gray-600 space-y-1.5 list-disc pl-4 font-medium">
                     <li>飯店<b>無安排早餐</b>，因價格較高且非自助式。</li>
                     <li>已包含 <b>吃到飽網卡</b> 不需要另外購買。</li>
-                    <li>行程中若要脫隊或某個景點不想去，回程請<b>自行回飯店唷</b>。</li>
+                    <li>行程中若要脫隊或某個景點不想去，回程請<b>自行回飯店</b>唷~飯店地址請看資訊(有導航)。</li>
                     <li>自由行每日基本上走 <b>約20,000 步以上</b>，建議穿著好走的鞋。</li>
                 </ul>
             </div>
@@ -465,6 +465,157 @@
             <div class="flex flex-col items-center w-1/3 px-2"><span class="text-[10px] text-gray-400 mb-2 font-bold">3h 0m</span><div class="w-full h-0.5 bg-gray-300 relative flex items-center justify-center"><i class="fa-solid fa-plane-departure text-sakura text-sm absolute bg-sakura-light/40 px-1"></i></div><span class="text-[10px] text-sakura mt-1">直飛</span></div>
             <div class="text-right"><div class="text-3xl font-bold text-gray-800 leading-none">14:00</div><div class="text-sm font-bold text-gray-600 mt-1">KHH 高雄</div></div>
           </div>
+        </div>
+      </div>
+
+      <!-- Hotel Info (Restored) -->
+      <div class="bg-white rounded-2xl p-5 shadow-card">
+        <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-hotel mr-2 text-purple-400"></i>住宿資訊</h3>
+        <div class="flex gap-4 mb-4">
+           <div class="w-20 h-20 bg-purple-50 rounded-xl overflow-hidden shrink-0 shadow-sm border border-purple-100 flex items-center justify-center text-purple-300">
+                <i class="fa-solid fa-bed text-3xl"></i>
+           </div>
+           <div class="flex-1 min-w-0 py-0.5">
+             <h4 class="font-bold text-gray-800 text-lg truncate">東急 Stay 大阪本町</h4>
+             <p class="text-xs text-gray-400 mb-2 truncate">Tokyu Stay Osaka Hommachi</p>
+             <div class="flex gap-1 flex-wrap">
+               <span class="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded border border-purple-100">本町站 11號出口</span>
+               <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-100">房內洗脫烘</span>
+             </div>
+           </div>
+        </div>
+        
+        <div class="space-y-2">
+            <div class="flex items-start gap-3 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                <i class="fa-solid fa-location-dot text-red-400 mt-0.5 ml-1"></i>
+                <div class="flex-1">
+                    <p class="font-bold text-gray-700">大阪府大阪市中央區久太郎町 2-4-24</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5">離心齋橋商店街步行約 10 分鐘</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button @click="openMap('東急 Stay 大阪本町')" class="flex-1 bg-purple-400 text-white py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-purple-500 transition-colors">
+                    <i class="fa-solid fa-map-location-dot mr-1"></i>Google 導航
+                </button>
+                 <a href="tel:+81662620109" class="flex-1 bg-white text-gray-600 border border-gray-200 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-phone mr-1"></i>撥打電話
+                </a>
+            </div>
+        </div>
+      </div>
+
+      <!-- Travel Tips (Collapsible) -->
+      <div class="bg-white rounded-2xl shadow-card overflow-hidden">
+        <button @click="isTravelTipsExpanded = !isTravelTipsExpanded" class="w-full p-5 flex justify-between items-center text-left hover:bg-gray-50 transition-colors focus:outline-none">
+            <h3 class="font-bold text-sakura-text flex items-center m-0">
+                <i class="fa-solid fa-triangle-exclamation mr-2 text-yellow-500"></i>旅遊須知 & 緊急聯絡
+            </h3>
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] text-gray-400 font-normal" v-show="!isTravelTipsExpanded">點擊展開</span>
+                <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300" :class="{'rotate-180': isTravelTipsExpanded}"></i>
+            </div>
+        </button>
+
+        <div v-show="isTravelTipsExpanded" class="px-5 pb-5 animate-fade-in border-t border-gray-100">
+            <div class="pt-4">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-white text-red-500 flex items-center justify-center shadow-sm font-bold text-sm"><i class="fa-solid fa-phone-volume"></i></div>
+                        <div><div class="text-[10px] text-gray-400">緊急 (警/消)</div><div class="text-lg font-bold text-red-600 leading-none">110 / 119</div></div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-white text-blue-500 flex items-center justify-center shadow-sm font-bold text-sm"><i class="fa-solid fa-passport"></i></div>
+                        <div><div class="text-[10px] text-gray-400">駐日代表處</div><a href="tel:+81664438481" class="text-sm font-bold text-blue-600 leading-tight underline">06-6443-8481</a></div>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex gap-3 items-start">
+                        <i class="fa-solid fa-plug text-gray-400 mt-1 w-4 text-center"></i>
+                        <div>
+                            <h5 class="text-xs font-bold text-gray-700">電壓與插座</h5>
+                            <p class="text-[10px] text-gray-500">日本電壓為 100V，插座為雙孔扁型（與台灣相同）。一般台灣電器可直接使用，無需轉接頭。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 items-start">
+                        <i class="fa-solid fa-clock text-gray-400 mt-1 w-4 text-center"></i>
+                        <div>
+                            <h5 class="text-xs font-bold text-gray-700">時差</h5>
+                            <p class="text-[10px] text-gray-500">日本比台灣快 1 小時 (台灣 8:00 = 日本 9:00)。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 items-start">
+                        <i class="fa-solid fa-hand-holding-dollar text-gray-400 mt-1 w-4 text-center"></i>
+                        <div>
+                            <h5 class="text-xs font-bold text-gray-700">小費與退稅</h5>
+                            <p class="text-[10px] text-gray-500">無小費文化。購物滿 5,000 日圓（未稅）可憑護照辦理退稅。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 items-start">
+                        <i class="fa-solid fa-qrcode text-gray-400 mt-1 w-4 text-center"></i>
+                        <div>
+                            <h5 class="text-xs font-bold text-gray-700">
+                                <a href="https://vjw-lp.digital.go.jp/zh-hant/" target="_blank" class="text-blue-500 hover:text-blue-700 underline decoration-blue-300 underline-offset-2">Visit Japan Web</a>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1 text-blue-400"></i>
+                            </h5>
+                            <p class="text-[10px] text-gray-500">建議事先填寫入境審查與海關申報，並截圖 QR Code 以加速通關。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 items-start">
+                        <i class="fa-regular fa-credit-card text-gray-400 mt-1 w-4 text-center"></i>
+                        <div>
+                            <h5 class="text-xs font-bold text-gray-700">交通卡 (ICOCA)</h5>
+                            <p class="text-[10px] text-gray-500">大阪與京都的 JR、地鐵、私鐵及巴士皆通用。進出站皆需刷卡。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Detailed Etiquette Section (Updated) -->
+                    <div class="pt-2 mt-2 border-t border-gray-100">
+                        <div class="flex gap-3 items-start">
+                            <i class="fa-solid fa-user-tie text-gray-400 mt-1 w-4 text-center"></i>
+                            <div class="w-full">
+                                <h5 class="text-xs font-bold text-gray-700 mb-2">日本旅遊禮儀大全</h5>
+                                
+                                <div class="space-y-2">
+                                    <!-- Dining -->
+                                    <div class="bg-orange-50/50 p-2.5 rounded-lg border border-orange-100">
+                                        <h6 class="text-[10px] font-bold text-orange-800 mb-1 flex items-center"><i class="fa-solid fa-utensils mr-1.5 text-orange-400"></i>用餐禮儀</h6>
+                                        <ul class="text-[10px] text-gray-600 list-disc pl-3 space-y-1 leading-relaxed">
+                                            <li><b>嚴禁邊走邊吃</b>：日本視為不禮貌。請在購買店家前定點吃完，或至附近公園/休息區。</li>
+                                            <li><b>筷子禁忌</b>：不可用筷子傳遞食物（像撿骨）、不可將筷子直插在飯上、不可用筷子指人。</li>
+                                            <li><b>餐盤回收</b>：在美食街或速食店，用餐完畢請自行分類回收餐具與垃圾。</li>
+                                            <li><b>禁帶外食</b>：大多數餐廳與咖啡廳嚴禁攜帶外食或飲料入內食用。</li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Transport -->
+                                    <div class="bg-blue-50/50 p-2.5 rounded-lg border border-blue-100">
+                                        <h6 class="text-[10px] font-bold text-blue-800 mb-1 flex items-center"><i class="fa-solid fa-train-subway mr-1.5 text-blue-400"></i>交通禮儀</h6>
+                                        <ul class="text-[10px] text-gray-600 list-disc pl-3 space-y-1 leading-relaxed">
+                                            <li><b>車廂寧靜</b>：手機請設靜音（Manner Mode），避免通話。交談請輕聲細語。</li>
+                                            <li><b>後背包前背</b>：尖峰時刻搭車，請將後背包改背在胸前，以免撞到他人。</li>
+                                            <li><b>手扶梯站法</b>：大阪習慣<b>靠右</b>站立（與台灣相同），但京都與其他地區多為<b>靠左</b>。建議觀察前方人流。</li>
+                                            <li><b>優先席</b>：博愛座附近請關閉手機電源（因心律調節器干擾疑慮），並優先禮讓。</li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Shopping/General -->
+                                    <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                                        <h6 class="text-[10px] font-bold text-gray-700 mb-1 flex items-center"><i class="fa-solid fa-bag-shopping mr-1.5 text-pink-400"></i>購物與日常</h6>
+                                        <ul class="text-[10px] text-gray-600 list-disc pl-3 space-y-1 leading-relaxed">
+                                            <li><b>付款禮儀</b>：結帳時請將現金或信用卡置於櫃檯的<b>「錢盤 (Cash Tray)」</b>上，勿直接手遞給店員。</li>
+                                            <li><b>垃圾不落地</b>：日本街頭垃圾桶極少。請隨身攜帶小塑膠袋，將垃圾帶回飯店或車站丟棄。</li>
+                                            <li><b>拍照注意</b>：請勿直接對著陌生人、警察或禁止攝影的店家商品近距離拍攝。</li>
+                                            <li><b>試穿禮儀</b>：試穿衣服（尤其是淺色上衣）時，請使用店家提供的不織布頭套，以免妝容沾染衣物。</li>
+                                            <li><b>室內脫鞋</b>：進入玄關若有高低差，通常代表需脫鞋。脫下的鞋子請將鞋尖朝外（朝門口）擺放整齊。</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
       </div>
 
@@ -508,6 +659,26 @@
             <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 幫 {{ currentPackingFilter }} 補齊預設項目
         </button>
       </div>
+
+      <!-- Osaka Metro Map (New) -->
+      <div class="bg-white rounded-2xl p-5 shadow-card mb-6">
+        <h3 class="font-bold text-sakura-text mb-3 border-b pb-2 flex justify-between items-center">
+          <span><i class="fa-solid fa-map-location-dot mr-2 text-indigo-500"></i>大阪地鐵圖</span>
+          <div class="flex gap-2">
+             <button @click="zoomOut" class="w-8 h-8 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 flex items-center justify-center transition-colors"><i class="fa-solid fa-minus"></i></button>
+             <button @click="zoomIn" class="w-8 h-8 bg-sakura text-white rounded-full shadow-sm hover:bg-sakura-dark flex items-center justify-center transition-colors"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </h3>
+        <div class="overflow-auto h-96 bg-gray-50 rounded-xl border border-gray-100 relative scroll-smooth">
+           <div :style="{ width: metroScale + '%', minWidth: '100%', transition: 'width 0.3s ease' }" class="origin-top-left">
+              <img src="https://i.ibb.co/39vfRXh9/osakametro-rosenzu-20250404.png" class="w-full h-auto block" alt="大阪地鐵圖">
+           </div>
+        </div>
+        <p class="text-[10px] text-gray-400 mt-2 text-center flex items-center justify-center gap-1">
+            <i class="fa-solid fa-magnifying-glass-plus"></i> 目前縮放: {{ metroScale }}% (可拖曳捲動)
+        </p>
+      </div>
+
     </div>
 
     <!-- TAB 3: Shopping -->
@@ -841,6 +1012,7 @@ window.__FULL_ITINERARY_DATA__ = [
       const selectedDate = ref('2026-04-02');
 
       const isTigerairInfoExpanded = ref(false);
+      const isTravelTipsExpanded = ref(false); // New state for Travel Tips
 
       // --- FIREBASE SYNC COLLECTIONS ---
       const itineraryList = ref([]);
@@ -857,6 +1029,11 @@ window.__FULL_ITINERARY_DATA__ = [
       const currentShoppingFilter = ref('全部');
       const currentPackingFilter = ref('士翔');
       const newPackingItem = ref('');
+
+      // Metro Map Zoom Logic
+      const metroScale = ref(100);
+      const zoomIn = () => { metroScale.value += 50; };
+      const zoomOut = () => { if(metroScale.value > 100) metroScale.value -= 50; };
 
       // Custom Alert & Confirm Implementation
       const confirmState = reactive({ show: false, message: '', resolve: null });
@@ -1414,9 +1591,12 @@ window.__FULL_ITINERARY_DATA__ = [
         exchange, currentRate, calcTwd, calcJpy, rateUpdateDate,
         getCategoryLabel, getCategoryColor, getExpenseIcon, getTransportIcon, handleImageUpload, openMap,
         firebaseStatus, reconnectFirebase, migrationStatus,
-        isTigerairInfoExpanded,
+        isTigerairInfoExpanded, isTravelTipsExpanded, // Export new state
         handleBannerUpload,
         
+        // Metro Map
+        metroScale, zoomIn, zoomOut,
+
         // Modal & Toast
         confirmState, toastState, handleConfirm
       };
