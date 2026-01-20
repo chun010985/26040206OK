@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 
- <meta charset="UTF-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>京阪奈之旅</title>
 
@@ -1069,9 +1069,9 @@ window.__FULL_ITINERARY_DATA__ = [
       
       // 修改：移除 '公費'
       const travelers = ref(['翔/君', '倫/怡', '茹', '媽媽', '爸爸']);
-      // 修改：移除 '全部' 選項，只保留個別成員 (原本過濾公費的邏輯保留也沒關係，因為已經從源頭拿掉了)
-      const shoppingTravelers = computed(() => travelers.value); 
-      const notebookOwners = computed(() => travelers.value);
+      // 修改：購物與筆記本加入 '全部' 選項，但預設不選擇
+      const shoppingTravelers = computed(() => ['全部', ...travelers.value]); 
+      const notebookOwners = computed(() => ['全部', ...travelers.value]);
       const packingPeople = ref(['士翔', '侑君', '士倫', '欣怡', '珮茹', '媽媽', '爸爸']);
 
       const days = [
@@ -1084,8 +1084,7 @@ window.__FULL_ITINERARY_DATA__ = [
       const selectedDate = ref('2026-04-02');
 
       const isTigerairInfoExpanded = ref(false);
-      // const isTravelTipsExpanded = ref(false); // Removed
-      const isExchangeWarningExpanded = ref(false); // New state for Exchange Warning
+      const isExchangeWarningExpanded = ref(false);
 
       // --- FIREBASE SYNC COLLECTIONS ---
       const itineraryList = ref([]);
@@ -1097,20 +1096,21 @@ window.__FULL_ITINERARY_DATA__ = [
       const isSaving = ref(false);
       const migrationStatus = ref('');
 
-      const currentMemberFilter = ref(null); // Default null for privacy
-      const currentNotebookFilter = ref(null); // Default null for privacy (Modified)
-      const currentShoppingFilter = ref(null); // Default null for privacy
+      // --- PRIVACY FILTERS ---
+      // 確保預設值為 null，這樣才會顯示隱私遮罩
+      const currentMemberFilter = ref(null); 
+      const currentNotebookFilter = ref(null); 
+      const currentShoppingFilter = ref(null); 
       const currentPackingFilter = ref('士翔');
       const newPackingItem = ref('');
 
-      // Metro Map Zoom Logic (Removed)
-
-      // Watch Tab Change to Reset Privacy Filters
+      // Watch Tab Change to Reset Privacy Filters (STRICT MODE)
       watch(currentTab, (newVal) => {
-          // 當切換分頁時，重置敏感資訊的篩選器為 null (隱藏狀態)
+          // 當切換分頁時，無論是進入還是離開，都將隱私篩選器重置為 null (隱藏狀態)
+          // 這樣可以確保每次點進去都是隱私模式，必須手動點選人名
           if (newVal !== 'shopping') currentShoppingFilter.value = null;
           if (newVal !== 'expense') currentMemberFilter.value = null;
-          if (newVal !== 'notebook') currentNotebookFilter.value = null; // Add notebook reset
+          if (newVal !== 'notebook') currentNotebookFilter.value = null;
       });
 
       // Custom Alert & Confirm Implementation
@@ -1284,9 +1284,11 @@ window.__FULL_ITINERARY_DATA__ = [
       );
 
       const filteredShoppingList = computed(() => {
-        // 如果沒有選擇過濾器 (null)，回傳空陣列 (配合 v-if 控制顯示)
+        // 如果沒有選擇過濾器 (null)，回傳空陣列 (配合 v-if 控制顯示隱私遮罩)
         if (!currentShoppingFilter.value) return [];
-        // 移除 '全部' 的邏輯
+        // 如果選擇「全部」，顯示所有資料
+        if (currentShoppingFilter.value === '全部') return shoppingList.value;
+        // 否則過濾出該成員的資料
         return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
       });
 
@@ -1316,6 +1318,8 @@ window.__FULL_ITINERARY_DATA__ = [
       const filteredNotebookList = computed(() => {
           // Add privacy check
           if (!currentNotebookFilter.value) return [];
+          // 如果選擇「全部」，顯示所有資料
+          if (currentNotebookFilter.value === '全部') return notebookList.value;
           return notebookList.value.filter(n => n.owner === currentNotebookFilter.value);
       });
 
@@ -1340,19 +1344,18 @@ window.__FULL_ITINERARY_DATA__ = [
             modal.title = '新增';
             // Shopping: use current filter if set, otherwise default
             if (type === 'shopping') {
-                // 修改預設邏輯：如果有選人就用那個人，沒選人預設為 '翔/君'
-                const defaultOwner = currentShoppingFilter.value ? currentShoppingFilter.value : '翔/君';
+                // 如果目前篩選器是 '全部' 或 未選，預設給第一個人；否則用目前選的人
+                const defaultOwner = (currentShoppingFilter.value && currentShoppingFilter.value !== '全部') ? currentShoppingFilter.value : travelers.value[0];
                 Object.assign(formData, { owner: defaultOwner, bought: false });
             }
             // Expense: use current filter if set, otherwise default
             if (type === 'expense') {
-                // 修改預設邏輯：因為移除了 '公費'，預設改為第一位成員 '翔/君'
-                const defaultOwner = (currentMemberFilter.value && currentMemberFilter.value !== 'ALL') ? currentMemberFilter.value : '翔/君';
+                const defaultOwner = (currentMemberFilter.value && currentMemberFilter.value !== 'ALL') ? currentMemberFilter.value : travelers.value[0];
                 Object.assign(formData, { date: selectedDate.value, category: 'food', owner: defaultOwner, method: '現金' });
             }
             // Notebook: use current filter if set, otherwise default
             if (type === 'notebook') {
-                const defaultOwner = currentNotebookFilter.value ? currentNotebookFilter.value : '翔/君';
+                const defaultOwner = (currentNotebookFilter.value && currentNotebookFilter.value !== '全部') ? currentNotebookFilter.value : travelers.value[0];
                 Object.assign(formData, { owner: defaultOwner });
             }
         }
