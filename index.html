@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>京阪奈之旅</title>
@@ -82,8 +81,9 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .app-container { max-width: 480px; margin: 0 auto; background-color: #fafafa; min-height: 100vh; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); padding-bottom: 80px; }
     .sakura-petal { position: absolute; background-color: #ffb7c5; border-radius: 100% 0 100% 0; opacity: 0; top: -20px; }
-
-   /* Custom Modal Styles */
+    .blur-sm { filter: blur(1px); }
+    
+    /* Custom Modal Styles */
     .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
   </style>
 </head>
@@ -135,8 +135,8 @@
   <header class="relative h-[240px] w-full overflow-hidden bg-gray-100 group">
     <!-- 橫幅圖片 -->
     <img :src="bannerImage" class="w-full h-full object-cover object-center origin-center opacity-100" @error="handleImageError">
-
-<!-- Countdown Badge -->
+    
+    <!-- Countdown Badge -->
     <div class="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-[10px] border border-white/20 shadow-lg flex items-center gap-2 z-20 font-bold">
       <i class="fa-regular fa-clock text-sakura"></i>
       <span v-if="daysUntilTrip > 0">距離出發 <b>{{ daysUntilTrip }}</b> 天</span>
@@ -159,14 +159,14 @@
       </span>
     </div>
 
- <!-- TAB 1: Itinerary -->
+    <!-- TAB 1: Itinerary -->
     <div v-if="currentTab === 'itinerary'">
       
       <!-- Weather Card (Compacted) -->
       <div class="relative bg-white rounded-3xl p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] mb-4 border border-gray-50 overflow-hidden group transition-all duration-300">
         <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-sakura-light to-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-
-<div v-if="weatherLoading" class="absolute inset-0 bg-white/80 backdrop-blur-md z-30 flex items-center justify-center rounded-3xl">
+        
+        <div v-if="weatherLoading" class="absolute inset-0 bg-white/80 backdrop-blur-md z-30 flex items-center justify-center rounded-3xl">
           <div class="text-sakura-dark animate-pulse flex flex-col items-center gap-1">
             <i class="fa-solid fa-cloud-sun text-4xl animate-bounce"></i>
             <span class="text-xs font-bold tracking-widest uppercase mt-1">Loading Weather</span>
@@ -380,8 +380,8 @@
         <button @click="updateItineraryContentOnly" class="text-[12px] text-gray-400 underline hover:text-sakura-dark transition-colors font-bold flex items-center justify-center mx-auto">
             <i class="fa-solid fa-arrows-rotate mr-1"></i>更新行程內容 (保留其他資料)
         </button>
-
-  <button @click="fixDuplicates" class="text-[12px] text-red-300 underline hover:text-red-500 transition-colors font-bold flex items-center justify-center mx-auto">
+        
+        <button @click="fixDuplicates" class="text-[12px] text-red-300 underline hover:text-red-500 transition-colors font-bold flex items-center justify-center mx-auto">
             <i class="fa-solid fa-wrench mr-1"></i>修復重複行程
         </button>
 
@@ -445,9 +445,9 @@
                 </p>
             </div>
         </div>
-   </div>
+      </div>
 
-   <!-- Flight Info -->
+      <!-- Flight Info -->
       <div class="bg-white rounded-2xl p-5 shadow-card">
         <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-plane mr-2 text-blue-400"></i>航班資訊</h3>
         <!-- Outbound -->
@@ -492,9 +492,9 @@
             <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-sakura"></i>20kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-briefcase mr-1 text-sakura"></i>10kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-utensils mr-1 text-sakura"></i>含餐</span>
           </div>
         </div>
-  </div>
+      </div>
 
-   <!-- Hotel Info (Restored) -->
+      <!-- Hotel Info (Restored) -->
       <div class="bg-white rounded-2xl p-5 shadow-card">
         <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-hotel mr-2 text-purple-400"></i>住宿資訊</h3>
         <div class="flex gap-4 mb-4">
@@ -514,8 +514,8 @@
              </div>
            </div>
         </div>
-
- <div class="space-y-2">
+        
+        <div class="space-y-2">
             <div class="flex items-start gap-3 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
                 <i class="fa-solid fa-location-dot text-red-400 mt-0.5 ml-1"></i>
                 <div class="flex-1">
@@ -534,11 +534,11 @@
         </div>
       </div>
 
-  <!-- Travel Tips (Restored to Static) -->
+      <!-- Travel Tips (Restored to Static) -->
       <div class="bg-white rounded-2xl p-5 shadow-card">
         <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-triangle-exclamation mr-2 text-yellow-500"></i>旅遊須知 & 緊急聯絡</h3>
-
- <div class="grid grid-cols-2 gap-3 mb-4">
+        
+        <div class="grid grid-cols-2 gap-3 mb-4">
             <div class="bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-white text-red-500 flex items-center justify-center shadow-sm font-bold text-sm"><i class="fa-solid fa-phone-volume"></i></div>
                 <div><div class="text-[10px] text-gray-400">緊急 (警/消)</div><div class="text-lg font-bold text-red-600 leading-none">110 / 119</div></div>
@@ -546,18 +546,16 @@
             <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-white text-blue-500 flex items-center justify-center shadow-sm font-bold text-sm"><i class="fa-solid fa-passport"></i></div>
                 <div><div class="text-[10px] text-gray-400">駐日代表處</div><a href="tel:+81664438481" class="text-sm font-bold text-blue-600 leading-tight underline">06-6443-8481</a></div>
-
-      </div>
+            </div>
         </div>
-
+        
         <div class="space-y-3">
             <div class="flex gap-3 items-start">
                 <i class="fa-solid fa-plug text-gray-400 mt-1 w-4 text-center"></i>
                 <div>
                     <h5 class="text-xs font-bold text-gray-700">電壓與插座</h5>
                     <p class="text-[10px] text-gray-500">日本電壓為 100V，插座為雙孔扁型（與台灣相同）。一般台灣電器可直接使用，無需轉接頭。</p>
-
-               </div>
+                </div>
             </div>
             <div class="flex gap-3 items-start">
                 <i class="fa-solid fa-clock text-gray-400 mt-1 w-4 text-center"></i>
@@ -576,8 +574,7 @@
                     <p class="text-[10px] text-red-400 mt-1 bg-red-50 p-1.5 rounded border border-red-100 leading-tight">
                         <i class="fa-solid fa-circle-exclamation mr-1"></i><b>注意：</b>辦理退稅後的消耗品（藥妝、食品等）會被裝入特殊封條袋中，<b>不可在日本境內拆封使用</b>，否則離境時可能需補繳稅金。
                     </p>
-
-             </div>
+                </div>
             </div>
 
             <!-- 天氣與穿搭 (New) -->
@@ -590,10 +587,9 @@
                         <br>建議採用<b>洋蔥式穿法</b>（薄長袖 + 薄外套/針織衫/風衣/輕羽絨），中午熱時可脫，早晚涼時可穿。
                     </p>
                 </div>
+            </div>
 
-     </div>
-
-   <div class="flex gap-3 items-start">
+            <div class="flex gap-3 items-start">
                 <i class="fa-solid fa-qrcode text-gray-400 mt-1 w-4 text-center"></i>
                 <div>
                     <h5 class="text-xs font-bold text-gray-700">
@@ -610,8 +606,8 @@
                     <p class="text-[10px] text-gray-500">大阪與京都的 JR、地鐵、私鐵及巴士皆通用。進出站皆需刷卡。</p>
                 </div>
             </div>
-
- <!-- Detailed Etiquette Section -->
+            
+            <!-- Detailed Etiquette Section -->
             <div class="pt-2 mt-2 border-t border-gray-100">
                 <div class="flex gap-3 items-start">
                     <i class="fa-solid fa-user-tie text-gray-400 mt-1 w-4 text-center"></i>
@@ -630,7 +626,7 @@
                                 </ul>
                             </div>
 
-   <!-- Transport -->
+                            <!-- Transport -->
                             <div class="bg-blue-50/50 p-2.5 rounded-lg border border-blue-100">
                                 <h6 class="text-[10px] font-bold text-blue-800 mb-1 flex items-center"><i class="fa-solid fa-train-subway mr-1.5 text-blue-400"></i>交通禮儀</h6>
                                 <ul class="text-[10px] text-gray-600 list-disc pl-3 space-y-1 leading-relaxed">
@@ -641,7 +637,7 @@
                                 </ul>
                             </div>
 
-        <!-- Shopping/General -->
+                            <!-- Shopping/General -->
                             <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-200">
                                 <h6 class="text-[10px] font-bold text-gray-700 mb-1 flex items-center"><i class="fa-solid fa-bag-shopping mr-1.5 text-pink-400"></i>購物與日常</h6>
                                 <ul class="text-[10px] text-gray-600 list-disc pl-3 space-y-1 leading-relaxed">
@@ -650,8 +646,8 @@
                                     <li><b>拍照注意</b>：請勿直接對著陌生人、警察或禁止攝影的店家商品近距離拍攝。</li>
                                     <li><b>試穿禮儀</b>：試穿衣服（尤其是淺色上衣）時，請使用店家提供的不織布頭套，以免妝容沾染衣物。</li>
                                     <li><b>室內脫鞋</b>：進入玄關若有高低差，通常代表需脫鞋。脫下的鞋子請將鞋尖朝外（朝門口）擺放整齊。</li>
-
-          </div>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -665,14 +661,15 @@
           <span><i class="fa-solid fa-suitcase-rolling mr-2 text-sakura"></i>行李檢查清單</span>
         </h3>
 
-     <!-- 修改為 Grid 佈局，設定為 4 欄 (每排 4 位) -->
+        <!-- 修改為 Grid 佈局，設定為 4 欄 (每排 4 位) -->
         <div class="grid grid-cols-4 gap-2 mb-3">
           <button v-for="person in packingPeople" :key="person" @click="currentPackingFilter = person"
             :class="['w-full py-1.5 rounded-full text-xs font-bold transition-colors border', (currentPackingFilter === person) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
             {{ person }}
           </button>
         </div>
-   <div class="space-y-0.5 mb-4">
+
+        <div class="space-y-0.5 mb-4">
           <div v-if="filteredPackingList.length === 0" class="text-center text-gray-400 py-4 text-xs">
             <i class="fa-solid fa-clipboard-check mb-1"></i><br>目前沒有項目
           </div>
@@ -688,8 +685,9 @@
             </label>
             <button @click="deletePackingItem(item.id)" class="text-gray-300 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-xmark"></i></button>
           </div>
+        </div>
 
-    <div class="flex gap-2 mb-2">
+        <div class="flex gap-2 mb-2">
           <input type="text" v-model="newPackingItem" placeholder="新增檢查項目..." class="flex-1 bg-gray-50 rounded-lg px-3 py-2 text-sm outline-none border focus:border-sakura" @keyup.enter="addPackingItem">
           <button @click="addPackingItem" class="bg-sakura text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i></button>
         </div>
@@ -698,11 +696,12 @@
             <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 幫 {{ currentPackingFilter }} 補齊預設項目
         </button>
       </div>
-   <!-- Osaka Metro Map (Removed) -->
+
+      <!-- Osaka Metro Map (Removed) -->
 
     </div>
 
-   <!-- TAB 3: Shopping -->
+    <!-- TAB 3: Shopping -->
     <div v-if="currentTab === 'shopping'">
       <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
         <!-- 點擊按鈕時設定 filter，這會解除隱私遮罩 -->
@@ -712,12 +711,12 @@
         </button>
       </div>
 
-    <div class="bg-pink-50 text-pink-700 text-xs px-4 py-2 rounded-xl mb-4 flex items-center border border-pink-100 mx-2 shadow-sm animate-pulse">
+      <div class="bg-pink-50 text-pink-700 text-xs px-4 py-2 rounded-xl mb-4 flex items-center border border-pink-100 mx-2 shadow-sm animate-pulse">
         <i class="fa-solid fa-wallet mr-2 text-pink-500"></i>
         溫馨提醒：日本是免稅不是免費~ 請理性購物😆
       </div>
 
- <!-- 隱私遮罩 (當沒有選擇成員時顯示) -->
+      <!-- 隱私遮罩 (當沒有選擇成員時顯示) -->
       <div v-if="!currentShoppingFilter" class="flex flex-col items-center justify-center py-20 text-gray-300 animate-fade-in">
           <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
               <i class="fa-solid fa-bag-shopping text-3xl text-gray-300"></i>
@@ -726,7 +725,7 @@
           <p class="text-xs mt-1">👆 請點擊上方成員名字以查看內容</p>
       </div>
 
-   <!-- 列表內容 (只有當有選擇成員時才顯示) -->
+      <!-- 列表內容 (只有當有選擇成員時才顯示) -->
       <div v-else class="grid grid-cols-2 gap-4 pb-24 animate-slide-up">
         <div v-for="(item, index) in filteredShoppingList" :key="item.id" class="bg-white rounded-2xl overflow-hidden shadow-card relative group">
           <div class="h-32 bg-gray-100 relative overflow-hidden">
@@ -790,7 +789,7 @@
             <p class="text-xs opacity-70 mt-2">約 TWD {{ (filteredTotalExpense * currentRate).toLocaleString(undefined, {maximumFractionDigits: 0}) }}</p>
           </div>
 
- <div class="bg-white rounded-t-2xl shadow-card min-h-[300px] pb-24">
+          <div class="bg-white rounded-t-2xl shadow-card min-h-[300px] pb-24">
             <div v-for="(item, index) in filteredExpenses" :key="item.id" class="p-4 border-b border-gray-50 flex justify-between items-center" @click="openModal('expense', item)">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg shadow-sm">
@@ -812,7 +811,7 @@
       <button @click="openModal('expense')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
     </div>
 
-  <!-- TAB 5: Notebook -->
+    <!-- TAB 5: Notebook -->
     <div v-if="currentTab === 'notebook'">
       <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
         <button v-for="traveler in notebookOwners" :key="traveler" @click="currentNotebookFilter = traveler"
@@ -821,7 +820,7 @@
         </button>
       </div>
 
-    <!-- 隱私遮罩 (當沒有選擇成員時顯示) -->
+      <!-- 隱私遮罩 (當沒有選擇成員時顯示) -->
       <div v-if="!currentNotebookFilter" class="flex flex-col items-center justify-center py-20 text-gray-300 animate-fade-in">
           <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
               <i class="fa-solid fa-book-open text-3xl text-gray-300"></i>
@@ -830,7 +829,7 @@
           <p class="text-xs mt-1">👆 請點擊上方成員名字以查看內容</p>
       </div>
 
-  <!-- 筆記列表 (只有當有選擇成員時才顯示) -->
+      <!-- 筆記列表 (只有當有選擇成員時才顯示) -->
       <div v-else class="grid gap-3 pb-24 animate-slide-up">
         <div v-if="filteredNotebookList.length === 0" class="text-center py-10 text-gray-400">
           <i class="fa-solid fa-book-open text-4xl mb-3 opacity-50"></i><p>這裡空空的，記點什麼吧！</p>
@@ -851,8 +850,7 @@
       <button @click="openModal('notebook')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
     </div>
 
- </main>
-
+  </main>
 
   <!-- Bottom Nav -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center h-20 px-2 pb-2 rounded-t-[20px] shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-40 max-w-[480px] mx-auto">
@@ -864,7 +862,7 @@
     </button>
   </nav>
 
-<!-- Input Modal -->
+  <!-- Input Modal -->
   <div v-if="modal.show" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center animate-fade-in">
     <div class="bg-white w-full max-w-[480px] rounded-t-[20px] sm:rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-6">
@@ -872,13 +870,13 @@
         <button @click="closeModal" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
 
- <!-- Dynamic Fields -->
+      <!-- Dynamic Fields -->
       <div class="space-y-4">
         <template v-if="modal.type === 'itinerary'">
              <div class="text-gray-500 text-center py-10">此行程為唯讀模式</div>
         </template>
 
- <template v-if="modal.type === 'shopping'">
+        <template v-if="modal.type === 'shopping'">
             <div><label class="block text-xs font-medium text-gray-500 mb-1">誰要買</label><select v-model="formData.owner" class="w-full bg-blue-50 rounded-xl p-3 font-bold text-blue-800"><option v-for="t in shoppingTravelers.filter(x=>x!=='全部')" :value="t">{{t}}</option></select></div>
             <div><label class="block text-xs font-medium text-gray-500 mb-1">商品名稱</label><input type="text" v-model="formData.name" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none"></div>
             <div>
@@ -909,8 +907,7 @@
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">內容</label>
                 <textarea v-model="formData.content" placeholder="請輸入內容..." class="w-full bg-gray-50 rounded-xl p-3 h-32 border focus:border-sakura outline-none"></textarea>
-
-   </div>
+            </div>
         </template>
       </div>
 
@@ -950,8 +947,7 @@
     <div class="bg-gray-800/90 text-white px-6 py-3 rounded-full shadow-xl backdrop-blur-md flex items-center gap-3 border border-white/10">
       <i class="fa-solid fa-circle-info text-sakura"></i>
       <span class="text-sm font-bold">{{ toastState.message }}</span>
-
-  </div>
+    </div>
   </div>
 
 </div>
@@ -959,11 +955,11 @@
 <!-- FULL DATA SEEDING -->
 <script>
 window.__FULL_ITINERARY_DATA__ = [
-  { id: 0, date: '2026-04-02', category: 'other', name: '高雄小港機場集合', time: '04:30', travelTime: 0, transportType: 'walk', note: '國際航廈出境大廳', description: '準備啟程出發囉！🎉 \n 請務必於04:30準時集合，辦理登機手續。記得再次檢查護照與必備證件！' },
+  { id: 0, date: '2026-04-02', category: 'other', name: '高雄小港機場集合', time: '04:30', travelTime: 0, transportType: 'walk', note: '國際航廈出境大廳', description: '準備啟程出發囉！🎉 請務必準時集合，準備辦理登機手續。記得再次檢查護照與必備證件！' },
   { id: 1, date: '2026-04-02', category: 'flight', name: '航班 IT-284 KHH->KIX', time: '07:00', travelTime: 0, transportType: 'flight', note: '起飛 07:00 / 抵達 10:55 (預計出關 11:30)' },
   
   // Day 1
-  { id: 2, date: '2026-04-02', category: 'transport', name: '關西機場 → 難波', time: '11:40', travelTime: 45, transportType: 'transit', note: '已事先購票，抵達機場後機台劃位即可', description: '🚉 路線：南海電鐵 - 空港急行 (Nankai Airport Exp.)\n📍 區間：關西機場站 (Kansai Airport) → 南海難波站 (Namba)\n💡 提示：出站後依指示前往地鐵御堂筋線。' },
+  { id: 2, date: '2026-04-02', category: 'transport', name: '關西機場 → 難波', time: '11:40', travelTime: 45, transportType: 'transit', note: '已事先購票', description: '🚉 路線：南海電鐵 - 空港急行 (Nankai Airport Exp.)\n📍 區間：關西機場站 (Kansai Airport) → 南海難波站 (Namba)\n💡 提示：出站後依指示前往地鐵御堂筋線。' },
   { id: 3, date: '2026-04-02', category: 'transport', name: '難波 → 本町 (飯店)', time: '12:40', travelTime: 15, transportType: 'transit', note: '轉乘御堂筋線 (紅線)', description: '🚉 路線：地鐵御堂筋線\n📍 區間：難波站 (M20) → 本町站 (M18)\n🚶 步行：由 11 號或 12 號出口出站，步行約 3-5 分鐘抵達飯店。' },
   { id: 4, date: '2026-04-02', category: 'accommodation', name: '東急 Stay 大阪本町', time: '13:00', travelTime: 0, transportType: 'walk', note: '先寄放行李', description: '先在大廳寄放行李，輕裝出發！' },
   { id: 41, date: '2026-04-02', category: 'transport', name: '本町 → 日本橋 (黑門市場)', time: '13:15', travelTime: 15, transportType: 'transit', note: '地鐵或計程車', description: '🚉 路線：地鐵堺筋線 (Sakaisuji Line)\n📍 區間：堺筋本町站 (K15) → 日本橋站 (K17)\n🚶 步行：10號出口出站，步行即達黑門市場。' },
@@ -1069,9 +1065,9 @@ window.__FULL_ITINERARY_DATA__ = [
       
       // 修改：移除 '公費'
       const travelers = ref(['翔/君', '倫/怡', '茹', '媽媽', '爸爸']);
-      // 修改：購物與筆記本加入 '全部' 選項，但預設不選擇
-      const shoppingTravelers = computed(() => ['全部', ...travelers.value]); 
-      const notebookOwners = computed(() => ['全部', ...travelers.value]);
+      // 修改：移除 '全部' 選項，只保留個別成員 (原本過濾公費的邏輯保留也沒關係，因為已經從源頭拿掉了)
+      const shoppingTravelers = computed(() => travelers.value); 
+      const notebookOwners = computed(() => travelers.value);
       const packingPeople = ref(['士翔', '侑君', '士倫', '欣怡', '珮茹', '媽媽', '爸爸']);
 
       const days = [
@@ -1084,7 +1080,8 @@ window.__FULL_ITINERARY_DATA__ = [
       const selectedDate = ref('2026-04-02');
 
       const isTigerairInfoExpanded = ref(false);
-      const isExchangeWarningExpanded = ref(false);
+      // const isTravelTipsExpanded = ref(false); // Removed
+      const isExchangeWarningExpanded = ref(false); // New state for Exchange Warning
 
       // --- FIREBASE SYNC COLLECTIONS ---
       const itineraryList = ref([]);
@@ -1096,21 +1093,20 @@ window.__FULL_ITINERARY_DATA__ = [
       const isSaving = ref(false);
       const migrationStatus = ref('');
 
-      // --- PRIVACY FILTERS ---
-      // 確保預設值為 null，這樣才會顯示隱私遮罩
-      const currentMemberFilter = ref(null); 
-      const currentNotebookFilter = ref(null); 
-      const currentShoppingFilter = ref(null); 
+      const currentMemberFilter = ref(null); // Default null for privacy
+      const currentNotebookFilter = ref(null); // Default null for privacy (Modified)
+      const currentShoppingFilter = ref(null); // Default null for privacy
       const currentPackingFilter = ref('士翔');
       const newPackingItem = ref('');
 
-      // Watch Tab Change to Reset Privacy Filters (STRICT MODE)
+      // Metro Map Zoom Logic (Removed)
+
+      // Watch Tab Change to Reset Privacy Filters
       watch(currentTab, (newVal) => {
-          // 當切換分頁時，無論是進入還是離開，都將隱私篩選器重置為 null (隱藏狀態)
-          // 這樣可以確保每次點進去都是隱私模式，必須手動點選人名
+          // 當切換分頁時，重置敏感資訊的篩選器為 null (隱藏狀態)
           if (newVal !== 'shopping') currentShoppingFilter.value = null;
           if (newVal !== 'expense') currentMemberFilter.value = null;
-          if (newVal !== 'notebook') currentNotebookFilter.value = null;
+          if (newVal !== 'notebook') currentNotebookFilter.value = null; // Add notebook reset
       });
 
       // Custom Alert & Confirm Implementation
@@ -1194,8 +1190,7 @@ window.__FULL_ITINERARY_DATA__ = [
                         }, { merge: true });
                     }
                     updateCount++;
-
-       }
+                }
           }
           
           migrationStatus.value = "";
@@ -1284,11 +1279,9 @@ window.__FULL_ITINERARY_DATA__ = [
       );
 
       const filteredShoppingList = computed(() => {
-        // 如果沒有選擇過濾器 (null)，回傳空陣列 (配合 v-if 控制顯示隱私遮罩)
+        // 如果沒有選擇過濾器 (null)，回傳空陣列 (配合 v-if 控制顯示)
         if (!currentShoppingFilter.value) return [];
-        // 如果選擇「全部」，顯示所有資料
-        if (currentShoppingFilter.value === '全部') return shoppingList.value;
-        // 否則過濾出該成員的資料
+        // 移除 '全部' 的邏輯
         return shoppingList.value.filter(item => item.owner === currentShoppingFilter.value);
       });
 
@@ -1318,8 +1311,6 @@ window.__FULL_ITINERARY_DATA__ = [
       const filteredNotebookList = computed(() => {
           // Add privacy check
           if (!currentNotebookFilter.value) return [];
-          // 如果選擇「全部」，顯示所有資料
-          if (currentNotebookFilter.value === '全部') return notebookList.value;
           return notebookList.value.filter(n => n.owner === currentNotebookFilter.value);
       });
 
@@ -1344,18 +1335,19 @@ window.__FULL_ITINERARY_DATA__ = [
             modal.title = '新增';
             // Shopping: use current filter if set, otherwise default
             if (type === 'shopping') {
-                // 如果目前篩選器是 '全部' 或 未選，預設給第一個人；否則用目前選的人
-                const defaultOwner = (currentShoppingFilter.value && currentShoppingFilter.value !== '全部') ? currentShoppingFilter.value : travelers.value[0];
+                // 修改預設邏輯：如果有選人就用那個人，沒選人預設為 '翔/君'
+                const defaultOwner = currentShoppingFilter.value ? currentShoppingFilter.value : '翔/君';
                 Object.assign(formData, { owner: defaultOwner, bought: false });
             }
             // Expense: use current filter if set, otherwise default
             if (type === 'expense') {
-                const defaultOwner = (currentMemberFilter.value && currentMemberFilter.value !== 'ALL') ? currentMemberFilter.value : travelers.value[0];
+                // 修改預設邏輯：因為移除了 '公費'，預設改為第一位成員 '翔/君'
+                const defaultOwner = (currentMemberFilter.value && currentMemberFilter.value !== 'ALL') ? currentMemberFilter.value : '翔/君';
                 Object.assign(formData, { date: selectedDate.value, category: 'food', owner: defaultOwner, method: '現金' });
             }
             // Notebook: use current filter if set, otherwise default
             if (type === 'notebook') {
-                const defaultOwner = (currentNotebookFilter.value && currentNotebookFilter.value !== '全部') ? currentNotebookFilter.value : travelers.value[0];
+                const defaultOwner = currentNotebookFilter.value ? currentNotebookFilter.value : '翔/君';
                 Object.assign(formData, { owner: defaultOwner });
             }
         }
@@ -1521,8 +1513,7 @@ window.__FULL_ITINERARY_DATA__ = [
                         icon: fInfo.icon,
                         color: fInfo.color
                     });
-
-   }
+                }
              }
              weatherData.forecast = forecastList;
 
@@ -1705,7 +1696,5 @@ window.__FULL_ITINERARY_DATA__ = [
     }
   }).mount('#app');
 </script>
-
-
 </body>
 </html>
