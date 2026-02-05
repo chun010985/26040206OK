@@ -137,12 +137,22 @@
     <img :src="bannerImage" class="w-full h-full object-cover object-center origin-center opacity-100" @error="handleImageError">
     
     <!-- Countdown Badge -->
-    <div class="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs border border-white/20 shadow-lg flex items-center gap-2 z-20 font-bold">
-      <i class="fa-regular fa-clock text-sakura"></i>
-      <span v-if="daysUntilTrip > 0">距離出發 <b>{{ daysUntilTrip }}</b> 天</span>
-      <span v-else-if="daysUntilTrip >= -3">旅程第 {{ Math.abs(daysUntilTrip) + 1 }} 天</span>
-      <span v-else-if="daysUntilTrip === -4">旅程結束 🏠</span>
-      <span v-else>旅程已圓滿結束</span>
+    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-lg flex items-center gap-3 z-20">
+      <div class="flex items-center gap-2 text-xs font-bold whitespace-nowrap text-gray-600">
+        <i class="fa-regular fa-clock text-sakura"></i>
+        <span v-if="daysUntilTrip > 0">距離出發 <b class="text-sakura-dark">{{ daysUntilTrip }}</b> 天</span>
+        <span v-else-if="daysUntilTrip >= -3">旅程第 {{ Math.abs(daysUntilTrip) + 1 }} 天</span>
+        <span v-else-if="daysUntilTrip === -4">旅程結束 🏠</span>
+        <span v-else>旅程已圓滿結束</span>
+      </div>
+      
+      <!-- Cute Progress Bar -->
+      <div v-if="daysUntilTrip > 0" class="w-20 h-3.5 bg-gray-200 rounded-full relative overflow-hidden shadow-inner">
+        <div class="h-full bg-gradient-to-r from-pink-300 to-sakura rounded-full transition-all duration-1000 relative flex items-center justify-end pr-1" :style="{ width: tripProgress + '%' }">
+           <!-- 改為走路小人，並水平翻轉讓他面向右邊 -->
+           <i class="fa-solid fa-person-walking text-[10px] text-white transform -scale-x-100 drop-shadow-md"></i>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -534,9 +544,17 @@
         </div>
       </div>
 
-      <!-- Travel Tips (Restored to Static) -->
+      <!-- Packing List Removed from here -->
+
+      <!-- Osaka Metro Map (Removed) -->
+
+    </div>
+
+    <!-- TAB: Tips (New) -->
+    <div v-if="currentTab === 'tips'" class="space-y-6 pb-20">
+      <!-- Travel Tips (Moved from Info) -->
       <div class="bg-white rounded-2xl p-5 shadow-card">
-        <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-triangle-exclamation mr-2 text-yellow-500"></i>旅遊須知 & 緊急聯絡</h3>
+        <h3 class="font-bold text-sakura-text mb-4 border-b pb-2"><i class="fa-solid fa-triangle-exclamation mr-2 text-yellow-500"></i>行前旅遊須知&緊急連絡</h3>
         
         <div class="grid grid-cols-2 gap-3 mb-4">
             <div class="bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-3">
@@ -655,7 +673,7 @@
         </div>
       </div>
 
-      <!-- Packing List -->
+      <!-- Packing List (Moved Here) -->
       <div class="bg-white rounded-2xl p-5 shadow-card">
         <h3 class="font-bold text-sakura-text mb-3 border-b pb-2 flex justify-between items-center">
           <span><i class="fa-solid fa-suitcase-rolling mr-2 text-sakura"></i>行李檢查清單</span>
@@ -696,9 +714,6 @@
             <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 幫 {{ currentPackingFilter }} 補齊預設項目
         </button>
       </div>
-
-      <!-- Osaka Metro Map (Removed) -->
-
     </div>
 
     <!-- TAB 3: Shopping -->
@@ -711,7 +726,7 @@
         </button>
       </div>
 
-      <div class="bg-pink-50 text-pink-700 text-sm px-4 py-2 rounded-xl mb-4 flex items-center border border-pink-100 mx-2 shadow-sm animate-pulse">
+      <div class="bg-pink-50 text-pink-700 text-[13px] px-4 py-2 rounded-xl mb-4 flex items-center border border-pink-100 mx-2 shadow-sm animate-pulse">
         <i class="fa-solid fa-wallet mr-2 text-pink-500"></i>
         溫馨提醒：日本是免稅不是免費~ 請理性購物😆
       </div>
@@ -854,11 +869,10 @@
 
   <!-- Bottom Nav -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center h-20 px-2 pb-2 rounded-t-[20px] shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-40 max-w-[480px] mx-auto">
-    <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id" class="flex flex-col items-center justify-center w-16 h-16 transition-all">
-      <div class="w-10 h-6 flex items-center justify-center rounded-full mb-1 transition-all" :class="currentTab === tab.id ? 'bg-sakura-light text-sakura-dark' : 'text-gray-400'">
-        <i :class="tab.icon" class="text-lg"></i>
+    <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id" class="flex flex-col items-center justify-center w-[16%] h-16 transition-all group">
+      <div class="w-12 h-12 flex items-center justify-center rounded-full transition-all" :class="currentTab === tab.id ? 'bg-sakura-light text-sakura-dark scale-110 shadow-sm' : 'text-gray-400 group-hover:bg-gray-50'">
+        <i :class="tab.icon" class="text-xl"></i>
       </div>
-      <span class="text-xs font-bold transition-all" :class="currentTab === tab.id ? 'text-sakura-text' : 'text-gray-400'">{{ tab.name }}</span>
     </button>
   </nav>
 
@@ -1046,6 +1060,7 @@ window.__FULL_ITINERARY_DATA__ = [
       const tabs = [
         { id: 'itinerary', name: '行程表', icon: 'fa-solid fa-map-location-dot' },
         { id: 'info', name: '資訊', icon: 'fa-solid fa-circle-info' },
+        { id: 'tips', name: '須知', icon: 'fa-solid fa-book-open-reader' }, // New tab
         { id: 'shopping', name: '購物清單', icon: 'fa-solid fa-basket-shopping' },
         { id: 'expense', name: '花費', icon: 'fa-solid fa-yen-sign' },
         { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' },
@@ -1061,6 +1076,18 @@ window.__FULL_ITINERARY_DATA__ = [
         const start = new Date(tripStartDate.getFullYear(), tripStartDate.getMonth(), tripStartDate.getDate());
         const diffTime = start - today;
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      });
+      
+      // Progress Bar Calculation
+      const planningDate = new Date('2026-01-01T00:00:00'); // Arbitrary start for progress bar visual
+      const tripProgress = computed(() => {
+          const total = tripStartDate - planningDate;
+          const now = new Date();
+          const elapsed = now - planningDate;
+          let p = Math.floor((elapsed / total) * 100);
+          if(p < 0) p = 0;
+          if(p > 100) p = 100;
+          return p;
       });
       
       // 修改：移除 '公費'
@@ -1669,6 +1696,7 @@ window.__FULL_ITINERARY_DATA__ = [
       return {
         showSplash, currentTab, tabs, bannerImage, handleImageError, daysUntilTrip,
         days, selectedDate, travelers, shoppingTravelers, packingPeople,
+        tripProgress, // added
         
         // Data
         filteredItinerary, filteredShoppingList, expenses, totalExpense, filteredTotalExpense, notebookList, filteredPackingList, filteredExpenses, filteredNotebookList,
