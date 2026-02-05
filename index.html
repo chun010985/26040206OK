@@ -54,6 +54,7 @@
             'fall-1': 'fall-sway-1 6s linear infinite',
             'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             'marquee': 'marquee 15s linear infinite',
+            'run': 'run 0.5s ease-in-out infinite', // 新增跑步動畫
           },
           keyframes: {
             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
@@ -68,6 +69,11 @@
             marquee: {
               '0%': { transform: 'translateX(100%)' },
               '100%': { transform: 'translateX(-100%)' }
+            },
+            // 定義跑步關鍵影格 (保持水平翻轉 scaleX(-1) 並上下跳動)
+            run: {
+              '0%, 100%': { transform: 'scaleX(-1) translateY(0)' },
+              '50%': { transform: 'scaleX(-1) translateY(-2px)' }
             }
           }
         }
@@ -132,7 +138,7 @@
   </div>
 
   <!-- 2. Header Banner (Restored Height to 240px) -->
-  <header class="relative h-[240px] w-full overflow-hidden bg-gray-100 group">
+  <header class="relative h-[200px] w-full overflow-hidden bg-gray-100 group">
     <!-- 橫幅圖片 -->
     <img :src="bannerImage" class="w-full h-full object-cover object-center origin-center opacity-100" @error="handleImageError">
     
@@ -149,8 +155,8 @@
       <!-- Cute Progress Bar -->
       <div v-if="daysUntilTrip > 0" class="w-20 h-3.5 bg-gray-200 rounded-full relative overflow-hidden shadow-inner">
         <div class="h-full bg-gradient-to-r from-pink-300 to-sakura rounded-full transition-all duration-1000 relative flex items-center justify-end pr-1" :style="{ width: tripProgress + '%' }">
-           <!-- fa-person-walking 預設向左，使用 style="transform: scaleX(-1)" 強制水平翻轉讓他向右走 -->
-           <i class="fa-solid fa-person-walking text-[8px] text-white drop-shadow-md" style="transform: scaleX(-1);"></i>
+           <!-- fa-person-walking 預設向左，套用 animate-run 讓它在向右看的同時上下跳動 -->
+           <i class="fa-solid fa-person-walking text-[8px] text-white drop-shadow-md animate-run"></i>
         </div>
       </div>
     </div>
@@ -313,9 +319,8 @@
       <!-- Dates -->
       <div class="flex overflow-x-auto no-scrollbar gap-3 mb-4 pb-2 justify-center">
         <button v-for="(day, index) in days" :key="index" @click="selectedDate = day.dateStr"
-          :class="['flex-shrink-0 flex flex-col items-center justify-center w-16 h-20 rounded-2xl transition-all duration-300 relative overflow-hidden', selectedDate === day.dateStr ? 'bg-sakura text-white shadow-soft transform scale-105' : 'bg-white text-gray-400 border border-gray-100']">
-          <span class="text-sm font-bold z-10 opacity-60 mb-1">Day{{ index + 1 }}</span>
-          <span class="text-xl font-bold z-10 leading-none">{{ day.displayDate }}</span>
+          :class="['flex-shrink-0 flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all duration-300 relative overflow-hidden', selectedDate === day.dateStr ? 'bg-sakura text-white shadow-soft transform scale-105' : 'bg-white text-gray-400 border border-gray-100']">
+          <span class="text-base font-bold z-10">Day{{ index + 1 }}</span>
         </button>
       </div>
 
@@ -666,8 +671,6 @@
                                     <li><b>付款禮儀</b>：結帳時請將現金或信用卡置於櫃檯的<b>「錢盤 (Cash Tray)」</b>上，勿直接手遞給店員。</li>
                                     <li><b>垃圾不落地</b>：日本街頭垃圾桶極少。請隨身攜帶小塑膠袋，將垃圾帶回飯店或車站丟棄。</li>
                                     <li><b>拍照注意</b>：請勿直接對著陌生人、警察或禁止攝影的店家商品近距離拍攝。</li>
-                                    <li><b>試穿禮儀</b>：試穿衣服（尤其是淺色上衣）時，請使用店家提供的不織布頭套，以免妝容沾染衣物。</li>
-                                    <li><b>室內脫鞋</b>：進入玄關若有高低差，通常代表需脫鞋。脫下的鞋子請將鞋尖朝外（朝門口）擺放整齊。</li>
                                 </ul>
                             </div>
                         </div>
@@ -780,8 +783,6 @@
     <!-- TAB 4: Expense -->
     <div v-if="currentTab === 'expense'">
       <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
-        <!-- 修改 "全部" 按鈕的邏輯，賦予特殊值 'ALL' -->
-        <button @click="currentMemberFilter = 'ALL'" :class="['px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === 'ALL') ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">全部</button>
         <button v-for="traveler in travelers" :key="traveler" @click="currentMemberFilter = traveler"
           :class="['px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
           {{ traveler }}
