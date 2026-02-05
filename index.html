@@ -54,7 +54,7 @@
             'fall-1': 'fall-sway-1 6s linear infinite',
             'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             'marquee': 'marquee 15s linear infinite',
-            'run': 'run 0.6s ease-in-out infinite', // 跑步動畫
+            'run': 'run 0.4s ease-in-out infinite', // 跑步頻率加快一點
           },
           keyframes: {
             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
@@ -70,10 +70,10 @@
               '0%': { transform: 'translateX(100%)' },
               '100%': { transform: 'translateX(-100%)' }
             },
-            // 定義跑步關鍵影格：使用 scaleX(-1) 來水平翻轉小人(向右看)，並上下跳動
+            // 簡化動畫：只負責上下跳動，方向由外層容器控制
             run: {
-              '0%, 100%': { transform: 'scaleX(-1) translateY(0)' },
-              '50%': { transform: 'scaleX(-1) translateY(-2px)' }
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-2px)' }
             }
           }
         }
@@ -156,8 +156,11 @@
       <div v-if="daysUntilTrip > 0" class="w-20 h-3.5 bg-gray-200 rounded-full relative overflow-hidden shadow-inner">
         <!-- 使用設計過的粉色漸層: 淺粉 -> 粉紅 -> 玫瑰紅 -->
         <div class="h-full bg-gradient-to-r from-pink-200 via-pink-400 to-rose-500 rounded-full transition-all duration-1000 relative flex items-center justify-end pr-1" :style="{ width: tripProgress + '%' }">
-           <!-- 使用 animate-run 動畫 (包含 scaleX(-1) 向右轉及上下跳動) -->
-           <i class="fa-solid fa-person-walking text-[8px] text-white drop-shadow-md animate-run" style="display: inline-block;"></i>
+           <!-- 外層 Div 負責翻轉 (-scale-x-100)，確保面向右邊 -->
+           <div class="transform -scale-x-100">
+               <!-- 內層 i 負責上下跳動 (animate-run) -->
+               <i class="fa-solid fa-person-walking text-[8px] text-white drop-shadow-md animate-run block"></i>
+           </div>
         </div>
       </div>
     </div>
@@ -705,7 +708,7 @@
                 <input type="checkbox" :checked="item.checked" @change="togglePackingCheck(item)" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-md checked:bg-sakura checked:border-sakura transition-colors">
                 <i class="fa-solid fa-check text-white text-xs absolute opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
               </div>
-              <span :class="{'line-through text-gray-400': item.checked, 'text-gray-600': !item.checked}" class="text-[10px] font-medium transition-colors select-none">
+              <span :class="{'line-through text-gray-400': item.checked, 'text-gray-600': !item.checked}" class="text-[13px] font-medium transition-colors select-none">
                 {{ item.text }}
               </span>
             </label>
@@ -784,8 +787,6 @@
     <!-- TAB 4: Expense -->
     <div v-if="currentTab === 'expense'">
       <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
-        <!-- 修改 "全部" 按鈕的邏輯，賦予特殊值 'ALL' -->
-        <button @click="currentMemberFilter = 'ALL'" :class="['px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === 'ALL') ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">全部</button>
         <button v-for="traveler in travelers" :key="traveler" @click="currentMemberFilter = traveler"
           :class="['px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
           {{ traveler }}
