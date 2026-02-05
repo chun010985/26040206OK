@@ -149,8 +149,8 @@
       <!-- Cute Progress Bar -->
       <div v-if="daysUntilTrip > 0" class="w-20 h-3.5 bg-gray-200 rounded-full relative overflow-hidden shadow-inner">
         <div class="h-full bg-gradient-to-r from-pink-300 to-sakura rounded-full transition-all duration-1000 relative flex items-center justify-end pr-1" :style="{ width: tripProgress + '%' }">
-           <!-- 改為走路小人，並水平翻轉讓他面向右邊 -->
-           <i class="fa-solid fa-person-walking text-[10px] text-white transform -scale-x-100 drop-shadow-md"></i>
+           <!-- fa-person-walking 預設向左，使用 style="transform: scaleX(-1)" 強制水平翻轉讓他向右走 -->
+           <i class="fa-solid fa-person-walking text-[8px] text-white drop-shadow-md" style="transform: scaleX(-1);"></i>
         </div>
       </div>
     </div>
@@ -172,137 +172,141 @@
     <!-- TAB 1: Itinerary -->
     <div v-if="currentTab === 'itinerary'">
       
-      <!-- Weather Card (Compacted) -->
-      <div class="relative bg-white rounded-3xl p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] mb-4 border border-gray-50 overflow-hidden group transition-all duration-300">
-        <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-sakura-light to-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+      <!-- Weather Card (Redesigned & Compact) -->
+      <div class="relative bg-gradient-to-b from-white to-[#fff9fb] rounded-3xl p-4 shadow-[0_10px_30px_-10px_rgba(255,183,197,0.3)] mb-4 border border-white overflow-hidden group transition-all duration-300">
+        <!-- Background Decorations (Scaled down) -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-200 via-sakura to-orange-200 opacity-50"></div>
+        <div class="absolute -right-6 -top-6 w-24 h-24 bg-yellow-100/30 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-6 top-16 w-24 h-24 bg-blue-50/50 rounded-full blur-2xl pointer-events-none"></div>
         
+        <!-- Loading Overlay -->
         <div v-if="weatherLoading" class="absolute inset-0 bg-white/80 backdrop-blur-md z-30 flex items-center justify-center rounded-3xl">
-          <div class="text-sakura-dark animate-pulse flex flex-col items-center gap-1">
+          <div class="text-sakura-dark animate-pulse flex flex-col items-center gap-2">
             <i class="fa-solid fa-cloud-sun text-4xl animate-bounce"></i>
-            <span class="text-xs font-bold tracking-widest uppercase mt-1">Loading Weather</span>
+            <span class="text-sm font-bold tracking-widest uppercase text-gray-400">Loading...</span>
           </div>
         </div>
 
-        <div v-if="currentDayCities.length > 1" class="flex justify-end gap-1.5 mb-1 relative z-20 overflow-x-auto no-scrollbar pb-1">
-          <button v-for="city in currentDayCities" :key="city.name" @click.stop="changeWeatherCity(city)"
-            :class="['text-xs px-2.5 py-1 rounded-full font-bold transition-all border shadow-sm', weatherData.city === city.name ? 'bg-sakura text-white border-sakura ring-1 ring-sakura/20' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50']">
+        <!-- City Selector -->
+        <div v-if="currentDayCities.length > 1" class="flex justify-center mb-2 relative z-20">
+          <div class="bg-gray-100/80 p-0.5 rounded-full flex gap-1 shadow-inner scale-95 origin-top">
+             <button v-for="city in currentDayCities" :key="city.name" @click.stop="changeWeatherCity(city)"
+            :class="['text-xs px-3 py-1 rounded-full font-bold transition-all', weatherData.city === city.name ? 'bg-white text-gray-700 shadow-sm' : 'text-gray-400 hover:text-gray-600']">
             {{ city.name }}
           </button>
-        </div>
-
-        <div @click="toggleWeather" class="relative z-10 cursor-pointer pt-0">
-          <div class="flex justify-between items-center">
-            <div class="pl-1">
-              <div class="flex items-center gap-2 mb-0.5">
-                <h2 class="text-lg font-bold text-gray-800 tracking-tight">{{ weatherData.city }}</h2>
-                <span class="px-2 py-0.5 bg-gray-100 rounded-md text-xs font-bold text-gray-500 flex items-center gap-1">
-                  <i class="fa-solid fa-circle text-[5px]" :style="{color: weatherData.iconColor}"></i>
-                  {{ weatherData.description }}
-                </span>
-              </div>
-              <div class="flex items-end h-10">
-                <span class="text-4xl font-bold text-gray-800 tracking-tighter leading-none -ml-0.5">{{ weatherData.temp }}°</span>
-                <div class="ml-3 flex flex-col justify-center text-xs font-bold text-gray-400 leading-tight border-l border-gray-200 pl-2 h-7">
-                  <span class="flex items-center gap-1 mb-0.5"><i class="fa-solid fa-arrow-up text-red-300"></i>{{ weatherData.maxTemp }}°</span>
-                  <span class="flex items-center gap-1"><i class="fa-solid fa-arrow-down text-blue-300"></i>{{ weatherData.minTemp }}°</span>
-                </div>
-              </div>
-              <p class="text-xs text-gray-400 mt-1 font-medium pl-0.5">體感 {{ weatherData.apparentTemp }}°C</p>
-            </div>
-            <div class="w-12 h-12 flex items-center justify-center animate-float mr-1">
-              <i :class="weatherData.icon" class="text-4xl drop-shadow-md transition-all duration-500" :style="{color: weatherData.iconColor}"></i>
-            </div>
-          </div>
-          <div class="flex justify-center -mt-1 opacity-30 group-hover:opacity-100 transition-opacity">
-            <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300 text-xs" :class="{'rotate-180': isWeatherExpanded}"></i>
           </div>
         </div>
 
-        <div v-if="isWeatherExpanded" class="mt-2 pt-2 border-t border-gray-100 animate-fade-in relative z-10">
+        <!-- Main Content (Click to toggle) -->
+        <div @click="toggleWeather" class="relative z-10 cursor-pointer">
+          <div class="flex items-center justify-between px-2 pt-1">
+            <!-- Left: Icon & Temp -->
+            <div class="flex items-center gap-3">
+                 <div class="w-14 h-14 flex items-center justify-center filter drop-shadow-md animate-float">
+                    <i :class="weatherData.icon" class="text-5xl transition-all duration-500" :style="{color: weatherData.iconColor}"></i>
+                 </div>
+                 <div class="flex flex-col">
+                    <div class="flex items-baseline">
+                        <span class="text-4xl font-bold text-gray-800 tracking-tighter leading-none">{{ weatherData.temp }}°</span>
+                        <div class="flex flex-col text-[11px] font-bold text-gray-400 ml-1.5 leading-none gap-0.5">
+                            <span class="flex items-center"><i class="fa-solid fa-arrow-up text-red-300 text-[10px] mr-0.5"></i>{{ weatherData.maxTemp }}°</span>
+                            <span class="flex items-center"><i class="fa-solid fa-arrow-down text-blue-300 text-[10px] mr-0.5"></i>{{ weatherData.minTemp }}°</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 font-medium mt-0.5">體感 {{ weatherData.apparentTemp }}°C</p>
+                 </div>
+            </div>
+
+            <!-- Right: City & Desc & Toggle -->
+            <div class="flex flex-col items-end">
+                 <h2 class="text-lg font-bold text-gray-700 tracking-wide flex items-center gap-1">
+                    {{ weatherData.city }}
+                    <i class="fa-solid fa-location-dot text-sakura text-sm"></i>
+                 </h2>
+                 <span class="text-sm text-gray-500 font-bold mb-1">{{ weatherData.description }}</span>
+                 <div class="w-7 h-7 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-300 mt-1">
+                    <i class="fa-solid fa-chevron-down text-xs transition-transform duration-500" :class="{'rotate-180': isWeatherExpanded}"></i>
+                 </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expanded Content -->
+        <div v-if="isWeatherExpanded" class="mt-3 pt-3 border-t border-gray-100 animate-fade-in relative z-10 space-y-3">
           
           <!-- 1. Outfit Advice -->
-          <div class="mb-3 bg-gradient-to-r from-sakura-light/30 to-white border border-sakura-light/40 rounded-xl p-2 shadow-sm flex gap-2 items-start">
-            <div class="w-5 h-5 rounded-full bg-white text-sakura-dark flex items-center justify-center shrink-0 shadow-sm text-xs mt-0.5"><i class="fa-solid fa-shirt"></i></div>
-            <div>
-              <h5 class="text-[11px] font-bold text-sakura-dark mb-0.5 tracking-wider uppercase">Outfit Advice</h5>
-              <p class="text-xs text-gray-600 font-medium leading-relaxed">{{ weatherData.clothing }}</p>
+          <div class="flex gap-2 items-start bg-sakura-light/20 p-2.5 rounded-xl border border-sakura-light/30">
+            <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sakura-dark shrink-0 shadow-sm mt-0.5">
+                <i class="fa-solid fa-shirt text-xs"></i>
+            </div>
+            <div class="flex-1">
+               <p class="text-sm text-gray-600 leading-relaxed font-medium">{{ weatherData.clothing }}</p>
             </div>
           </div>
 
-          <!-- 2. Hourly Forecast (New) -->
-          <div class="mb-3">
-            <h5 class="text-xs text-gray-400 font-bold mb-2 ml-1">未來 24 小時</h5>
-            <div class="flex overflow-x-auto no-scrollbar gap-2 pb-2">
-                <div v-for="(hour, hIdx) in weatherData.hourly" :key="hIdx" class="flex-shrink-0 flex flex-col items-center bg-gray-50 rounded-xl p-1.5 w-12 border border-gray-100">
-                    <span class="text-[11px] text-gray-500 font-bold mb-1">{{ hour.time }}</span>
-                    <i :class="hour.icon" class="text-sm mb-1" :style="{color: hour.color}"></i>
-                    <span class="text-xs font-bold text-gray-700">{{ hour.temp }}°</span>
-                    <span v-if="hour.pop > 0" class="text-[10px] text-blue-400 font-bold mt-0.5">{{ hour.pop }}%</span>
+          <!-- 2. Hourly Forecast -->
+          <div>
+            <h5 class="text-xs font-bold text-gray-400 mb-2 pl-1 flex items-center"><i class="fa-regular fa-clock mr-1"></i>24小時預報</h5>
+            <div class="flex overflow-x-auto no-scrollbar gap-2 pb-1 -mx-2 px-2">
+                <div v-for="(hour, hIdx) in weatherData.hourly" :key="hIdx" class="flex-shrink-0 flex flex-col items-center justify-between bg-white rounded-2xl py-2 w-12 h-24 border border-gray-100 shadow-sm">
+                    <span class="text-[11px] text-gray-400 font-bold">{{ hour.time.split(':')[0] }}時</span>
+                    <i :class="hour.icon" class="text-lg my-0.5" :style="{color: hour.color}"></i>
+                    <div class="flex flex-col items-center">
+                        <span class="text-sm font-bold text-gray-700">{{ hour.temp }}°</span>
+                    </div>
                 </div>
             </div>
           </div>
 
-          <!-- 3. Detailed Metrics Grid (Expanded) -->
-          <div class="grid grid-cols-3 gap-2 mb-3">
-            <!-- Humidity -->
-            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
-              <i class="fa-solid fa-droplet text-blue-400 text-sm mb-0.5"></i>
-              <div class="text-[11px] text-gray-400 font-bold uppercase">濕度</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.humidity }}%</div>
-            </div>
-            <!-- Rain -->
-            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
-              <i class="fa-solid fa-umbrella text-cyan-400 text-sm mb-0.5"></i>
-              <div class="text-[11px] text-gray-400 font-bold uppercase">降雨量</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.rain }}<span class="text-[10px] font-normal scale-75">mm</span></div>
-            </div>
-            <!-- Wind -->
-            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
-              <i class="fa-solid fa-wind text-indigo-400 text-sm mb-0.5"></i>
-              <div class="text-[11px] text-gray-400 font-bold uppercase">風速</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.windSpeed }}<span class="text-[10px] font-normal scale-75">m/s</span></div>
-            </div>
-            <!-- UV -->
-            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
-              <i class="fa-solid fa-sun text-orange-400 text-sm mb-0.5"></i>
-              <div class="text-[11px] text-gray-400 font-bold uppercase">紫外線</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.uvIndex }}</div>
-            </div>
-            <!-- Pressure (New) -->
-            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
-              <i class="fa-solid fa-gauge-high text-emerald-400 text-sm mb-0.5"></i>
-              <div class="text-[11px] text-gray-400 font-bold uppercase">氣壓</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.pressure }}<span class="text-[10px] font-normal scale-75">hPa</span></div>
-            </div>
-            <!-- Visibility (New) -->
-            <div class="bg-gray-50 rounded-xl p-1.5 flex flex-col items-center justify-center border border-gray-100 h-16">
-              <i class="fa-solid fa-eye text-purple-400 text-sm mb-0.5"></i>
-              <div class="text-[11px] text-gray-400 font-bold uppercase">能見度</div>
-              <div class="text-xs font-bold text-gray-700">{{ weatherData.visibility }}<span class="text-[10px] font-normal scale-75">km</span></div>
-            </div>
+          <!-- 3. Metrics Grid -->
+          <div class="grid grid-cols-3 gap-2">
+             <div class="bg-gray-50/80 rounded-xl flex flex-col items-center justify-center p-1.5 text-center h-16">
+                 <i class="fa-solid fa-droplet text-blue-400 text-sm mb-0.5"></i>
+                 <span class="text-[11px] text-gray-400 font-bold scale-90">濕度</span>
+                 <span class="text-sm font-bold text-gray-700 leading-none">{{ weatherData.humidity }}%</span>
+             </div>
+             <div class="bg-gray-50/80 rounded-xl flex flex-col items-center justify-center p-1.5 text-center h-16">
+                 <i class="fa-solid fa-umbrella text-cyan-400 text-sm mb-0.5"></i>
+                 <span class="text-[11px] text-gray-400 font-bold scale-90">降雨</span>
+                 <span class="text-sm font-bold text-gray-700 leading-none">{{ weatherData.rain }}<span class="text-[10px] font-normal">mm</span></span>
+             </div>
+             <div class="bg-gray-50/80 rounded-xl flex flex-col items-center justify-center p-1.5 text-center h-16">
+                 <i class="fa-solid fa-wind text-indigo-400 text-sm mb-0.5"></i>
+                 <span class="text-[11px] text-gray-400 font-bold scale-90">風速</span>
+                 <span class="text-sm font-bold text-gray-700 leading-none">{{ weatherData.windSpeed }}<span class="text-[10px] font-normal">m/s</span></span>
+             </div>
           </div>
 
-          <!-- 4. Sun Times -->
-          <div class="flex justify-between items-center bg-gray-50 rounded-full px-4 py-1.5 border border-gray-100 mb-3">
-            <div class="flex items-center gap-2"><i class="fa-regular fa-sun text-orange-400 text-xs"></i><div class="flex flex-col"><span class="text-[10px] text-gray-400 leading-none">日出</span><span class="text-xs font-bold text-gray-600 leading-none">{{ weatherData.sunrise }}</span></div></div>
-            <div class="h-6 w-px bg-gray-200 mx-2"></div>
-            <div class="flex items-center gap-2"><div class="flex flex-col items-end"><span class="text-[10px] text-gray-400 leading-none">日落</span><span class="text-xs font-bold text-gray-600 leading-none">{{ weatherData.sunset }}</span></div><i class="fa-regular fa-moon text-indigo-400 text-xs"></i></div>
+          <!-- 4. Sun & Moon (Compact) -->
+          <div class="relative h-9 bg-gradient-to-r from-orange-50 to-indigo-50 rounded-full flex items-center justify-between px-4 border border-gray-100">
+             <div class="flex items-center gap-1.5">
+                 <i class="fa-solid fa-sun text-orange-400 text-sm"></i>
+                 <span class="text-xs font-bold text-gray-600">{{ weatherData.sunrise }}</span>
+             </div>
+             <div class="flex items-center gap-1.5">
+                 <span class="text-xs font-bold text-gray-600">{{ weatherData.sunset }}</span>
+                 <i class="fa-solid fa-moon text-indigo-400 text-sm"></i>
+             </div>
           </div>
 
-          <!-- 5. Daily Forecast -->
-          <div v-if="weatherData.forecast && weatherData.forecast.length > 0" class="border-t border-gray-100 pt-3">
-            <h5 class="text-xs text-gray-400 font-bold mb-2 ml-1">未來預報</h5>
-            <div class="flex flex-col gap-2">
-              <div v-for="day in weatherData.forecast" :key="day.dayName" class="flex justify-between items-center bg-gray-50 rounded-xl p-1.5 px-3 border border-transparent hover:border-sakura-light transition-colors">
-                <span class="text-xs font-bold text-gray-600 w-12">{{ day.dayName }}</span>
+          <!-- 5. Weekly Forecast -->
+          <div v-if="weatherData.forecast && weatherData.forecast.length > 0">
+            <h5 class="text-xs font-bold text-gray-400 mb-2 pl-1 flex items-center"><i class="fa-regular fa-calendar-days mr-1"></i>未來預報</h5>
+            <div class="space-y-1.5">
+              <div v-for="day in weatherData.forecast" :key="day.dayName" class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-gray-50 shadow-sm">
+                <span class="text-sm font-bold text-gray-600 w-10">{{ day.dayName }}</span>
                 <div class="flex items-center gap-2 flex-1 justify-center">
-                    <i :class="day.icon" class="text-sm" :style="{color: day.color}"></i>
-                    <span v-if="day.pop > 0" class="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-bold flex items-center"><i class="fa-solid fa-umbrella text-[10px] mr-1"></i>{{ day.pop }}%</span>
+                    <i :class="day.icon" class="text-base" :style="{color: day.color}"></i>
+                    <span v-if="day.pop > 0" class="text-[11px] bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded-full font-bold flex items-center">{{ day.pop }}%</span>
                 </div>
-                <div class="flex items-center text-xs font-bold text-gray-700 w-16 justify-end">{{ day.max }}° <span class="text-[11px] text-gray-400 font-normal ml-1">{{ day.min }}°</span></div>
+                <div class="flex items-center gap-2 w-18 justify-end">
+                    <span class="text-sm font-bold text-gray-800">{{ day.max }}°</span>
+                    <span class="text-xs font-bold text-gray-400">{{ day.min }}°</span>
+                </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
