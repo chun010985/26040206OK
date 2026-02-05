@@ -54,7 +54,7 @@
             'fall-1': 'fall-sway-1 6s linear infinite',
             'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             'marquee': 'marquee 15s linear infinite',
-            'run': 'run 0.5s ease-in-out infinite', // 新增跑步動畫
+            'run': 'run 0.6s ease-in-out infinite', // 跑步動畫
           },
           keyframes: {
             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
@@ -70,7 +70,7 @@
               '0%': { transform: 'translateX(100%)' },
               '100%': { transform: 'translateX(-100%)' }
             },
-            // 定義跑步關鍵影格 (保持水平翻轉 scaleX(-1) 並上下跳動)
+            // 定義跑步關鍵影格：使用 scaleX(-1) 來水平翻轉小人(向右看)，並上下跳動
             run: {
               '0%, 100%': { transform: 'scaleX(-1) translateY(0)' },
               '50%': { transform: 'scaleX(-1) translateY(-2px)' }
@@ -154,9 +154,10 @@
       
       <!-- Cute Progress Bar -->
       <div v-if="daysUntilTrip > 0" class="w-20 h-3.5 bg-gray-200 rounded-full relative overflow-hidden shadow-inner">
-        <div class="h-full bg-gradient-to-r from-pink-300 to-sakura rounded-full transition-all duration-1000 relative flex items-center justify-end pr-1" :style="{ width: tripProgress + '%' }">
-           <!-- fa-person-walking 預設向左，套用 animate-run 讓它在向右看的同時上下跳動 -->
-           <i class="fa-solid fa-person-walking text-[8px] text-white drop-shadow-md animate-run"></i>
+        <!-- 使用設計過的粉色漸層: 淺粉 -> 粉紅 -> 玫瑰紅 -->
+        <div class="h-full bg-gradient-to-r from-pink-200 via-pink-400 to-rose-500 rounded-full transition-all duration-1000 relative flex items-center justify-end pr-1" :style="{ width: tripProgress + '%' }">
+           <!-- 使用 animate-run 動畫 (包含 scaleX(-1) 向右轉及上下跳動) -->
+           <i class="fa-solid fa-person-walking text-[8px] text-white drop-shadow-md animate-run" style="display: inline-block;"></i>
         </div>
       </div>
     </div>
@@ -485,7 +486,7 @@
             <span class="text-sm font-bold text-blue-600 bg-white border border-blue-200 px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-user-clock mr-1"></i>建議報到：04:30</span>
           </div>
           <!-- Restored Baggage & Meal Info (Outbound) -->
-          <div class="flex justify-between items-center text-sm text-gray-500 border-t border-blue-200/50 pt-3 mt-2">
+          <div class="flex justify-between items-center text-[11px] text-gray-500 border-t border-blue-200/50 pt-3 mt-2">
             <span class="flex items-center"><i class="fa-regular fa-calendar-check mr-1.5 text-blue-400"></i>2026/04/02 (週四)</span>
             <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-blue-400"></i>20kg<span class="mx-1 text-blue-200">|</span><i class="fa-solid fa-briefcase mr-1 text-blue-400"></i>10kg<span class="mx-1 text-blue-200">|</span><i class="fa-solid fa-utensils mr-1 text-blue-400"></i>含餐</span>
           </div>
@@ -506,7 +507,7 @@
             <span class="text-sm font-bold text-sakura-text bg-white border border-sakura-light px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-user-clock mr-1 text-sakura"></i>建議報到：10:00</span>
           </div>
           <!-- Restored Baggage & Meal Info (Inbound) -->
-          <div class="flex justify-between items-center text-sm text-gray-500 border-t border-sakura-light pt-3 mt-2">
+          <div class="flex justify-between items-center text-[11px] text-gray-500 border-t border-sakura-light pt-3 mt-2">
             <span class="flex items-center"><i class="fa-regular fa-calendar-check mr-1.5 text-sakura"></i>2026/04/06 (週一)</span>
             <span class="flex items-center"><i class="fa-solid fa-suitcase-rolling mr-1 text-sakura"></i>20kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-briefcase mr-1 text-sakura"></i>10kg<span class="mx-1 text-sakura-light">|</span><i class="fa-solid fa-utensils mr-1 text-sakura"></i>含餐</span>
           </div>
@@ -704,7 +705,7 @@
                 <input type="checkbox" :checked="item.checked" @change="togglePackingCheck(item)" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-md checked:bg-sakura checked:border-sakura transition-colors">
                 <i class="fa-solid fa-check text-white text-xs absolute opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
               </div>
-              <span :class="{'line-through text-gray-400': item.checked, 'text-gray-600': !item.checked}" class="text-base font-medium transition-colors select-none">
+              <span :class="{'line-through text-gray-400': item.checked, 'text-gray-600': !item.checked}" class="text-[10px] font-medium transition-colors select-none">
                 {{ item.text }}
               </span>
             </label>
@@ -783,6 +784,8 @@
     <!-- TAB 4: Expense -->
     <div v-if="currentTab === 'expense'">
       <div class="flex flex-wrap gap-2 mb-4 px-1 justify-center">
+        <!-- 修改 "全部" 按鈕的邏輯，賦予特殊值 'ALL' -->
+        <button @click="currentMemberFilter = 'ALL'" :class="['px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === 'ALL') ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">全部</button>
         <button v-for="traveler in travelers" :key="traveler" @click="currentMemberFilter = traveler"
           :class="['px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors border', (currentMemberFilter === traveler) ? 'bg-sakura text-white border-sakura shadow-md' : 'bg-white text-gray-500 border-gray-200']">
           {{ traveler }}
