@@ -717,8 +717,10 @@
         </div>
 
         <div class="flex gap-2 mb-2">
-          <input type="text" v-model="newPackingItem" placeholder="新增檢查項目..." class="flex-1 bg-gray-50 rounded-lg px-3 py-2 text-base outline-none border focus:border-sakura" @keyup.enter="addPackingItem">
-          <button @click="addPackingItem" class="bg-sakura text-white px-3 py-2 rounded-lg text-base font-bold shadow-sm active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i></button>
+          <!-- 加上 min-w-0 防止 flex 子元素溢出，並將文字改為 text-sm -->
+          <input type="text" v-model="newPackingItem" placeholder="新增檢查項目..." class="flex-1 min-w-0 bg-gray-50 rounded-lg px-3 py-2 text-sm outline-none border focus:border-sakura" @keyup.enter="addPackingItem">
+          <!-- 改為固定寬高 w-10 h-10 並加上 shrink-0 防止被擠壓 -->
+          <button @click="addPackingItem" class="bg-sakura text-white w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shadow-sm active:scale-95 transition-transform shrink-0"><i class="fa-solid fa-plus"></i></button>
         </div>
         
         <button v-if="filteredPackingList.length === 0 && currentPackingFilter" @click="checkAndMigrateData(true, currentPackingFilter)" class="w-full py-2 bg-gray-100 text-gray-500 rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors dashed border border-gray-300">
