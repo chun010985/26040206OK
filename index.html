@@ -919,7 +919,7 @@
             <div><label class="block text-sm font-medium text-gray-500 mb-1">日期</label><select v-model="formData.date" class="w-full bg-gray-50 rounded-xl p-3"><option v-for="d in days" :value="d.dateStr">{{d.displayDate}}</option></select></div>
             <div><label class="block text-sm font-medium text-gray-500 mb-1">類別</label>
                 <select v-model="formData.category" class="w-full bg-gray-50 rounded-xl p-3">
-                    <option value="food">飲食</option><option value="transport">交通</option><option value="shopping">購物</option><option value="ticket">門票</option><option value="accommodation">住宿</option><option value="other">其他</option>
+                    <option value="food">飲食</option><option value="transport">交通</option><option value="shopping">購物</option><option value="ticket">門票</option><option value="accommodation">住宿</option><option value="investment">投資</option><option value="other">其他</option>
                 </select>
             </div>
             <div><label class="block text-sm font-medium text-gray-500 mb-1">項目</label><input type="text" v-model="formData.name" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none"></div>
@@ -1011,7 +1011,7 @@ window.__FULL_ITINERARY_DATA__ = [
   // Day 3 (Nara)
   { id: 201, date: '2026-04-04', category: 'transport', name: '飯店 → 奈良', time: '08:00', travelTime: 60, transportType: 'transit', note: '地鐵轉近鐵', description: '📍 轉乘路徑：\n1. 本町站 (M18) → 難波站 (M20) (地鐵御堂筋線)\n2. 難波站 → 近鐵奈良站 (近鐵奈良線 - 快速急行)\n💡 提示：搭乘快速急行約 40 分鐘，比普通車快很多。' },
   { id: 202, date: '2026-04-04', category: 'attraction', name: '奈良公園 (梅花鹿公園)', time: '09:10', travelTime: 10, transportType: 'walk', note: '買鹿仙貝小心被圍攻', ticket: '鹿仙貝¥200', description: '從近鐵奈良站 2 號出口出來，沿著登大路往東走即達。沿途就會看到很多鹿。請注意手上的地圖或紙張，鹿可能會咬走。' },
-  { id: 203, date: '2026-04-04', category: 'attraction', name: '東大寺 (大佛殿)', time: '10:00', travelTime: 15, transportType: 'walk', note: '世界最大木造建築', ticket: '¥600', openHours: '07:30 - 17:30', description: '穿越巨大的南大門（有金剛力士像），參觀大佛殿內的盧舍那佛。如果人不多，可以挑戰鑽「大佛鼻孔」柱子洞，聽說能保平安。' },
+  { id: 203, date: '2026-04-04', category: 'attraction', name: '東大寺 (大佛殿)', time: '10:00', travelTime: 15, transportType: 'walk', note: '世界最大木造建築', ticket: '¥600', openHours: '07:30 - 17:30', description: '穿越巨大的南大門（有金剛力士像），參觀大佛殿內的盧舍那佛。如果人不多，可以挑戰鑽「大佛鼻孔」柱子洞，聽聽說能保平安。' },
   { id: 204, date: '2026-04-04', category: 'attraction', name: '春日大社', time: '11:30', travelTime: 20, transportType: 'walk', note: '參道石燈籠', description: '沿著森林參道前往，這裡氣氛比較幽靜。以數千座石燈籠和吊燈籠聞名。如果走累了，可以在參道入口附近的茶屋休息吃點東西。' },
   { id: 205, date: '2026-04-04', category: 'transport', name: '春日大社 → JR 奈良站', time: '13:00', travelTime: 25, transportType: 'transit', note: '搭乘巴士', description: '🚉 路線：奈良交通巴士 (70/97/98號)\n📍 區間：春日大社本殿 → JR 奈良站\n💡 提示：若步行需約 30-40 分鐘，建議搭車保留體力。' },
   { id: 206, date: '2026-04-04', category: 'transport', name: 'JR 奈良 → JR 稻荷', time: '13:30', travelTime: 35, transportType: 'transit', note: '搭乘 JR 奈良線', description: '🚉 路線：JR 奈良線\n📍 區間：JR 奈良站 → JR 稻荷站\n💡 注意：請搭乘「普通」列車 (Miyakoji Rapid 不停稻荷)，或搭快速到宇治/東福寺再轉普通車。' },
@@ -1669,7 +1669,7 @@ window.__FULL_ITINERARY_DATA__ = [
 
       const getCategoryLabel = (c) => ({attraction:'景點',food:'美食',shopping:'購物',transport:'交通',flight:'航班',accommodation:'住宿',other:'其他'}[c]||c);
       const getCategoryColor = (c) => ({attraction:'bg-red-100 text-red-500',food:'bg-orange-100 text-orange-500',shopping:'bg-pink-100 text-pink-500',flight:'bg-blue-100 text-blue-500', transport:'bg-green-100 text-green-600', accommodation:'bg-purple-100 text-purple-500'}[c]||'bg-gray-100 text-gray-500');
-      const getExpenseIcon = (c) => ({food:'fa-solid fa-utensils',transport:'fa-solid fa-train',shopping:'fa-solid fa-bag-shopping',accommodation:'fa-solid fa-bed',ticket:'fa-solid fa-ticket'}[c]||'fa-solid fa-yen-sign');
+      const getExpenseIcon = (c) => ({food:'fa-solid fa-utensils',transport:'fa-solid fa-train',shopping:'fa-solid fa-bag-shopping',accommodation:'fa-solid fa-bed',ticket:'fa-solid fa-ticket', investment:'fa-solid fa-chart-line'}[c]||'fa-solid fa-yen-sign');
       const getTransportIcon = (t) => t==='walk'?'fa-solid fa-person-walking':(t==='flight'?'fa-solid fa-plane':'fa-solid fa-train-subway');
 
       // --- AUTH & INIT ---
