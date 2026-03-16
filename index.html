@@ -35,6 +35,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Cropper.js (新增裁切套件) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
   <!-- Vue 3 (Global Build) -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
@@ -945,6 +948,21 @@
       </div>
     </div>
   </div>
+
+  <!-- Crop Modal (新增裁切視窗) -->
+  <div v-if="cropState.show" class="fixed inset-0 bg-black z-[70] flex flex-col animate-fade-in">
+    <div class="flex justify-between items-center p-4 bg-black text-white">
+        <h3 class="font-bold text-lg">裁切圖片</h3>
+        <button @click="closeCropModal"><i class="fa-solid fa-xmark text-2xl"></i></button>
+    </div>
+    <div class="flex-1 w-full relative overflow-hidden bg-black flex items-center justify-center">
+        <img id="crop-image" :src="cropState.src" style="display: block; max-width: 100%; max-height: 100%;">
+    </div>
+    <div class="p-6 bg-black pb-12 flex gap-4">
+        <button @click="closeCropModal" class="flex-1 bg-gray-800 text-white font-bold py-3 rounded-xl border border-gray-700">取消</button>
+        <button @click="confirmCrop" class="flex-[2] bg-sakura text-white font-bold py-3 rounded-xl">確認裁切</button>
+    </div>
+  </div>
   
   <!-- Confirm Modal -->
   <div v-if="confirmState.show" class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-black/20 backdrop-blur-sm animate-fade-in">
@@ -1355,6 +1373,7 @@ window.__FULL_ITINERARY_DATA__ = [
       // --- MODAL & FORM ---
       const modal = reactive({ show: false, type: '', title: '', isEdit: false });
       const formData = reactive({});
+      const cropState = reactive({ show: false, src: '', cropper: null }); // 新增裁切狀態
 
       const openModal = (type, item = null) => {
         if (type === 'itinerary' && item) return; 
@@ -1616,42 +1635,51 @@ window.__FULL_ITINERARY_DATA__ = [
         const file = e.target.files[0];
         if(!file) return;
 
-        const maxSize = 2 * 1024 * 1024; // 2MB
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            // 打開裁切視窗
+            cropState.src = evt.target.result;
+            cropState.show = true;
+            
+            // 等待 DOM 更新後初始化 Cropper
+            setTimeout(() => {
+                const image = document.getElementById('crop-image');
+                if (cropState.cropper) {
+                    cropState.cropper.destroy();
+                }
+                cropState.cropper = new Cropper(image, {
+                    aspectRatio: 1, // 強制 1:1 正方形裁切
+                    viewMode: 1,
+                    dragMode: 'move',
+                    background: false,
+                    autoCropArea: 0.9,
+                });
+            }, 100);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = ''; // 重置 input 以允許重複上傳相同檔案
+      };
 
-        if (file.size > maxSize) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    const maxDim = 1280;
-                    if (width > maxDim || height > maxDim) {
-                        if (width > height) {
-                            height = Math.round((height * maxDim) / width);
-                            width = maxDim;
-                        } else {
-                            width = Math.round((width * maxDim) / height);
-                            height = maxDim;
-                        }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    formData.image = canvas.toDataURL('image/jpeg', 0.3);
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                formData.image = evt.target.result;
-            };
-            reader.readAsDataURL(file);
+      const confirmCrop = () => {
+        if (!cropState.cropper) return;
+        // 取得裁切後的圖片 (最大 800x800)
+        const canvas = cropState.cropper.getCroppedCanvas({
+            width: 800,
+            height: 800,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+        formData.image = canvas.toDataURL('image/jpeg', 0.6); // 壓縮並存入表單
+        closeCropModal();
+      };
+
+      const closeCropModal = () => {
+        if (cropState.cropper) {
+            cropState.cropper.destroy();
+            cropState.cropper = null;
         }
+        cropState.show = false;
+        cropState.src = '';
       };
       
       const handleBannerUpload = (e) => {
@@ -1730,6 +1758,9 @@ window.__FULL_ITINERARY_DATA__ = [
         isTigerairInfoExpanded, isExchangeWarningExpanded, // Export new state
         handleBannerUpload,
         
+        // Cropper (匯出裁切相關方法)
+        cropState, confirmCrop, closeCropModal,
+
         // Modal & Toast
         confirmState, toastState, handleConfirm
       };
