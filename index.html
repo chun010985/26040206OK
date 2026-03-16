@@ -898,42 +898,6 @@
       <button @click="openModal('notebook')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
     </div>
 
-    <!-- TAB 6: AI Assistant (New) -->
-    <div v-if="currentTab === 'assistant'" class="pb-28">
-      <div class="space-y-4 pt-2">
-        <div v-for="(msg, i) in chatMessages" :key="i" class="flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
-          <div v-if="msg.role === 'model'" class="w-8 h-8 rounded-full bg-sakura-light flex items-center justify-center text-sakura-dark shrink-0 mr-2 shadow-sm mt-1">
-            <i class="fa-solid fa-robot text-sm"></i>
-          </div>
-          <div :class="msg.role === 'user' ? 'bg-sakura text-white rounded-l-2xl rounded-tr-2xl' : 'bg-white text-gray-700 rounded-r-2xl rounded-tl-2xl shadow-sm border border-gray-100'" class="px-4 py-2.5 max-w-[75%] text-sm whitespace-pre-wrap leading-relaxed shadow-sm">
-            {{ msg.text }}
-          </div>
-        </div>
-        
-        <!-- Loading Indicator -->
-        <div v-if="isChatLoading" class="flex justify-start animate-fade-in">
-          <div class="w-8 h-8 rounded-full bg-sakura-light flex items-center justify-center text-sakura-dark shrink-0 mr-2 shadow-sm mt-1">
-            <i class="fa-solid fa-robot text-sm"></i>
-          </div>
-          <div class="bg-white rounded-r-2xl rounded-tl-2xl shadow-sm border border-gray-100 px-4 py-3 flex items-center gap-1.5">
-            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
-            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chat Input Box -->
-      <div class="fixed bottom-24 left-0 right-0 px-4 z-30 max-w-[480px] mx-auto animate-slide-up">
-        <div class="bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-[0_5px_25px_rgba(0,0,0,0.1)] border border-sakura-light/50 flex items-center gap-2">
-          <input type="text" v-model="chatInput" @keydown.enter.prevent="sendMessage" placeholder="問問 AI 導遊 (例如：怎麼去河原町)..." class="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-sakura transition-colors">
-          <button @click="sendMessage" :disabled="!chatInput.trim() || isChatLoading" class="w-11 h-11 shrink-0 bg-sakura text-white rounded-xl flex items-center justify-center shadow-sm disabled:opacity-50 disabled:bg-gray-300 transition-colors">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
   </main>
 
   <!-- Bottom Nav -->
@@ -1153,11 +1117,10 @@ window.__FULL_ITINERARY_DATA__ = [
       const tabs = [
         { id: 'itinerary', name: '行程表', icon: 'fa-solid fa-map-location-dot' },
         { id: 'info', name: '資訊', icon: 'fa-solid fa-circle-info' },
-        { id: 'tips', name: '須知', icon: 'fa-solid fa-book-open-reader' }, // New tab
+        { id: 'tips', name: '須知', icon: 'fa-solid fa-book-open-reader' },
         { id: 'shopping', name: '購物清單', icon: 'fa-solid fa-basket-shopping' },
         { id: 'expense', name: '花費', icon: 'fa-solid fa-yen-sign' },
-        { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' },
-        { id: 'assistant', name: 'AI導遊', icon: 'fa-solid fa-robot' },
+        { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' }
       ];
       // Changed default image back to previous version
       const bannerImage = ref('https://i.ibb.co/YBR5dpk4/22223.png');
@@ -1760,49 +1723,6 @@ window.__FULL_ITINERARY_DATA__ = [
         cropState.src = '';
       };
       
-      // --- AI CHATBOT FEATURES ---
-      const chatMessages = ref([
-          { isWelcome: true, role: 'model', text: '你好！我是你的專屬 AI 導遊 ✨\n有什麼關於這趟京阪奈之旅的問題都可以問我喔！\n\n例如：\n「從京都車站怎麼去河原町？」\n「黑門市場有什麼必吃的美食？」' }
-      ]);
-      const chatInput = ref('');
-      const isChatLoading = ref(false);
-
-      const sendMessage = async () => {
-          const text = chatInput.value.trim();
-          if (!text || isChatLoading.value) return;
-
-          chatMessages.value.push({ role: 'user', text });
-          chatInput.value = '';
-          isChatLoading.value = true;
-          
-          setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
-
-          try {
-              const contents = chatMessages.value
-                  .filter(m => !m.isWelcome)
-                  .map(m => ({ role: m.role, parts: [{ text: m.text }] }));
-                  
-              const payload = {
-                  systemInstruction: { parts: [{ text: "你是一位專屬日本關西(京阪奈)旅遊的AI導遊。請用繁體中文、活潑熱情的語氣回答問題，可以適當加上表情符號。回答盡量精簡扼要、排版清晰，適合在手機上閱讀。如果有交通問題，請提供簡單明確的路線。" }] },
-                  contents: contents
-              };
-              
-              const result = await callGeminiWithRetry(payload);
-              if (result) {
-                  chatMessages.value.push({ role: 'model', text: result });
-              } else {
-                  showToast('AI 好像恍神了，請再試一次！');
-                  chatMessages.value.pop();
-              }
-          } catch (err) {
-              showToast('網路連線似乎有點問題，請稍後再試。');
-              chatMessages.value.pop();
-          } finally {
-              isChatLoading.value = false;
-              setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
-          }
-      };
-
       // --- AI FEATURES (GEMINI API) ---
       const callGeminiWithRetry = async (payload) => {
           const apiKey = "";
@@ -1947,9 +1867,6 @@ window.__FULL_ITINERARY_DATA__ = [
         
         // Cropper (匯出裁切相關方法)
         cropState, confirmCrop, closeCropModal,
-
-        // AI Chatbot
-        chatMessages, chatInput, isChatLoading, sendMessage,
 
         // AI Features
         aiLoading, identifyProductWithAI,
