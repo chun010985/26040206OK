@@ -787,6 +787,7 @@
           </div>
           <div class="p-3">
             <h4 class="font-bold text-gray-700 text-base truncate">{{ item.name }}</h4>
+            <p v-if="item.note" class="text-xs text-gray-500 mt-1 line-clamp-2" :title="item.note">{{ item.note }}</p>
             <div class="flex items-center gap-1 mt-2 justify-between">
                 <label class="flex items-center gap-1 cursor-pointer">
                     <input type="checkbox" :checked="item.bought" @change="toggleShoppingCheck(item)" class="accent-sakura w-4 h-4 rounded-full">
@@ -897,11 +898,47 @@
       <button @click="openModal('notebook')" class="fixed bottom-24 right-6 w-14 h-14 bg-sakura text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-sakura-dark transition-colors z-20"><i class="fa-solid fa-plus"></i></button>
     </div>
 
+    <!-- TAB 6: AI Assistant (New) -->
+    <div v-if="currentTab === 'assistant'" class="pb-28">
+      <div class="space-y-4 pt-2">
+        <div v-for="(msg, i) in chatMessages" :key="i" class="flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
+          <div v-if="msg.role === 'model'" class="w-8 h-8 rounded-full bg-sakura-light flex items-center justify-center text-sakura-dark shrink-0 mr-2 shadow-sm mt-1">
+            <i class="fa-solid fa-robot text-sm"></i>
+          </div>
+          <div :class="msg.role === 'user' ? 'bg-sakura text-white rounded-l-2xl rounded-tr-2xl' : 'bg-white text-gray-700 rounded-r-2xl rounded-tl-2xl shadow-sm border border-gray-100'" class="px-4 py-2.5 max-w-[75%] text-sm whitespace-pre-wrap leading-relaxed shadow-sm">
+            {{ msg.text }}
+          </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div v-if="isChatLoading" class="flex justify-start animate-fade-in">
+          <div class="w-8 h-8 rounded-full bg-sakura-light flex items-center justify-center text-sakura-dark shrink-0 mr-2 shadow-sm mt-1">
+            <i class="fa-solid fa-robot text-sm"></i>
+          </div>
+          <div class="bg-white rounded-r-2xl rounded-tl-2xl shadow-sm border border-gray-100 px-4 py-3 flex items-center gap-1.5">
+            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Box -->
+      <div class="fixed bottom-24 left-0 right-0 px-4 z-30 max-w-[480px] mx-auto animate-slide-up">
+        <div class="bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-[0_5px_25px_rgba(0,0,0,0.1)] border border-sakura-light/50 flex items-center gap-2">
+          <input type="text" v-model="chatInput" @keydown.enter.prevent="sendMessage" placeholder="問問 AI 導遊 (例如：怎麼去河原町)..." class="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-sakura transition-colors">
+          <button @click="sendMessage" :disabled="!chatInput.trim() || isChatLoading" class="w-11 h-11 shrink-0 bg-sakura text-white rounded-xl flex items-center justify-center shadow-sm disabled:opacity-50 disabled:bg-gray-300 transition-colors">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- Bottom Nav -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center h-20 px-2 pb-2 rounded-t-[20px] shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-40 max-w-[480px] mx-auto">
-    <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id" class="flex flex-col items-center justify-center w-[16%] h-16 transition-all group">
+    <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id" class="flex-1 flex flex-col items-center justify-center h-16 transition-all group">
       <div class="w-12 h-12 flex items-center justify-center rounded-full transition-all" :class="currentTab === tab.id ? 'bg-sakura-light text-sakura-dark scale-110 shadow-sm' : 'text-gray-400 group-hover:bg-gray-50'">
         <i :class="tab.icon" class="text-xl"></i>
       </div>
@@ -932,6 +969,15 @@
                     <img v-if="formData.image" :src="formData.image" class="w-full h-full object-cover">
                     <div v-else class="text-center text-gray-400"><i class="fa-solid fa-camera mb-1"></i><p class="text-sm">點擊上傳圖片</p></div>
                  </div>
+                 
+                 <button type="button" v-if="formData.image" @click="identifyProductWithAI" :disabled="aiLoading" class="mt-3 w-full text-sm bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 py-2.5 rounded-xl hover:shadow-md transition-all font-bold flex items-center justify-center border border-purple-200">
+                     <i v-if="aiLoading" class="fa-solid fa-spinner fa-spin mr-2"></i>
+                     <span v-else><i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-purple-500"></i>✨ AI 圖片辨識與翻譯</span>
+                 </button>
+            </div>
+            <div>
+                 <label class="block text-sm font-medium text-gray-500 mb-1">備註 / AI 辨識結果</label>
+                 <textarea v-model="formData.note" class="w-full bg-gray-50 rounded-xl p-3 h-20 border focus:border-sakura outline-none" placeholder="可自行輸入，或上傳圖片讓 AI 幫您辨識..."></textarea>
             </div>
         </template>
         
@@ -952,7 +998,7 @@
             <div><label class="block text-sm font-medium text-gray-500 mb-1">標題</label><input type="text" v-model="formData.title" class="w-full bg-gray-50 rounded-xl p-3 border focus:border-sakura outline-none"></div>
             <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">內容</label>
-                <textarea v-model="formData.content" placeholder="請輸入內容..." class="w-full bg-gray-50 rounded-xl p-3 h-32 border focus:border-sakura outline-none"></textarea>
+                <textarea v-model="formData.content" placeholder="請輸入備忘錄內容，例如：藥妝比價、哪裡買得到..." class="w-full bg-gray-50 rounded-xl p-3 h-32 border focus:border-sakura outline-none"></textarea>
             </div>
         </template>
       </div>
@@ -1111,6 +1157,7 @@ window.__FULL_ITINERARY_DATA__ = [
         { id: 'shopping', name: '購物清單', icon: 'fa-solid fa-basket-shopping' },
         { id: 'expense', name: '花費', icon: 'fa-solid fa-yen-sign' },
         { id: 'notebook', name: '筆記本', icon: 'fa-solid fa-book' },
+        { id: 'assistant', name: 'AI導遊', icon: 'fa-solid fa-robot' },
       ];
       // Changed default image back to previous version
       const bannerImage = ref('https://i.ibb.co/YBR5dpk4/22223.png');
@@ -1177,6 +1224,8 @@ window.__FULL_ITINERARY_DATA__ = [
       const firebaseStatus = ref('connecting'); 
       const isSaving = ref(false);
       const migrationStatus = ref('');
+      
+      const aiLoading = ref(false); // New State for AI
 
       const currentMemberFilter = ref(null); // Default null for privacy
       const currentNotebookFilter = ref(null); // Default null for privacy (Modified)
@@ -1711,6 +1760,115 @@ window.__FULL_ITINERARY_DATA__ = [
         cropState.src = '';
       };
       
+      // --- AI CHATBOT FEATURES ---
+      const chatMessages = ref([
+          { isWelcome: true, role: 'model', text: '你好！我是你的專屬 AI 導遊 ✨\n有什麼關於這趟京阪奈之旅的問題都可以問我喔！\n\n例如：\n「從京都車站怎麼去河原町？」\n「黑門市場有什麼必吃的美食？」' }
+      ]);
+      const chatInput = ref('');
+      const isChatLoading = ref(false);
+
+      const sendMessage = async () => {
+          const text = chatInput.value.trim();
+          if (!text || isChatLoading.value) return;
+
+          chatMessages.value.push({ role: 'user', text });
+          chatInput.value = '';
+          isChatLoading.value = true;
+          
+          setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+
+          try {
+              const contents = chatMessages.value
+                  .filter(m => !m.isWelcome)
+                  .map(m => ({ role: m.role, parts: [{ text: m.text }] }));
+                  
+              const payload = {
+                  systemInstruction: { parts: [{ text: "你是一位專屬日本關西(京阪奈)旅遊的AI導遊。請用繁體中文、活潑熱情的語氣回答問題，可以適當加上表情符號。回答盡量精簡扼要、排版清晰，適合在手機上閱讀。如果有交通問題，請提供簡單明確的路線。" }] },
+                  contents: contents
+              };
+              
+              const result = await callGeminiWithRetry(payload);
+              if (result) {
+                  chatMessages.value.push({ role: 'model', text: result });
+              } else {
+                  showToast('AI 好像恍神了，請再試一次！');
+                  chatMessages.value.pop();
+              }
+          } catch (err) {
+              showToast('網路連線似乎有點問題，請稍後再試。');
+              chatMessages.value.pop();
+          } finally {
+              isChatLoading.value = false;
+              setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+          }
+      };
+
+      // --- AI FEATURES (GEMINI API) ---
+      const callGeminiWithRetry = async (payload) => {
+          const apiKey = "";
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+          const delays = [1000, 2000, 4000, 8000, 16000];
+          
+          for (let i = 0; i < 5; i++) {
+              try {
+                  const response = await fetch(url, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(payload)
+                  });
+                  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                  const data = await response.json();
+                  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+              } catch (error) {
+                  if (i === 4) throw error;
+                  await new Promise(resolve => setTimeout(resolve, delays[i]));
+              }
+          }
+      };
+
+      const identifyProductWithAI = async () => {
+          if (!formData.image) {
+              showToast('請先上傳圖片喔！');
+              return;
+          }
+          aiLoading.value = true;
+          try {
+              const base64Data = formData.image.split(',')[1];
+              const mimeType = formData.image.split(';')[0].split(':')[1] || 'image/jpeg';
+              
+              const prompt = "你是一位精通日本藥妝與名產的導遊。請辨識這張圖片中的商品。請嚴格遵守以下格式回覆：\n名稱：[中文名] ([日文名])\n介紹：[簡短的商品介紹，如果知道的話可以預估大約多少日幣]";
+              
+              const payload = {
+                  contents: [{
+                      role: "user",
+                      parts: [
+                          { text: prompt },
+                          { inlineData: { mimeType: mimeType, data: base64Data } }
+                      ]
+                  }]
+              };
+              
+              const result = await callGeminiWithRetry(payload);
+              if (result) {
+                  const nameMatch = result.match(/名稱：([^\n]+)/);
+                  if (nameMatch && nameMatch[1]) {
+                      formData.name = nameMatch[1].trim();
+                      const noteText = result.replace(nameMatch[0], '').replace(/^介紹：/, '').trim();
+                      formData.note = formData.note ? formData.note + '\n\n' + noteText : noteText;
+                  } else {
+                      formData.note = formData.note ? formData.note + '\n\n' + result : result;
+                  }
+                  showToast('AI 辨識完成！');
+              } else {
+                  showToast('AI 沒有回傳內容，請再試一次。');
+              }
+          } catch (err) {
+              showToast('AI 辨識失敗，請稍後再試。');
+          } finally {
+              aiLoading.value = false;
+          }
+      };
+
       const handleBannerUpload = (e) => {
         const file = e.target.files[0];
         if(!file) return;
@@ -1789,6 +1947,12 @@ window.__FULL_ITINERARY_DATA__ = [
         
         // Cropper (匯出裁切相關方法)
         cropState, confirmCrop, closeCropModal,
+
+        // AI Chatbot
+        chatMessages, chatInput, isChatLoading, sendMessage,
+
+        // AI Features
+        aiLoading, identifyProductWithAI,
 
         // Modal & Toast
         confirmState, toastState, handleConfirm
