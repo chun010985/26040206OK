@@ -185,7 +185,26 @@
     <!-- TAB 1: Itinerary -->
     <div v-if="currentTab === 'itinerary'">
       
-      <!-- Weather Card (Redesigned & Compact) -->
+      <!-- Dates (移至最上方) -->
+      <div class="flex overflow-x-auto no-scrollbar gap-3 mb-5 pb-3 px-2 justify-start sm:justify-center">
+        <button v-for="(day, index) in days" :key="index" @click="selectedDate = day.dateStr"
+          class="flex-shrink-0 flex flex-col items-center w-[72px] rounded-[20px] transition-all duration-300 relative overflow-hidden border-2 focus:outline-none"
+          :class="selectedDate === day.dateStr ? 'border-sakura shadow-[0_8px_15px_-3px_rgba(255,183,197,0.5)] transform -translate-y-1' : 'border-gray-100 bg-white shadow-sm hover:border-sakura-light/50 hover:-translate-y-0.5'">
+          
+          <!-- Top header (日曆頭部) -->
+          <div class="w-full py-1 text-center transition-colors duration-300" :class="selectedDate === day.dateStr ? 'bg-sakura text-white' : 'bg-gray-50 text-gray-400'">
+              <span class="text-[11px] font-bold tracking-wider uppercase">Day {{ index + 1 }}</span>
+          </div>
+          
+          <!-- Bottom body (日期與星期) -->
+          <div class="w-full py-2.5 flex flex-col items-center justify-center bg-white">
+              <span class="text-xl font-bold leading-none mb-1 tracking-tight" :class="selectedDate === day.dateStr ? 'text-gray-800' : 'text-gray-500'">{{ day.displayDate }}</span>
+              <span class="text-[10px] font-bold" :class="selectedDate === day.dateStr ? 'text-sakura-dark' : 'text-gray-400'">{{ day.dayOfWeek }}</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Weather Card (移至日期下方) -->
       <div class="relative bg-gradient-to-b from-white to-[#fff9fb] rounded-3xl p-4 shadow-[0_10px_30px_-10px_rgba(255,183,197,0.3)] mb-4 border border-white overflow-hidden group transition-all duration-300">
         <!-- Background Decorations (Scaled down) -->
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-200 via-sakura to-orange-200 opacity-50"></div>
@@ -197,16 +216,6 @@
           <div class="text-sakura-dark animate-pulse flex flex-col items-center gap-2">
             <i class="fa-solid fa-cloud-sun text-4xl animate-bounce"></i>
             <span class="text-sm font-bold tracking-widest uppercase text-gray-400">Loading...</span>
-          </div>
-        </div>
-
-        <!-- City Selector -->
-        <div v-if="currentDayCities.length > 1" class="flex justify-center mb-2 relative z-20">
-          <div class="bg-gray-100/80 p-0.5 rounded-full flex gap-1 shadow-inner scale-95 origin-top">
-             <button v-for="city in currentDayCities" :key="city.name" @click.stop="changeWeatherCity(city)"
-            :class="['text-xs px-3 py-1 rounded-full font-bold transition-all', weatherData.city === city.name ? 'bg-white text-gray-700 shadow-sm' : 'text-gray-400 hover:text-gray-600']">
-            {{ city.name }}
-          </button>
           </div>
         </div>
 
@@ -230,15 +239,27 @@
                  </div>
             </div>
 
-            <!-- Right: City & Desc & Toggle -->
+            <!-- Right: City Selector & Desc & Toggle -->
             <div class="flex flex-col items-end">
-                 <h2 class="text-lg font-bold text-gray-700 tracking-wide flex items-center gap-1">
+                 <!-- City Selector (Inline) -->
+                 <div v-if="currentDayCities.length > 1" class="bg-gray-100/80 p-0.5 rounded-full flex gap-1 shadow-inner mb-1.5" @click.stop>
+                     <button v-for="city in currentDayCities" :key="city.name" @click.stop="changeWeatherCity(city)"
+                    :class="['text-[11px] px-2.5 py-1 rounded-full font-bold transition-all', weatherData.city === city.name ? 'bg-white text-sakura-dark shadow-sm' : 'text-gray-400 hover:text-gray-600']">
+                    {{ city.name }}
+                  </button>
+                 </div>
+                 <!-- Single City Name (When only 1 city) -->
+                 <h2 v-else class="text-lg font-bold text-gray-700 tracking-wide flex items-center gap-1 mb-1.5">
                     {{ weatherData.city }}
                     <i class="fa-solid fa-location-dot text-sakura text-sm"></i>
                  </h2>
-                 <span class="text-sm text-gray-500 font-bold mb-1">{{ weatherData.description }}</span>
-                 <div class="w-7 h-7 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-300 mt-1">
-                    <i class="fa-solid fa-chevron-down text-xs transition-transform duration-500" :class="{'rotate-180': isWeatherExpanded}"></i>
+                 
+                 <!-- Description & Toggle Indicator -->
+                 <div class="flex items-center gap-2">
+                     <span class="text-sm text-gray-500 font-bold">{{ weatherData.description }}</span>
+                     <div class="w-6 h-6 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-300">
+                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-500" :class="{'rotate-180': isWeatherExpanded}"></i>
+                     </div>
                  </div>
             </div>
           </div>
@@ -320,15 +341,12 @@
             </div>
           </div>
 
-        </div>
-      </div>
+          <!-- Collapse Button (新增的收合按鈕) -->
+          <button @click="toggleWeather" class="w-full mt-1 py-2.5 bg-white border border-gray-100 text-gray-400 hover:text-gray-600 hover:bg-gray-50 text-xs font-bold rounded-xl flex items-center justify-center transition-colors shadow-sm">
+             <i class="fa-solid fa-chevron-up mr-1.5"></i>收合天氣
+          </button>
 
-      <!-- Dates -->
-      <div class="flex overflow-x-auto no-scrollbar gap-3 mb-4 pb-2 justify-center">
-        <button v-for="(day, index) in days" :key="index" @click="selectedDate = day.dateStr"
-          :class="['flex-shrink-0 flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all duration-300 relative overflow-hidden', selectedDate === day.dateStr ? 'bg-sakura text-white shadow-soft transform scale-105' : 'bg-white text-gray-400 border border-gray-100']">
-          <span class="text-base font-bold z-10">Day{{ index + 1 }}</span>
-        </button>
+        </div>
       </div>
 
       <!-- Marquee Notice (Moved Here) -->
@@ -1133,7 +1151,18 @@ window.__FULL_ITINERARY_DATA__ = [
         { dateStr: '2026-04-05', displayDate: '4/5', dayOfWeek: '週日', mainCity: '大阪市', locations: [{name:'大阪市', lat:34.6937, lng:135.5023}] },
         { dateStr: '2026-04-06', displayDate: '4/6', dayOfWeek: '週一', mainCity: '關西機場', locations: [{name:'大阪市', lat:34.6937, lng:135.5023}, {name:'泉佐野市(機場)', lat:34.4320, lng:135.2304}] },
       ];
-      const selectedDate = ref('2026-04-02');
+
+      // 自動偵測今天的日期，如果是旅遊期間，就預設顯示當天行程
+      const getCurrentLocalISODate = () => {
+          const now = new Date();
+          const yyyy = now.getFullYear();
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          return `${yyyy}-${mm}-${dd}`;
+      };
+      const todayStr = getCurrentLocalISODate();
+      const isTripDay = days.some(d => d.dateStr === todayStr);
+      const selectedDate = ref(isTripDay ? todayStr : days[0].dateStr);
 
       const isTigerairInfoExpanded = ref(false);
       // const isTravelTipsExpanded = ref(false); // Removed
