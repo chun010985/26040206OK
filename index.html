@@ -185,20 +185,23 @@
     <!-- TAB 1: Itinerary -->
     <div v-if="currentTab === 'itinerary'">
       
-      <!-- Dates (手帳便簽/紙膠帶風格) -->
-      <div class="flex overflow-x-auto no-scrollbar gap-4 mb-5 pb-4 px-3 justify-start sm:justify-center pt-3">
+      <!-- Dates (行李吊牌風格) -->
+      <div class="flex overflow-x-auto no-scrollbar gap-3 mb-5 pb-4 px-3 justify-start sm:justify-center pt-2">
         <button v-for="(day, index) in days" :key="index" @click="selectedDate = day.dateStr"
-          class="flex-shrink-0 flex flex-col items-center justify-center w-[72px] h-[82px] transition-all duration-300 relative focus:outline-none bg-white rounded-md"
-          :class="selectedDate === day.dateStr ? 'shadow-[2px_8px_15px_-3px_rgba(255,183,197,0.5)] transform -translate-y-2 rotate-[-2deg] border border-sakura-light' : 'shadow-[1px_3px_8px_rgba(0,0,0,0.06)] border border-gray-100 hover:-translate-y-1 hover:shadow-md hover:rotate-[-1deg]'">
+          class="flex-shrink-0 flex flex-col items-center w-[68px] pt-3 pb-2 transition-all duration-300 relative focus:outline-none rounded-t-[30px] rounded-b-[16px] border shadow-[0_4px_10px_rgba(0,0,0,0.03)] group"
+          :class="selectedDate === day.dateStr ? 'bg-sakura border-sakura shadow-[0_8px_15px_-3px_rgba(255,183,197,0.5)] transform -translate-y-2' : 'bg-white border-gray-100 hover:-translate-y-1 hover:border-sakura-light'">
           
-          <!-- Masking Tape (紙膠帶) -->
-          <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-10 h-3.5 backdrop-blur-sm shadow-sm transition-all duration-300"
-               :class="selectedDate === day.dateStr ? 'bg-sakura/80 rotate-[4deg]' : 'bg-gray-200/80 rotate-[-3deg]'">
+          <!-- Tag Hole & String -->
+          <div class="relative flex justify-center w-full mb-1.5">
+              <div class="w-3.5 h-3.5 rounded-full shadow-inner border border-black/5 relative z-10"
+                   :class="selectedDate === day.dateStr ? 'bg-white/40' : 'bg-gray-100'"></div>
+              <!-- Small string graphic on top -->
+              <div class="absolute -top-3 w-1 h-3 rounded-full" :class="selectedDate === day.dateStr ? 'bg-sakura-dark/30' : 'bg-gray-200'"></div>
           </div>
           
-          <span class="text-[11px] font-bold tracking-wider uppercase mb-1" :class="selectedDate === day.dateStr ? 'text-sakura-dark' : 'text-gray-400'">Day {{ index + 1 }}</span>
-          <span class="text-[22px] font-bold leading-none tracking-tight mb-1" :class="selectedDate === day.dateStr ? 'text-gray-800' : 'text-gray-500'">{{ day.displayDate }}</span>
-          <span class="text-[10px] font-bold" :class="selectedDate === day.dateStr ? 'text-sakura' : 'text-gray-400'">{{ day.dayOfWeek }}</span>
+          <span class="text-[10px] font-bold tracking-widest uppercase mb-1" :class="selectedDate === day.dateStr ? 'text-white/90' : 'text-gray-400'">Day {{ index + 1 }}</span>
+          <span class="text-[20px] font-bold leading-none tracking-tight mb-1" :class="selectedDate === day.dateStr ? 'text-white' : 'text-gray-800'">{{ day.displayDate }}</span>
+          <span class="text-[9px] font-bold" :class="selectedDate === day.dateStr ? 'text-white/90' : 'text-sakura-dark'">{{ day.dayOfWeek }}</span>
           
         </button>
       </div>
@@ -775,24 +778,21 @@
 
       <!-- 列表內容 (只有當有選擇成員時才顯示) -->
       <div v-else class="grid grid-cols-2 gap-4 pb-24 animate-slide-up">
-        <div v-for="(item, index) in filteredShoppingList" :key="item.id" class="bg-white rounded-2xl overflow-hidden shadow-card relative group">
+        <div v-for="(item, index) in filteredShoppingList" :key="item.id" @click="openModal('shoppingDetail', item)" class="bg-white rounded-2xl overflow-hidden shadow-card relative group cursor-pointer transition-transform hover:-translate-y-1">
           <div class="h-32 bg-gray-100 relative overflow-hidden">
             <img v-if="item.image" :src="item.image" class="w-full h-full object-cover">
             <div v-else class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-image text-3xl"></i></div>
-            <div class="absolute top-1 right-1 flex gap-1">
-              <button @click="openModal('shopping', item)" class="bg-white/80 w-6 h-6 rounded-full text-gray-500 text-sm flex items-center justify-center shadow-sm hover:text-sakura-dark"><i class="fa-solid fa-pen"></i></button>
-            </div>
             <span class="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm">{{ item.owner || '未指定' }}</span>
           </div>
           <div class="p-3">
             <h4 class="font-bold text-gray-700 text-base truncate">{{ item.name }}</h4>
-            <p v-if="item.note" class="text-xs text-gray-500 mt-1 line-clamp-2" :title="item.note">{{ item.note }}</p>
+            <p v-if="item.note" class="text-xs text-gray-400 mt-1 truncate">{{ item.note }}</p>
             <div class="flex items-center gap-1 mt-2 justify-between">
-                <label class="flex items-center gap-1 cursor-pointer">
+                <label class="flex items-center gap-1 cursor-pointer" @click.stop>
                     <input type="checkbox" :checked="item.bought" @change="toggleShoppingCheck(item)" class="accent-sakura w-4 h-4 rounded-full">
                     <span class="text-sm text-gray-500" :class="{'line-through': item.bought}">已購買</span>
                 </label>
-                <button @click="deleteShoppingItem(item.id)" class="text-gray-300 hover:text-red-400 text-sm p-1"><i class="fa-solid fa-trash-can"></i></button>
+                <button @click.stop="deleteShoppingItem(item.id)" class="text-gray-300 hover:text-red-400 text-sm p-1 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
             </div>
           </div>
         </div>
@@ -910,8 +910,10 @@
 
   <!-- Input Modal -->
   <div v-if="modal.show" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center animate-fade-in">
-    <div class="bg-white w-full max-w-[480px] rounded-t-[20px] sm:rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-6">
+    <div class="bg-white w-full max-w-[480px] rounded-t-[20px] sm:rounded-2xl p-6 shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto relative">
+      
+      <!-- 只有在非 Detail 時顯示通用標題列 -->
+      <div v-if="modal.type !== 'shoppingDetail'" class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-bold text-sakura-text">{{ modal.title }}</h3>
         <button @click="closeModal" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
@@ -932,15 +934,48 @@
                     <img v-if="formData.image" :src="formData.image" class="w-full h-full object-cover">
                     <div v-else class="text-center text-gray-400"><i class="fa-solid fa-camera mb-1"></i><p class="text-sm">點擊上傳圖片</p></div>
                  </div>
-                 
-                 <button type="button" v-if="formData.image" @click="identifyProductWithAI" :disabled="aiLoading" class="mt-3 w-full text-sm bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 py-2.5 rounded-xl hover:shadow-md transition-all font-bold flex items-center justify-center border border-purple-200">
-                     <i v-if="aiLoading" class="fa-solid fa-spinner fa-spin mr-2"></i>
-                     <span v-else><i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-purple-500"></i>✨ AI 圖片辨識與翻譯</span>
-                 </button>
             </div>
             <div>
-                 <label class="block text-sm font-medium text-gray-500 mb-1">備註 / AI 辨識結果</label>
-                 <textarea v-model="formData.note" class="w-full bg-gray-50 rounded-xl p-3 h-20 border focus:border-sakura outline-none" placeholder="可自行輸入，或上傳圖片讓 AI 幫您辨識..."></textarea>
+                 <label class="block text-sm font-medium text-gray-500 mb-1">備註</label>
+                 <textarea v-model="formData.note" class="w-full bg-gray-50 rounded-xl p-3 h-20 border focus:border-sakura outline-none" placeholder="可自行輸入想買的款式、價格或其他備忘資訊..."></textarea>
+            </div>
+        </template>
+
+        <!-- 新增：購物清單詳情模式 -->
+        <template v-if="modal.type === 'shoppingDetail'">
+            <div class="-mt-6 -mx-6 mb-5 relative bg-gray-100 sm:rounded-t-2xl rounded-t-[20px] overflow-hidden flex items-center justify-center" :class="formData.image ? 'h-64' : 'h-32'">
+                <img v-if="formData.image" :src="formData.image" class="w-full h-full object-contain bg-black/5">
+                <i v-else class="fa-solid fa-image text-5xl text-gray-300"></i>
+                
+                <button @click="closeModal" class="absolute top-4 right-4 w-8 h-8 bg-black/40 text-white rounded-full flex items-center justify-center backdrop-blur-md hover:bg-black/60 transition-colors z-10">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="px-2 pb-2">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex-1 pr-4">
+                        <span class="text-xs font-bold text-sakura-dark bg-sakura-light px-2 py-0.5 rounded-full mb-2 inline-block">{{ formData.owner }}</span>
+                        <h3 class="text-2xl font-bold text-gray-800 leading-tight">{{ formData.name }}</h3>
+                    </div>
+                    <label class="flex flex-col items-center gap-1 cursor-pointer bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100 shrink-0">
+                        <input type="checkbox" :checked="formData.bought" @change="toggleShoppingCheck(formData); formData.bought = !formData.bought" class="accent-sakura w-5 h-5 rounded-full">
+                        <span class="text-[10px] font-bold text-gray-500">{{ formData.bought ? '已購買' : '未購買' }}</span>
+                    </label>
+                </div>
+                
+                <div class="mt-4">
+                    <h4 class="text-sm font-bold text-gray-400 mb-1.5 flex items-center"><i class="fa-solid fa-file-lines mr-1.5"></i>備註</h4>
+                    <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 leading-relaxed whitespace-pre-line border border-gray-100 min-h-[80px]">
+                        {{ formData.note || '沒有填寫備註' }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-3 px-2">
+                <button @click="openModal('shopping', formData)" class="flex-1 bg-sakura text-white font-bold py-3.5 rounded-xl shadow-soft hover:bg-sakura-dark transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-pen mr-2"></i>編輯內容
+                </button>
             </div>
         </template>
         
@@ -966,7 +1001,8 @@
         </template>
       </div>
 
-      <div class="mt-6 flex gap-3" v-if="modal.type !== 'itinerary'">
+      <!-- 通用 Footer (詳情模式隱藏) -->
+      <div class="mt-6 flex gap-3" v-if="modal.type !== 'itinerary' && modal.type !== 'shoppingDetail'">
         <button v-if="modal.isEdit" @click="deleteCurrentItem" class="flex-1 bg-red-50 text-red-500 font-bold py-3 rounded-xl hover:bg-red-100 transition-colors">刪除</button>
         <button @click="submitForm" class="flex-[2] bg-sakura text-white font-bold py-3 rounded-xl shadow-soft hover:bg-sakura-dark transition-colors flex items-center justify-center">
             <i v-if="isSaving" class="fa-solid fa-spinner fa-spin mr-2"></i>
@@ -1426,7 +1462,7 @@ window.__FULL_ITINERARY_DATA__ = [
         Object.keys(formData).forEach(k => delete formData[k]);
         
         if (item) {
-            modal.title = '編輯';
+            modal.title = type === 'shoppingDetail' ? '商品詳情' : '編輯';
             Object.assign(formData, JSON.parse(JSON.stringify(item))); 
         } else {
             modal.title = '新增';
@@ -1722,72 +1758,6 @@ window.__FULL_ITINERARY_DATA__ = [
         cropState.src = '';
       };
       
-      // --- AI FEATURES (GEMINI API) ---
-      const callGeminiWithRetry = async (payload) => {
-          const apiKey = "";
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-          const delays = [1000, 2000, 4000, 8000, 16000];
-          
-          for (let i = 0; i < 5; i++) {
-              try {
-                  const response = await fetch(url, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(payload)
-                  });
-                  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                  const data = await response.json();
-                  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-              } catch (error) {
-                  if (i === 4) throw error;
-                  await new Promise(resolve => setTimeout(resolve, delays[i]));
-              }
-          }
-      };
-
-      const identifyProductWithAI = async () => {
-          if (!formData.image) {
-              showToast('請先上傳圖片喔！');
-              return;
-          }
-          aiLoading.value = true;
-          try {
-              const base64Data = formData.image.split(',')[1];
-              const mimeType = formData.image.split(';')[0].split(':')[1] || 'image/jpeg';
-              
-              const prompt = "你是一位精通日本藥妝與名產的導遊。請辨識這張圖片中的商品。請嚴格遵守以下格式回覆：\n名稱：[中文名] ([日文名])\n介紹：[簡短的商品介紹，如果知道的話可以預估大約多少日幣]";
-              
-              const payload = {
-                  contents: [{
-                      role: "user",
-                      parts: [
-                          { text: prompt },
-                          { inlineData: { mimeType: mimeType, data: base64Data } }
-                      ]
-                  }]
-              };
-              
-              const result = await callGeminiWithRetry(payload);
-              if (result) {
-                  const nameMatch = result.match(/名稱：([^\n]+)/);
-                  if (nameMatch && nameMatch[1]) {
-                      formData.name = nameMatch[1].trim();
-                      const noteText = result.replace(nameMatch[0], '').replace(/^介紹：/, '').trim();
-                      formData.note = formData.note ? formData.note + '\n\n' + noteText : noteText;
-                  } else {
-                      formData.note = formData.note ? formData.note + '\n\n' + result : result;
-                  }
-                  showToast('AI 辨識完成！');
-              } else {
-                  showToast('AI 沒有回傳內容，請再試一次。');
-              }
-          } catch (err) {
-              showToast('AI 辨識失敗，請稍後再試。');
-          } finally {
-              aiLoading.value = false;
-          }
-      };
-
       const handleBannerUpload = (e) => {
         const file = e.target.files[0];
         if(!file) return;
@@ -1866,9 +1836,6 @@ window.__FULL_ITINERARY_DATA__ = [
         
         // Cropper (匯出裁切相關方法)
         cropState, confirmCrop, closeCropModal,
-
-        // AI Features
-        aiLoading, identifyProductWithAI,
 
         // Modal & Toast
         confirmState, toastState, handleConfirm
