@@ -1455,15 +1455,19 @@ window.__FULL_ITINERARY_DATA__ = [
         if (type === 'itinerary' && item) return; 
         if (type === 'itinerary' && !item) return;
 
+        // 提前深拷貝備份，避免傳入 formData 自己時，在下方清空步驟被洗掉
+        const clonedItem = item ? JSON.parse(JSON.stringify(item)) : null;
+
         modal.type = type;
         modal.show = true;
         modal.isEdit = !!item;
         
+        // 清空當前表單
         Object.keys(formData).forEach(k => delete formData[k]);
         
-        if (item) {
+        if (clonedItem) {
             modal.title = type === 'shoppingDetail' ? '商品詳情' : '編輯';
-            Object.assign(formData, JSON.parse(JSON.stringify(item))); 
+            Object.assign(formData, clonedItem); 
         } else {
             modal.title = '新增';
             // Shopping: use current filter if set, otherwise default
